@@ -1,4 +1,5 @@
 import {IncomingMessage as Request, ServerResponse as Response} from "http";
+export {Request, Response};
 
 export default class Context{
     #request:Request;
