@@ -8,9 +8,7 @@ const message = {
 }
 
 app.use("/Test", (ctx)=>{
-    ctx.response.writeHead(200, {'Content-Type': 'application/json'});
-    ctx.response.write(JSON.stringify(message));
-    ctx.response.end();
+    ctx.json(message);
 });
 
 test("Init Test", done => {
