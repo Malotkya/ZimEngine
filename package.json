@@ -1,0 +1,18 @@
+{
+  "name": "weblibrary",
+  "version": "0.0.1",
+  "description": "\"Combining front and backend rendering\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc && node ./src"
+  },
+  "author": "Alex Malotky",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "@types/node": "^20.11.30",
+    "path-to-regexp": "^6.2.1"
+  }
+}
