@@ -12,8 +12,8 @@ import Context from "../Context";
 export default class Route extends Layer {
     #layers: Array<Layer>;
 
-    public constructor(path:string = "", layers:Array<Layer> = []){
-        super(path, undefined, true);
+    public constructor(path:string = "", options?:any, layers:Array<Layer> = []){
+        super(path, options, undefined);
             
         this.#layers = layers;
     }
@@ -30,7 +30,7 @@ export default class Route extends Layer {
         const layer = this.filter(args);
 
         if(Array.isArray(layer)){
-            this.#layers.push(new Route(this.path, layer));
+            this.#layers.push(new Route(this.path, undefined, layer));
         } else {
             this.#layers.push(layer);
         }
@@ -42,13 +42,9 @@ export default class Route extends Layer {
      * 
      * @param {Context} context 
      */
-    async handle(path:string, context:Context){
-        const match = this.match(path, context);
-        
-        if(match){
-            for(let l of this.#layers) {
-                await l.handle(match, context);
-            }
+    async handle(context:Context){
+        for(let l of this.#layers) {
+            await l.handle(context);
         }
     }
 }

@@ -40,13 +40,10 @@ export default class Router extends Layer{
      * 
      * @param {Context} context 
      */
-    async handle(path:string, context:Context){
-        const match = this.match(path, context)
-        if(match){
-            for(const {name, layer} of this.#methods) {
-                if(name === context.method || name === "ALL")
-                    layer.handle(match, context);
-            }
+    async handle(context:Context){
+        for(const {name, layer} of this.#methods) {
+            if(name === context.method || name === "ALL")
+                await layer.handle(context);
         }
     }
 

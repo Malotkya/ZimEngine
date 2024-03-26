@@ -3,8 +3,9 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
-import Path from "../Path";
-import {join} from "path";
+import {pathToRegexp, Key} from "path-to-regexp";
+
+const SUB_LAYER_OPTS = {strict: false, end: true};
 
 /** Handler Function Type
  * 
@@ -16,8 +17,10 @@ export type Handler = (context:Context)=>Promise<void>|void;
  * Layer of middelware routing structure.
  */
 export default class Layer {
-    #path:Path;
-    #initPath:string;
+    #regex:RegExp
+    #keys:Array<Key>
+    #path:string;
+    #shortcut:boolean;
 
     protected _handler:Handler;
 
@@ -27,17 +30,18 @@ export default class Layer {
      * @param {any} options 
      * @param {Handler} handler 
      */
-    constructor(path:string = "/", handler:Handler=()=>undefined, override:boolean = false) {
-        this.#path = new Path(path, override);
-        this.#initPath = path;
+    constructor(path:string = "/", options:any = {end:false}, handler:Handler=()=>undefined) {
+        this.#regex = pathToRegexp(path, this.#keys = [], options);
+        this.#path = path;
         this._handler = handler;
+        this.#shortcut = path === '/' && options.end === false
     }
 
-    private static init(path:string, handler:Handler|Layer):Layer {
+    private static init(path:string, options:any, handler:Handler|Layer):Layer {
         if(handler instanceof Layer){
-            return new Layer(path, handler._handler);
+            return handler;
         } else if(typeof handler === "function"){
-            return new Layer(path, handler);
+            return new Layer(path, options, handler);
         } else {
             throw new TypeError("Unknown Handler Type!");
         }
@@ -62,8 +66,8 @@ export default class Layer {
                 throw new Error("No arguments given!");
 
             case 1:
-                if(type0 === "function" || type1 === "object"){
-                    path = "";
+                if(type0 === "function" || type0 === "object"){
+                    path = "/";
                     handler = args[0];
                 } else {
                     throw new TypeError("Middleware must by either a Layer or Handler Function");
@@ -71,10 +75,8 @@ export default class Layer {
                 break;
 
             case 2:
-                path = String(args[0]);
-
                 if(type1 === "function" || type1 === "object"){
-                    path = "";
+                    path = String(args[0]);
                     handler = args[1];
                 } else {
                     throw new TypeError("Middleware must by either a Layer or Handler Function");
@@ -87,13 +89,13 @@ export default class Layer {
         }
     
         if(Array.isArray(handler)){
-            return handler.map(h=>Layer.init(path, h))
+            return handler.map(h=>Layer.init(path, SUB_LAYER_OPTS, h))
         }
-        return Layer.init(path, handler);
+        return Layer.init(path, SUB_LAYER_OPTS, handler);
     }
 
-    async handle(path:string, context:Context) {
-        if(this.match(path, context))
+    async handle(context:Context) {
+        if(this.match(context))
             await this._handler(context);
     }
 
@@ -102,20 +104,32 @@ export default class Layer {
      * @param {Context} context 
      * @returns {bollean}
      */
-    match(path:string, context:Context):string|undefined{
-        let match = this.#path.match(path);
+    match(context:Context):boolean{
+
+        if(this.#shortcut){
+            context.params = {};
+            return true;
+        }
+
+        const match = context.url.pathname.match(this.#regex);
 
         if(match === null)
-            return undefined;
+            return false;
 
-        context.params = match.params;
-        return match.path.value;
+        let params:Dictionary<string> = {};
+        for(let index=1;index<match.length;index++){
+            if(match[index])
+                params[this.#keys[index-1].name] = decodeURIComponent(match[index]);
+        }
+
+        context.params = params;
+        return true;
     }
 
     /** Path Getter
      * 
      */
     public get path():string {
-        return this.#path.value;
+        return this.#path;
     }
 }

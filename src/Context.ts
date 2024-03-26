@@ -126,7 +126,7 @@ export default class Context{
      */
     text(value:string): Context{
         if (!this.#response.getHeader("Content-Type")) {
-            this.#response.setHeader('Content-Type', 'application/text');
+            this.#response.setHeader('Content-Type', 'text/plain');
         }
         this.#response.write(value);
         return this;
