@@ -1,16 +1,27 @@
-const {App, Route} = require("../build");
+const {App, Route, Router} = require("../build");
+const Layer_1 = require("../build/Router/Layer");
+const Layer = Layer_1.default;
 const request = require('supertest');
 
 const app = new App();
 const route = new Route();
+const home = new Router();
+
+app.use("/Go", new Route("/Really", undefined, [
+    new Layer("/Deep", undefined, (ctx)=>{
+        ctx.text("Good Job!");
+    })
+]))
 
 const message = {
     value:"Hello World!"
 }
 
-app.use("/", (ctx)=>{
+home.all((ctx)=>{
     ctx.json(message);
 });
+
+app.use("/", home);
 
 app.use("/:one/:two/:three/:four?", (ctx)=>{
     const params = [
@@ -32,7 +43,8 @@ app.use("/:one/:two/:three/:four?", (ctx)=>{
 route.use("/Hello", 
     (ctx)=>ctx.text("Hello World\n"),
     (ctx)=>ctx.text("Hola Mundo\n")
-)
+);
+app.use(route);
 
 test("Init Test", done => {
     request(app.engine)
@@ -68,6 +80,7 @@ test("Params & Search Variables", done => {
 test("Complex Routing Test", done => {
     request(app.engine)
         .get("/Hello")
+        .expect("Content-Type", "text/plain")
         .expect("Hello World\nHola Mundo\n")
         .expect(200, done);
 })
@@ -77,6 +90,14 @@ test("404 Test", done => {
         .get("/Bad/Link")
         .expect(404, done);
 });
+
+test("Deep Router Test", done=>{
+    request(app.engine)
+        .get("/Go/Really/Deep")
+        .expect("Content-Type", "text/plain")
+        .expect("Good Job!")
+        .expect(200, done);
+})
 
 
 
