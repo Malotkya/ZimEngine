@@ -1,6 +1,14 @@
+/** /Context
+ * 
+ * @author Alex Malotky
+ */
 import {IncomingMessage as Request, ServerResponse as Response} from "http";
 export {Request, Response};
 
+/** Context
+ * 
+ * Wrapper Around Request/Response
+ */
 export default class Context{
     #request:Request;
     #response:Response;
@@ -8,6 +16,11 @@ export default class Context{
     #search:Dictionary<string>;
     #params:Dictionary<string>;
 
+    /** Constructor
+     * 
+     * @param request 
+     * @param response 
+     */
     constructor(request: Request, response: Response){
 
         //Getter Only Variables
@@ -24,22 +37,37 @@ export default class Context{
         this.#params = Object.create(this.#search);
     }
 
+    /** Request Getter
+     * 
+     */
     get request():Request {
         return this.#request;
     }
 
+    /** Response Getter
+     * 
+     */
     get response():Response {
         return this.#response;
     }
 
+    /** Url Getter
+     * 
+     */
     get url():URL {
         return this.#url;
     }
 
+    /** Method Getter
+     * 
+     */
     get method():string|undefined {
         return this.request.method;
     }
 
+    /** Params Setter
+     * 
+     */
     set params(value:Dictionary<string>){
         this.#params = Object.create(this.#search);
 
@@ -48,10 +76,18 @@ export default class Context{
         }
     }
 
+    /** Params Getter
+     * 
+     */
     get params():Dictionary<string>{
         return this.#params;
     }
 
+    /** Set Status Code
+     * 
+     * @param {number} value 
+     * @returns {Context}
+     */
     status(value:number):Context {
         if(typeof value !== "number") {
             value = Number(value);
@@ -67,7 +103,12 @@ export default class Context{
         return this;
     }
 
-    json(object:Object){
+    /** Set Json Content
+     * 
+     * @param {Object} object 
+     * @returns {Context}
+     */
+    json(object:Object): Context{
         if (!this.#response.getHeader("Content-Type")) {
             this.#response.setHeader('Content-Type', 'application/json');
         }
@@ -75,7 +116,12 @@ export default class Context{
         return this;
     }
 
-    text(value:string){
+    /** Set Text Content
+     * 
+     * @param {string} value 
+     * @returns {this}
+     */
+    text(value:string): Context{
         if (!this.#response.getHeader("Content-Type")) {
             this.#response.setHeader('Content-Type', 'application/text');
         }
@@ -83,11 +129,19 @@ export default class Context{
         return this;
     }
 
-    write(chunk:any){
+    /** Write Chunk
+     * 
+     * @param {string} chunk 
+     * @returns {this}
+     */
+    write(chunk:any):Context{
         this.#response.write(chunk);
         return this;
     }
 
+    /** Done
+     * 
+     */
     done() {
         this.#response.end();
     }

@@ -1,13 +1,22 @@
-import Layer, {Handler} from "./Layer"
+/** /Router/Route
+ * 
+ * @author Alex Malotky
+ */
+import Layer from "./Layer"
 import Context from "../Context";
-import {join} from "path";
 
+/** Route
+ * 
+ * Array of Layers
+ */
 export default class Route extends Layer {
     #layers: Array<Layer>;
 
     public constructor(path:string = "", options?:any, layers:Array<Layer> = []){
         super(path, options);
+            
         this.#layers = layers;
+        this.path = path;
     }
 
     /** Use Middleware or Route
@@ -34,12 +43,12 @@ export default class Route extends Layer {
                 break;
 
             case 2:
-                path = args[0];
+                path = String(args[0]);
                 middleware = Layer.init(path, this._options, args[1]);
                 break;
                 
             default:
-                path = args.shift();
+                path = String(args.shift());
                 middleware = new Route(path, this._options,
                     args.map((value)=>Layer.init(path, this._options, value))
                 );
@@ -49,11 +58,18 @@ export default class Route extends Layer {
         return this;
     }
 
+    /** Path setter override.
+     * 
+     */
     public set path(value:string){
         for(let l of this.#layers)
             l.path = value;
     }
 
+    /** Handle Request Override
+     * 
+     * @param {Context} context 
+     */
     async handle(context:Context){
         for(let l of this.#layers)
             l.handle(context);

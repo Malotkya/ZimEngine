@@ -1,4 +1,15 @@
-//https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+/** /HttpError
+ * 
+ * @author Alex Malotky
+ */
+
+/** Get Message
+ * 
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+ * 
+ * @param {number} value 
+ * @returns {string}
+ */
 function getMessage(value:number):string {
     if(value < 400)
         return "Redirected";
@@ -120,9 +131,17 @@ function getMessage(value:number):string {
     return "Internal Server Error";
 }
 
+/** Http Error
+ * 
+ */
 export default class HttpError extends Error{
     #status:number;
 
+    /** constructor
+     * 
+     * @param {number} status 
+     * @param {string} message 
+     */
     constructor(status:number, message?:string){
         let value:number = Number(status);
 
@@ -137,6 +156,9 @@ export default class HttpError extends Error{
         this.#status = value;
     }
 
+    /** Status Getter
+     * 
+     */
     get status():number{
         return this.#status;
     }
