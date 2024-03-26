@@ -60,31 +60,10 @@ export default class Router extends Layer{
      * @param {Array<any>} args 
      * @returns {Layer}
      */
-    private filter(args:Array<any>):Layer {
-        let path: string;
-        let middleware: Layer;
-
-        switch (args.length){
-            case 0:
-                throw new Error("No arguments given!");
-
-            case 1:
-                path = "";
-                middleware = Layer.init(path, this._options, args[0]);
-                break;
-
-            case 2:
-                path = String(args[0]);
-                middleware = Layer.init(path, this._options, args[1]);
-                break;
-                
-            default:
-                path = String(args.shift());
-                middleware = new Route(path, this._options,
-                    args.map((value)=>Layer.init(path, this._options, value))
-                );
-        }
-
+    protected filter(args:Array<any>):Layer {
+        const middleware = super.filter(args);
+        if(Array.isArray(middleware))
+            return new Route(this.path, this._options, middleware);
         return middleware;
     }
 
