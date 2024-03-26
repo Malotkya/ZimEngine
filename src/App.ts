@@ -38,7 +38,7 @@ export default class App extends Route{
          */
         this.#engine = (incoming:IncomingMessage, response:ServerResponse) => {
             const ctx = new Context(incoming, response)
-            this.handle(ctx)
+            this.handle(ctx.url.pathname, ctx)
                 .then(()=>ctx.done())
                 .catch((err)=>{
                     if(typeof err === "number")
@@ -68,8 +68,8 @@ export default class App extends Route{
      * 
      * @param {Context} context 
      */
-    async handle(context:Context){
-        await super.handle(context)
+    async handle(path:string, context:Context){
+        await super.handle(path, context)
         if( !context.response.headersSent )
             this.#notFound(context);
     }

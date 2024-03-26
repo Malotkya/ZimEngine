@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
-import {pathToRegexp, Key} from "path-to-regexp";
+import Path from "../Path";
 import {join} from "path";
 
 /** Handler Function Type
@@ -16,13 +16,10 @@ export type Handler = (context:Context)=>Promise<void>|void;
  * Layer of middelware routing structure.
  */
 export default class Layer {
-    #regex: RegExp;
-    #keys: Array<Key>;
-    #path:string;
+    #path:Path;
     #initPath:string;
 
     protected _handler:Handler;
-    protected _options:any;
 
     /** Constructor
      * 
@@ -30,19 +27,17 @@ export default class Layer {
      * @param {any} options 
      * @param {Handler} handler 
      */
-    constructor(path:string = "/", options:any = {}, handler:Handler=()=>undefined) {
-        this.#regex = pathToRegexp(path, this.#keys = [], options);
-        this.#path = path;
+    constructor(path:string = "/", handler:Handler=()=>undefined, override:boolean = false) {
+        this.#path = new Path(path, override);
         this.#initPath = path;
         this._handler = handler;
-        this._options = options;
     }
 
-    private static init(path:string, options:any, handler:Handler|Layer):Layer {
+    private static init(path:string, handler:Handler|Layer):Layer {
         if(handler instanceof Layer){
-            return new Layer(path, options, handler._handler);
+            return new Layer(path, handler._handler);
         } else if(typeof handler === "function"){
-            return new Layer(path, options, handler);
+            return new Layer(path, handler);
         } else {
             throw new TypeError("Unknown Handler Type!");
         }
@@ -92,17 +87,13 @@ export default class Layer {
         }
     
         if(Array.isArray(handler)){
-            return handler.map(h=>Layer.init(path, this._options, h))
+            return handler.map(h=>Layer.init(path, h))
         }
-        return Layer.init(path, this._options, handler);
+        return Layer.init(path, handler);
     }
 
-    /** Handle Request
-     * 
-     * @param {Context} context 
-     */
-    public async handle(context:Context){
-        if(this.match(context))
+    async handle(path:string, context:Context) {
+        if(this.match(path, context))
             await this._handler(context);
     }
 
@@ -111,35 +102,20 @@ export default class Layer {
      * @param {Context} context 
      * @returns {bollean}
      */
-    private match(context:Context):boolean{
-        let match = context.url.pathname.match(this.#regex)
+    match(path:string, context:Context):string|undefined{
+        let match = this.#path.match(path);
 
         if(match === null)
-            return false;
+            return undefined;
 
-        let params:Dictionary<string> = {};
-        for(let index=1; index<match.length; index++){
-            if(match[index])
-                params[this.#keys[index-1].name] = decodeURIComponent(match[index]);
-        }
-
-        context.params = params;
-        return true;
-    }
-
-    /** Path Setter
-     * 
-     * Updates path to include 
-     */
-    public set path(value:string){
-        this.#path = join(value, this.#initPath);
-        this.#regex = pathToRegexp(this.#path, this.#keys = [], this._options);
+        context.params = match.params;
+        return match.path.value;
     }
 
     /** Path Getter
      * 
      */
     public get path():string {
-        return this.#path;
+        return this.#path.value;
     }
 }

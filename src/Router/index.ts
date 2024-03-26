@@ -40,19 +40,14 @@ export default class Router extends Layer{
      * 
      * @param {Context} context 
      */
-    async handle(context:Context){
-        for(const {name, layer} of this.#methods) {
-            if(name === context.method || name === "ALL")
-                layer.handle(context);
+    async handle(path:string, context:Context){
+        const match = this.match(path, context)
+        if(match){
+            for(const {name, layer} of this.#methods) {
+                if(name === context.method || name === "ALL")
+                    layer.handle(match, context);
+            }
         }
-    }
-
-    /** Path Setter override.
-     * 
-     */
-    set path(value:string){
-        for(const {layer} of this.#methods)
-            layer.path = value;
     }
 
     /** Filter Arguments
@@ -63,7 +58,7 @@ export default class Router extends Layer{
     protected filter(args:Array<any>):Layer {
         const middleware = super.filter(args);
         if(Array.isArray(middleware))
-            return new Route(this.path, this._options, middleware);
+            return new Route(this.path, middleware);
         return middleware;
     }
 
