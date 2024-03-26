@@ -26,7 +26,7 @@ export default class Context{
         //Getter Only Variables
         this.#request = request;
         this.#response = response;
-        this.#url = new URL(request.url || "", `http://${request.headers.host}`);
+        this.#url = new URL(request.url || "/", `http://${request.headers.host}`);
 
         //Params Search Values
         this.#search = {};
@@ -34,7 +34,7 @@ export default class Context{
             this.#search[name] = value;
 
         //Defaults
-        this.#params = Object.create(this.#search);
+        this.#params = {};
     }
 
     /** Request Getter
@@ -69,11 +69,7 @@ export default class Context{
      * 
      */
     set params(value:Dictionary<string>){
-        this.#params = Object.create(this.#search);
-
-        for(let name in value){
-            this.#params[name] = String(value[name]);
-        }
+        this.#params = Object.create(value);
     }
 
     /** Params Getter
@@ -81,6 +77,13 @@ export default class Context{
      */
     get params():Dictionary<string>{
         return this.#params;
+    }
+
+    /** Search Getter
+     * 
+     */
+    get search():Dictionary<string>{
+        return this.#search;
     }
 
     /** Set Status Code
