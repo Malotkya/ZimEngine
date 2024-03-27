@@ -39,12 +39,11 @@ export default class App extends Route{
         this.#engine = (incoming:IncomingMessage, response:ServerResponse) => {
             const ctx = new Context(incoming, response)
             this.handle(ctx)
-                .then(()=>ctx.done())
                 .catch((err)=>{
                     if(typeof err === "number")
                         err = new HttpError(err);
                     this.#errorHandler(err, ctx);
-                })
+                }).finally(()=>ctx.flush())
         }
 
         /** Defult 404 Handler
@@ -60,7 +59,18 @@ export default class App extends Route{
                 status = 500,
                 message = err || "An Unknown Error Occured!"
             } = err;
-            ctx.status(status).write(message).done();
+
+            ctx.status(status);
+
+            const contentType:string = ctx.request.headers["content-type"] || "unkown";
+            if(contentType.includes("json")) {
+                ctx.json({status, message});
+            } else if(contentType.includes("xml")) {
+                //We don't have that yet
+                ctx.text(message);
+            } else {
+                ctx.write(message);
+            }
         }
     }
 
@@ -69,8 +79,8 @@ export default class App extends Route{
      * @param {Context} context 
      */
     async handle(context:Context){
-        await super.handle(context)
-        if( !context.response.headersSent )
+        await super.handle(context);
+        if( context.nothingSent() )
             this.#notFound(context);
     }
 
