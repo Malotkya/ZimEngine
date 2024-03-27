@@ -29,13 +29,13 @@ test("Render View", ()=>{
 
     const update = {
         head: {
-            title: "<title>New Title</head>",
+            title: "New Title",
         },
         content: "<h1>Hello World</h1>"
     }
 
     expect(v.render(update))
-        .toBe("<!DOCTYPE html><html><head><title>New Title</title></head><body><h1>Hello World</h1></body></html>")
+        .toBe("<!DOCTYPE html><html><head><title>New Title</title><script href='./zim.js' defer=''></script></head><body><h1>Hello World</h1></body></html>")
 })
 
 /*function defaultHead() {

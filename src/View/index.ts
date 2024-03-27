@@ -98,7 +98,7 @@ function generateHeadObject(tags:Array<ElementTag>):Dictionary<ElementTag>{
 }
 
 function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<string>):string {
-    original = Object.create(original);
+    original = Object.assign({}, original);
     for(let name in update){
         name = name.toLowerCase();
         //If Updating!
@@ -161,7 +161,7 @@ function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<
         }//End_If
     }
 
-    return Object.values(original).map(value=>value?createElement(value.name, value.attributes, value.self, value.content || null): "").join();
+    return Object.values(original).map(value=>value?createElement(value.name, value.attributes, value.self, value.content || null): "").join("");
 }
 
 /** View Class
