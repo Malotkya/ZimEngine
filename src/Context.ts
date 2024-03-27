@@ -3,6 +3,7 @@
  * @author Alex Malotky
  */
 import {IncomingMessage as Request, ServerResponse as Response} from "http";
+import View, {ContentUpdate, Content} from "./View";
 export {Request, Response};
 
 /** Context
@@ -15,13 +16,16 @@ export default class Context{
     #url:URL;
     #search:Dictionary<string>;
     #params:Dictionary<string>;
+    #htmlHeaders:Dictionary<string>;
+    #htmlContent:Array<Content>;
+    #view:View|undefined;
 
     /** Constructor
      * 
      * @param request 
      * @param response 
      */
-    constructor(request: Request, response: Response){
+    constructor(request: Request, response: Response, view?:View){
 
         //Getter Only Variables
         this.#request = request;
@@ -35,6 +39,9 @@ export default class Context{
 
         //Defaults
         this.#params = {};
+        this.#htmlHeaders = {};
+        this.#htmlContent = [];
+        this.#view = view;
     }
 
     /** Request Getter
@@ -132,6 +139,19 @@ export default class Context{
         return this;
     }
 
+    /** Set HTML Content
+     * 
+     * @param {string} value 
+     * @returns {this}
+     */
+    html(value:string): Context{
+        if (!this.#response.getHeader("Content-Type")) {
+            this.#response.setHeader('Content-Type', 'text/html');
+        }
+        this.#response.write(value);
+        return this;
+    }
+
     /** Write Chunk
      * 
      * @param {string} chunk 
@@ -142,10 +162,50 @@ export default class Context{
         return this;
     }
 
-    /** Done
+    /** Reunder Update Content
+     * 
+     * @param {ContentUpdate} update 
+     */
+    render(update:ContentUpdate){
+        this.#htmlContent.push(update.content);
+
+        for(let name in update.head){
+            this.#htmlHeaders[name] = update.head[name];
+        }
+    }
+
+    /** Flush Update Content
      * 
      */
-    done() {
+    flush():void {
+        if(this.#htmlContent.length > 0){
+            if(typeof this.#view === "undefined")
+                throw new Error("No View to render content!");
+
+            const contentType = this.#request.headers["content-type"];
+            const update:ContentUpdate = {
+                head: this.#htmlHeaders,
+                content: this.#htmlContent
+            };
+
+            if(contentType && contentType.includes("json")) {
+                this.json(update);
+            } else {
+                this.html(this.#view.render(update));
+            }
+        }
+        
         this.#response.end();
+    }
+
+    /** Was Nothing Sent
+     * 
+     * @returns {boolean}
+     */
+    nothingSent():boolean {
+        if(this.#htmlContent.length > 0)
+            return false;
+
+        return !this.#response.headersSent;
     }
 }
