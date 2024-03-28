@@ -15,7 +15,7 @@ export type Content = string|Array<Content>|null;
  * @param {string} body 
  * @returns {string}
  */
-export default function HtmlDocument(att:Dictionary<string>, head:string, body:string):string{
+export default function HtmlDocument(att:Dictionary<string>, head:string, body:Content):string{
     return "<!DOCTYPE html>"+
         createElement("html", att, 
             createElement("head", head),
