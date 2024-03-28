@@ -80,6 +80,7 @@ export default function MimeTypes(extension:string):string {
             return "image/gif";
 
         case "htm":
+        case "html":
             return "text/html";
 
         case "ico":
