@@ -17,10 +17,10 @@ var isRouting:boolean = false;
 
 window.zim.route = function route(href:string, body?:any){
     if(!isRouting) {
-        const {path, anchor} = getRouteInfo(href);
+        const {anchor} = getRouteInfo(href);
         window.history.pushState({}, "", href);
 
-        routeHandler().then(()=>{
+        routeHandler(body).then(()=>{
             if(anchor)
                 this.scroll(anchor);
         }).catch(console.error);
@@ -107,16 +107,18 @@ async function routeHandler(body?:FormData):Promise<void>{
         }
     }
 
-    insertContent(findOrCreateElement("main", "body"), update.content);
+    const target = findOrCreateElement("main", "body");
+    target.innerHTML = "";
+    insertContent(target, update.content);
     isRouting = false;
 }
 
 function insertContent(target:HTMLElement, content:Content){
     if(Array.isArray(content)){
-        for(let c in content)
+        for(let c of content)
             insertContent(target, c);
     } else if(content !== null){
-        target.innerHTML = String(content);
+        target.innerHTML += String(content);
     }
 }
 
@@ -187,6 +189,9 @@ document.body.addEventListener("click", function RouteEvent(event:Event){
     const link:HTMLAnchorElement|null = target.closest("a");
 
     if(link){
+        event.preventDefault();
+        target.blur();
+
         if(link.getAttribute("target") !== "_blank" && link.href.indexOf(location.hostname) !== -1){
             const {anchor, path} = getRouteInfo(link.href);
 
