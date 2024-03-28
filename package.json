@@ -4,7 +4,8 @@
   "description": "\"Combining front and backend rendering\"",
   "main": "index.js",
   "scripts": {
-    "test": "tsc && jest"
+    "test": "tsc && jest",
+    "test:serve": "tsc && node ./test"
   },
   "author": "Alex Malotky",
   "license": "ISC",
