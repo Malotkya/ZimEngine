@@ -209,7 +209,7 @@ export default class View{
         this.#defaultContent = stationaryContent;
         this.#attribute = attributes;
         this.#defaultHead = generateHeadObject(headTags);
-        this.#defaultHead["injectedJS"] = {name: "script", attributes:{src:View.route, defer:""}, content: "var exports = {};"};
+        this.#defaultHead["injectedJS"] = {name: "script", attributes:{src:View.route, defer:""}};
     }
 
     /** File Route Getter
