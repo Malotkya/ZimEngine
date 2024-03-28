@@ -7,6 +7,7 @@ import {IncomingMessage, ServerResponse} from "http";
 import Context from "./Context";
 import {Handler} from "./Router/Layer";
 import HttpError from "./HttpError";
+import View from "./View";
 
 /** Engine Type
  * 
@@ -25,6 +26,7 @@ export default class App extends Route{
     #engine:Engine;
     #notFound:Handler;
     #errorHandler:ErrorHandler;
+    #view:View|undefined;
 
     /** Constructor
      * 
@@ -37,14 +39,14 @@ export default class App extends Route{
          * Done this way so that 'this' references this instance.
          */
         this.#engine = (incoming:IncomingMessage, response:ServerResponse) => {
-            const ctx = new Context(incoming, response)
+            const ctx = new Context(incoming, response, this.#view);
             this.handle(ctx)
                 .catch((err)=>{
                     if(typeof err === "number")
                         err = new HttpError(err);
                     this.#errorHandler(err, ctx);
                 }).finally(()=>ctx.flush())
-        }
+        } 
 
         /** Defult 404 Handler
          * 
@@ -109,5 +111,14 @@ export default class App extends Route{
      */
     get engine():Engine{
         return this.#engine;
+    }
+
+    /** View Setter
+     * 
+     * @param {View} view
+     */
+    view(view:View){
+        this.#view = view;
+        this.use(View.route, View.getFile);
     }
 }
