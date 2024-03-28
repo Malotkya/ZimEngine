@@ -4,6 +4,8 @@
  */
 import {IncomingMessage as Request, ServerResponse as Response} from "http";
 import View, {ContentUpdate, Content} from "./View";
+import fs from "fs";
+import MimeTypes from "./MimeTypes";
 export {Request, Response};
 
 /** Context
@@ -120,7 +122,7 @@ export default class Context{
      */
     json(object:Object): Context{
         if (!this.#response.getHeader("Content-Type")) {
-            this.#response.setHeader('Content-Type', 'application/json');
+            this.#response.setHeader('Content-Type', MimeTypes("json"));
         }
         this.#response.write(JSON.stringify(object));
         return this;
@@ -133,7 +135,7 @@ export default class Context{
      */
     text(value:string): Context{
         if (!this.#response.getHeader("Content-Type")) {
-            this.#response.setHeader('Content-Type', 'text/plain');
+            this.#response.setHeader('Content-Type', MimeTypes("txt"));
         }
         this.#response.write(value);
         return this;
@@ -146,7 +148,7 @@ export default class Context{
      */
     html(value:string): Context{
         if (!this.#response.getHeader("Content-Type")) {
-            this.#response.setHeader('Content-Type', 'text/html');
+            this.#response.setHeader('Content-Type', MimeTypes("html"));
         }
         this.#response.write(value);
         return this;
@@ -159,6 +161,23 @@ export default class Context{
      */
     write(chunk:any):Context{
         this.#response.write(chunk);
+        return this;
+    }
+
+    file(name:string):Context{
+        if(!fs.existsSync(name))
+            throw 404;
+        
+        const stats = fs.statSync(name);
+        const contentType = MimeTypes(name.substring(name.lastIndexOf(".")));
+        
+        if(stats.isDirectory())
+            throw 404;
+
+        this.response.setHeader("Content-Type", contentType)
+        this.response.setHeader("Content-Size", stats.size);
+
+        fs.createReadStream(name).pipe(this.response);
         return this;
     }
 
