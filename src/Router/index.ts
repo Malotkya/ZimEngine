@@ -31,8 +31,8 @@ export default class Router extends Layer{
      * 
      * @param {any} options 
      */
-    constructor(options?:any) {
-        super("", options, (ctx:Context)=>this.handle(ctx));
+    constructor(options:any = {}) {
+        super("", options, ()=>{throw new Error("_handler called from Router!")});
         this.#methods = new Stack();
     }
 
@@ -42,8 +42,11 @@ export default class Router extends Layer{
      */
     async handle(context:Context){
         for(const {name, layer} of this.#methods) {
-            if(name === context.method || name === "ALL")
+            if( (name === context.method || name === "ALL")
+                                    && layer.match(context)) {
                 await layer.handle(context);
+            }
+                
         }
     }
 

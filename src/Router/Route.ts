@@ -12,8 +12,8 @@ import Context from "../Context";
 export default class Route extends Layer {
     #layers: Array<Layer>;
 
-    public constructor(path:string = "", options?:any, layers:Array<Layer> = []){
-        super(path, options, (ctx:Context)=>this.handle(ctx));
+    public constructor(path:string = "", options:any={shortcut:true}, layers:Array<Layer> = []){
+        super(path, options, ()=>{throw new Error("_handler called from Router!")});
             
         this.#layers = layers;
         for(let l of this.#layers)
@@ -47,8 +47,18 @@ export default class Route extends Layer {
      */
     async handle(context:Context){
         for(let l of this.#layers) {
-            await l.handle(context);
+            if(l.match(context))
+                await l.handle(context);
         }
+    }
+
+    public match(context:Context):boolean{
+        if(super.match(context)){
+            for(let l of this.#layers)
+                if(l.match(context))
+                    return true;
+        }
+        return false;
     }
 
     public set path(value:string){

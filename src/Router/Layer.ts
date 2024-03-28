@@ -38,12 +38,14 @@ export default class Layer {
         this._path = path;
         this._options = options;
         this._handler = handler;
-        this.#shortcut = path === '/' && options.end === false
+        this.#shortcut = (path === '/' && options.end === true) || options.shortcut;
     }
 
     private static init(path:string, options:any, handler:Handler|Layer):Layer {
         if(handler instanceof Layer){
-            return new Layer(join(path, handler.path), options, handler._handler);
+            handler._options = options;
+            handler.initPath = path;
+            return handler;
         } else if(typeof handler === "function"){
             return new Layer(path, options, handler);
         } else {
@@ -99,8 +101,7 @@ export default class Layer {
     }
 
     async handle(context:Context) {
-        if(this.match(context))
-            await this._handler(context);
+        await this._handler(context);
     }
 
     /** Match Route
@@ -128,6 +129,11 @@ export default class Layer {
 
         context.params = params;
         return true;
+    }
+
+    private set initPath(value:string){
+        this.#initPath = value;
+        this.path = value;
     }
 
     /** Path Setter
