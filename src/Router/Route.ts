@@ -13,9 +13,11 @@ export default class Route extends Layer {
     #layers: Array<Layer>;
 
     public constructor(path:string = "", options?:any, layers:Array<Layer> = []){
-        super(path, options, undefined);
+        super(path, options, (ctx:Context)=>this.handle(ctx));
             
         this.#layers = layers;
+        for(let l of this.#layers)
+            l.path = this.path;
     }
 
     /** Use Middleware or Route
@@ -32,6 +34,7 @@ export default class Route extends Layer {
         if(Array.isArray(layer)){
             this.#layers.push(new Route(this.path, undefined, layer));
         } else {
+            layer.path = this._path;
             this.#layers.push(layer);
         }
 
@@ -46,5 +49,11 @@ export default class Route extends Layer {
         for(let l of this.#layers) {
             await l.handle(context);
         }
+    }
+
+    public set path(value:string){
+        super.path = value;
+        for(let l of this.#layers)
+            l.path = this.path;
     }
 }

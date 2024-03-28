@@ -32,7 +32,7 @@ export default class Router extends Layer{
      * @param {any} options 
      */
     constructor(options?:any) {
-        super("", options);
+        super("", options, (ctx:Context)=>this.handle(ctx));
         this.#methods = new Stack();
     }
 
@@ -56,6 +56,8 @@ export default class Router extends Layer{
         const middleware = super.filter(args);
         if(Array.isArray(middleware))
             return new Route(this.path, middleware);
+        
+        middleware.path = this._path;
         return middleware;
     }
 

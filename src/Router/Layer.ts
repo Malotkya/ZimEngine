@@ -19,10 +19,12 @@ export type Handler = (context:Context)=>Promise<void>|void;
 export default class Layer {
     #regex:RegExp
     #keys:Array<Key>
-    #path:string;
+    #initPath:string;
     #shortcut:boolean;
 
     protected _handler:Handler;
+    protected _path:string;
+    protected _options:any;
 
     /** Constructor
      * 
@@ -30,16 +32,18 @@ export default class Layer {
      * @param {any} options 
      * @param {Handler} handler 
      */
-    constructor(path:string = "/", options:any = {end:false}, handler:Handler=()=>undefined) {
+    constructor(path:string = "/", options:any = {end:false}, handler:Handler) {
         this.#regex = pathToRegexp(path, this.#keys = [], options);
-        this.#path = path;
+        this.#initPath = path;
+        this._path = path;
+        this._options = options;
         this._handler = handler;
         this.#shortcut = path === '/' && options.end === false
     }
 
     private static init(path:string, options:any, handler:Handler|Layer):Layer {
         if(handler instanceof Layer){
-            return handler;
+            return new Layer(join(path, handler.path), options, handler._handler);
         } else if(typeof handler === "function"){
             return new Layer(path, options, handler);
         } else {
@@ -126,10 +130,22 @@ export default class Layer {
         return true;
     }
 
+    /** Path Setter
+     * 
+     */
+    public set path(value:string){
+        this._path = join(value, this.#initPath);
+        this.#regex = pathToRegexp(this._path, this.#keys = [], this._options);
+    }
+
     /** Path Getter
      * 
      */
     public get path():string {
-        return this.#path;
+        return this._path;
     }
+}
+
+function join(...paths:Array<string>){
+    return paths.join("/").replace(/\/+/gm, "/");
 }
