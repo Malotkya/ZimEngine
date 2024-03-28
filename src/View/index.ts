@@ -5,7 +5,9 @@
 import HtmlDocument, {Content, createElement, compressContent} from "./Html";
 export {Content, createElement};
 import Context from "../Context";
+import fs from "fs";
 import path from "path";
+import MimeTypes from "../MimeTypes";
 
 /** Content Update Interface
  * 
@@ -19,7 +21,7 @@ export interface ContentUpdate{
  * 
  * Used to determin where content will be rendered on partial render.
  */
-export type RenderContent = (update:Content)=>string;
+export type RenderContent = (update:Content)=>Content;
 
 /** Element Tag Interface
  * 
@@ -132,12 +134,20 @@ function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<
         } else {
             switch (name){
                 case "base":
-                case "script":
                 case "link":
                     original[name] = {
                         name: name,
                         attributes: {
                             href: update["name"]
+                        }
+                    }
+                    break;
+
+                case "script":
+                    original[name] = {
+                        name: name,
+                        attributes: {
+                            src: update["name"]
                         }
                     }
                     break;
@@ -166,6 +176,12 @@ function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<
     return Object.values(original).map(value=>value?createElement(value.name, value.attributes, value.self, value.content || null): "").join("");
 }
 
+/** Injected File Information.
+ * 
+ */
+const fileHeader:string = MimeTypes("js");
+const fileContent:string = fs.readFileSync(path.join(__dirname, "web.js")).toString().replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
+
 /** View Class
  * 
  */
@@ -193,7 +209,7 @@ export default class View{
         this.#defaultContent = stationaryContent;
         this.#attribute = attributes;
         this.#defaultHead = generateHeadObject(headTags);
-        this.#defaultHead["injectedJS"] = {name: "script", attributes:{href:View.route, defer:""}};
+        this.#defaultHead["injectedJS"] = {name: "script", attributes:{src:View.route, defer:""}, content: "var exports = {};"};
     }
 
     /** File Route Getter
@@ -208,8 +224,8 @@ export default class View{
      * @param {Context} ctx 
      */
     static getFile(ctx:Context):void {
-        let file = path.join(__dirname, "web.js");
-        ctx.file(file);
+        ctx.response.setHeader("Content-Type", fileHeader);
+        ctx.response.write(fileContent);
     }
 
     /** Render Content Update
@@ -219,7 +235,7 @@ export default class View{
      */
     render(update:ContentUpdate):string{
         const head:string = generateHeadElement(this.#defaultHead, update.head);
-        const body:string = this.#defaultContent(update.content);
+        const body:Content = this.#defaultContent(update.content);
         return HtmlDocument(this.#attribute, head, body);
     }
 }
