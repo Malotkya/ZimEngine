@@ -47,18 +47,8 @@ export default class Route extends Layer {
      */
     async handle(context:Context){
         for(let l of this.#layers) {
-            if(l.match(context))
-                await l.handle(context);
+            await l.handle(context);
         }
-    }
-
-    public match(context:Context):boolean{
-        if(super.match(context)){
-            for(let l of this.#layers)
-                if(l.match(context))
-                    return true;
-        }
-        return false;
     }
 
     public set path(value:string){

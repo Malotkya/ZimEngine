@@ -20,7 +20,6 @@ export default class Layer {
     #regex:RegExp
     #keys:Array<Key>
     #initPath:string;
-    #shortcut:boolean;
 
     protected _handler:Handler;
     protected _path:string;
@@ -38,7 +37,6 @@ export default class Layer {
         this._path = path;
         this._options = options;
         this._handler = handler;
-        this.#shortcut = (path === '/' && options.end === true) || options.shortcut;
     }
 
     private static init(path:string, options:any, handler:Handler|Layer):Layer {
@@ -101,7 +99,8 @@ export default class Layer {
     }
 
     async handle(context:Context) {
-        await this._handler(context);
+        if(this.match(context))
+            await this._handler(context);
     }
 
     /** Match Route
@@ -110,14 +109,9 @@ export default class Layer {
      * @returns {bollean}
      */
     match(context:Context):boolean{
+        const path:string = context.url.pathname;
 
-        if(this.#shortcut){
-            context.params = {};
-            return true;
-        }
-
-        const match = context.url.pathname.match(this.#regex);
-
+        const match = path.match(this.#regex);
         if(match === null)
             return false;
 
@@ -153,5 +147,7 @@ export default class Layer {
 }
 
 function join(...paths:Array<string>){
-    return paths.join("/").replace(/\/+/gm, "/");
+    return paths.join("/")
+        .replace(/\/+/gm, "/") //Remove any multiple slashes
+        .replace(/\/$/, "");   //Remove trailing slash
 }
