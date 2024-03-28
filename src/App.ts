@@ -69,9 +69,9 @@ export default class App extends Route{
                 ctx.json({status, message});
             } else if(contentType.includes("xml")) {
                 //We don't have that yet
-                ctx.text(message);
+                ctx.html(message);
             } else {
-                ctx.write(message);
+                ctx.text(message);
             }
         }
     }
