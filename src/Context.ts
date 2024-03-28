@@ -4,7 +4,7 @@
  */
 import {IncomingMessage as Request, ServerResponse as Response} from "http";
 import View, {ContentUpdate, Content} from "./View";
-import fs from "fs";
+import fs, { ReadStream } from "fs";
 import MimeTypes from "./MimeTypes";
 export {Request, Response};
 
@@ -21,6 +21,7 @@ export default class Context{
     #htmlHeaders:Dictionary<string>;
     #htmlContent:Array<Content>;
     #view:View|undefined;
+    #streams:Array<ReadStream>;
 
     /** Constructor
      * 
@@ -44,6 +45,7 @@ export default class Context{
         this.#htmlHeaders = {};
         this.#htmlContent = [];
         this.#view = view;
+        this.#streams = [];
     }
 
     /** Request Getter
@@ -177,7 +179,10 @@ export default class Context{
         this.response.setHeader("Content-Type", contentType)
         this.response.setHeader("Content-Size", stats.size);
 
-        fs.createReadStream(name).pipe(this.response);
+        const file = fs.createReadStream(name);
+        this.#streams.push(file);
+        file.pipe(this.response);
+
         return this;
     }
 
@@ -196,7 +201,9 @@ export default class Context{
     /** Flush Update Content
      * 
      */
-    flush():void {
+    async flush():Promise<void> {
+        await this.waitForPipes();
+
         if(this.#htmlContent.length > 0){
             if(typeof this.#view === "undefined")
                 throw new Error("No View to render content!");
@@ -206,15 +213,32 @@ export default class Context{
                 head: this.#htmlHeaders,
                 content: this.#htmlContent
             };
-
+        
             if(contentType && contentType.includes("json")) {
                 this.json(update);
             } else {
                 this.html(this.#view.render(update));
             }
         }
-        
+
         this.#response.end();
+    }
+
+    /** Wait for any File Streams to Close
+     * 
+     */
+    waitForPipes():Promise<void>{
+        const wait = (n:number=1) => new Promise<void>(res=>setTimeout(res, n));
+
+        return new Promise((res, rej)=>{
+            const all:Array<Promise<void>> = this.#streams.map(async(stream)=>{
+                while(!stream.closed)
+                    await wait();
+            });
+
+            Promise.all(all).then(()=>res()).catch(rej);
+        })
+        
     }
 
     /** Was Nothing Sent
@@ -222,7 +246,7 @@ export default class Context{
      * @returns {boolean}
      */
     nothingSent():boolean {
-        if(this.#htmlContent.length > 0)
+        if(this.#htmlContent.length > 0 || this.#streams.length > 0)
             return false;
 
         return !this.#response.headersSent;
