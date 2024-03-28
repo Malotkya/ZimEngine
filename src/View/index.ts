@@ -4,6 +4,8 @@
  */
 import HtmlDocument, {Content, createElement, compressContent} from "./Html";
 export {Content, createElement};
+import Context from "../Context";
+import path from "path";
 
 /** Content Update Interface
  * 
@@ -67,7 +69,7 @@ function generateHeadObject(tags:Array<ElementTag>):Dictionary<ElementTag>{
             case "link":
                 tag.attributes = tag.attributes || {};
                 if(tag.attributes.href === undefined)
-                    tag.attributes.href = tag.content;
+                    tag.attributes.href = String(tag.content);
                 delete tag.content;
                 tag.self = true;
                 output[id] = tag;
@@ -87,7 +89,7 @@ function generateHeadObject(tags:Array<ElementTag>):Dictionary<ElementTag>{
                 }
                 output[name] = {
                     name:"meta",
-                    attributes: {name:tag.name, content: tag.content},
+                    attributes: {name:tag.name, content: String(tag.content)},
                     self: true
                 };
         }
@@ -191,7 +193,23 @@ export default class View{
         this.#defaultContent = stationaryContent;
         this.#attribute = attributes;
         this.#defaultHead = generateHeadObject(headTags);
-        this.#defaultHead["injectedJS"] = {name: "script", attributes:{href:"./zim.js", defer:""}};
+        this.#defaultHead["injectedJS"] = {name: "script", attributes:{href:View.route, defer:""}};
+    }
+
+    /** File Route Getter
+     * 
+     */
+    static get route():string {
+        return "/zim.js"
+    }
+
+    /** Get File Name Handler
+     * 
+     * @param {Context} ctx 
+     */
+    static getFile(ctx:Context):void {
+        let file = path.join(__dirname, "web.js");
+        ctx.file(file);
     }
 
     /** Render Content Update
