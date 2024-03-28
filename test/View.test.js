@@ -1,5 +1,5 @@
 const {default:View} = require("../build/View");
-const {App} = require("../build");
+const {default:App} = require("../build/App");
 
 test("View Init Test", ()=>{
     expect(new View()).not.toBe(undefined);
@@ -55,13 +55,3 @@ test("Hosting Script Page", done=>{
         .expect(target)
         .expect(200, done);
 })
-
-/*function defaultHead() {
-    return createElement("head", 
-        createElement("meta", {charset: "UTF-8"}, true),
-        createElement("meta", {name: "viewport", content: "width=device-wdith, initial-scale=1"}, true),
-        createElement("script", {src:"/script.js", type:"module"}),
-        createElement("meta", {name:"author", content: "Alex Malotky"}),
-        createElement("title", "Zim Engine")
-    )
-}*/
