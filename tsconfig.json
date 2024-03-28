@@ -1,16 +1,17 @@
 {
     "compilerOptions": {
-      "lib": ["es2021", "dom"],
-      "module": "node16",
-      "target": "es2021",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "moduleResolution": "node16",
-      "outDir": "build",
+        "lib": ["es2021", "dom"],
+        "module": "node16",
+        "target": "es2021",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node16",
+        "outDir": "build",
+        "sourceMap": true
     },
     "include": [
-      "src",
-      "./global.d.ts"
+        "src",
+        "./global.d.ts"
     ]
-  }
+}
