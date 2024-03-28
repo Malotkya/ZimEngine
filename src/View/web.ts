@@ -181,3 +181,23 @@ function findOrCreateElement(name?:string, ...parents:Array<string>): HTMLElemen
 
     return newNode;
 }
+
+document.body.addEventListener("click", function RouteEvent(event:Event){
+    const target:HTMLElement = event.target as HTMLElement;
+    const link:HTMLAnchorElement|null = target.closest("a");
+
+    if(link){
+        if(link.getAttribute("target") !== "_blank" && link.href.indexOf(location.hostname) !== -1){
+            const {anchor, path} = getRouteInfo(link.href);
+
+            //Determine if scrolling or routing.
+            if(location.pathname === path){
+                window.zim.scroll(anchor);
+            } else {
+                window.zim.route(link.href);
+            }
+        } else {
+            window.zim.link(link.href);
+        }
+    }
+})
