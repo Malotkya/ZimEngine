@@ -35,14 +35,15 @@ test("Render View", ()=>{
     }
 
     expect(v.render(update))
-        .toBe("<!DOCTYPE html><html><head><title>New Title</title><script href='/zim.js' defer=''></script></head><body><h1>Hello World</h1></body></html>")
+        .toBe("<!DOCTYPE html><html><head><title>New Title</title><script src='/zim.js' defer=''></script></head><body><h1>Hello World</h1></body></html>")
 });
 
 test("Hosting Script Page", done=>{
     const fs = require("fs");
     const path = require("path");
     const request = require('supertest');
-    const target = fs.readFileSync(path.join(__dirname, "..", "build", "view", "web.js")).toString();
+    const target = fs.readFileSync(path.join(__dirname, "..", "build", "view", "web.js")).toString()
+                    .replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
 
     const app = new App();
     const v = new View();
