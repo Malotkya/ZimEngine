@@ -1,5 +1,5 @@
 const {default:View} = require("../build/View");
-
+const {App} = require("../build");
 
 test("View Init Test", ()=>{
     expect(new View()).not.toBe(undefined);
@@ -35,7 +35,25 @@ test("Render View", ()=>{
     }
 
     expect(v.render(update))
-        .toBe("<!DOCTYPE html><html><head><title>New Title</title><script href='./zim.js' defer=''></script></head><body><h1>Hello World</h1></body></html>")
+        .toBe("<!DOCTYPE html><html><head><title>New Title</title><script href='/zim.js' defer=''></script></head><body><h1>Hello World</h1></body></html>")
+});
+
+test("Hosting Script Page", done=>{
+    const fs = require("fs");
+    const path = require("path");
+    const request = require('supertest');
+    const target = fs.readFileSync(path.join(__dirname, "..", "build", "view", "web.js")).toString();
+
+    const app = new App();
+    const v = new View();
+
+    app.view(v);
+
+    request(app.engine)
+        .get(View.route)
+        .expect("Content-Type", "text/javascript")
+        .expect(target)
+        .expect(200, done);
 })
 
 /*function defaultHead() {
