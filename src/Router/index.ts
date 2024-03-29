@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
-import Layer from "./Layer";
+import Layer, {Handler} from "./Layer";
 import Route from "./Route";
 
 /** Method Stack
@@ -156,5 +156,24 @@ export default class Router extends Layer{
     all(...args:Array<any>):Router{
         this.#methods.add("ALL", this.filter(args));
         return this;
+    }
+
+    /** Authorization Method
+     * 
+     */
+    auth(realm:string|Handler){
+        if(typeof realm === "string") {
+            realm = function setRealm(ctx:Context){
+                const auth = ctx.authorization();
+                if(!auth){
+                    ctx.response.setHeader("WWW-Authenticate", "Basic realm="+realm)
+                    throw 401;
+                }
+            }
+        } else if(typeof realm !== "function"){
+            throw new TypeError("Authenticaiton requires a string or function!");
+        }
+
+        this.#methods.add("ALL", new Layer("/", undefined, realm));
     }
 }
