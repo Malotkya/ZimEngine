@@ -11,6 +11,10 @@ export default function Static(directory:string){
 
     return function serveStatic(ctx:Context){
         const target:string = path.join(directory, decodeURI(ctx.url.pathname));
-        ctx.file(target);
+
+        if(fs.existsSync(target) && fs.statSync(target).isFile())
+            ctx.file(target);
+
+        
     }
 }
