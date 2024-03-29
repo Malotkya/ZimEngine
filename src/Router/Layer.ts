@@ -3,6 +3,7 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
+import {join} from "../Util";
 import {pathToRegexp, Key} from "path-to-regexp";
 
 const SUB_LAYER_OPTS = {strict: false, end: true};
@@ -146,8 +147,3 @@ export default class Layer {
     }
 }
 
-function join(...paths:Array<string>){
-    return paths.join("/")
-        .replace(/\/+/gm, "/") //Remove any multiple slashes
-        .replace(/\/$/, "");   //Remove trailing slash
-}

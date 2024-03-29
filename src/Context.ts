@@ -4,6 +4,7 @@
  */
 import {IncomingMessage as Request, ServerResponse as Response} from "http";
 import View, {ContentUpdate, Content} from "./View";
+import { sleep } from "./Util";
 import fs, { ReadStream } from "fs";
 import MimeTypes from "./MimeTypes";
 export {Request, Response};
@@ -228,12 +229,12 @@ export default class Context{
      * 
      */
     waitForPipes():Promise<void>{
-        const wait = (n:number=1) => new Promise<void>(res=>setTimeout(res, n));
+        
 
         return new Promise((res, rej)=>{
             const all:Array<Promise<void>> = this.#streams.map(async(stream)=>{
                 while(!stream.closed)
-                    await wait();
+                    await sleep();
             });
 
             Promise.all(all).then(()=>res()).catch(rej);
