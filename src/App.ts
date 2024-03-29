@@ -67,8 +67,7 @@ export default class App extends Route{
             const contentType:string = ctx.request.headers["content-type"] || "unkown";
             if(contentType.includes("json")) {
                 ctx.json({status, message});
-            } else if(contentType.includes("xml")) {
-                //We don't have that yet
+            } else if(contentType.includes("html")) {
                 ctx.html(message);
             } else {
                 ctx.text(message);
