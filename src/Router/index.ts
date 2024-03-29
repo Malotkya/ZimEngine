@@ -32,7 +32,7 @@ export default class Router extends Layer{
      * @param {any} options 
      */
     constructor(options:any = {}) {
-        super("", options, ()=>{throw new Error("_handler called from Router!")});
+        super("/", options, ()=>{throw new Error("_handler called from Router!")});
         this.#methods = new Stack();
     }
 
@@ -41,18 +41,15 @@ export default class Router extends Layer{
      * @param {Context} context 
      */
     async handle(context:Context){
+        const query = context.query;
         for(const {name, layer} of this.#methods) {
             if(name === context.method || name === "ALL") {
-                await layer.handle(context);
+                if(layer.match(context)) {
+                    await layer.handle(context);
+                    context.query = query;
+                }
             }
                 
-        }
-    }
-
-    public set path(value:string){
-        super.path = value;
-        for(const {layer} of this.#methods){
-            layer.path = this._path;
         }
     }
 
@@ -64,9 +61,8 @@ export default class Router extends Layer{
     protected filter(args:Array<any>):Layer {
         const middleware = super.filter(args);
         if(Array.isArray(middleware))
-            return new Route(this.path, middleware);
+            return new Route(this._path, middleware);
         
-        middleware.path = this._path;
         return middleware;
     }
 

@@ -12,12 +12,10 @@ import Context from "../Context";
 export default class Route extends Layer {
     #layers: Array<Layer>;
 
-    public constructor(path:string = "", options:any={shortcut:true}, layers:Array<Layer> = []){
+    public constructor(path:string = "/", options:any={end:true}, layers:Array<Layer> = []){
         super(path, options, ()=>{throw new Error("_handler called from Router!")});
             
         this.#layers = layers;
-        for(let l of this.#layers)
-            l.path = this.path;
     }
 
     /** Use Middleware or Route
@@ -32,9 +30,8 @@ export default class Route extends Layer {
         const layer = this.filter(args);
 
         if(Array.isArray(layer)){
-            this.#layers.push(new Route(this.path, undefined, layer));
+            this.#layers.push(new Route(this._path, undefined, layer));
         } else {
-            layer.path = this._path;
             this.#layers.push(layer);
         }
 
@@ -46,14 +43,12 @@ export default class Route extends Layer {
      * @param {Context} context 
      */
     async handle(context:Context){
+        const query = context.query;
         for(let l of this.#layers) {
-            await l.handle(context);
+            if(l.match(context)) {
+                await l.handle(context);
+                context.query = query;
+            }
         }
-    }
-
-    public set path(value:string){
-        super.path = value;
-        for(let l of this.#layers)
-            l.path = this.path;
     }
 }

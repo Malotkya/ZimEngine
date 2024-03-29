@@ -22,7 +22,8 @@ export default class Context{
     #htmlHeaders:Dictionary<string>;
     #htmlContent:Array<Content>;
     #view:View|undefined;
-    #streams:Array<ReadStream>;
+    private _streams:Array<ReadStream>;
+    private _query:string|undefined;
 
     /** Constructor
      * 
@@ -46,7 +47,7 @@ export default class Context{
         this.#htmlHeaders = {};
         this.#htmlContent = [];
         this.#view = view;
-        this.#streams = [];
+        this._streams = [];
     }
 
     /** Request Getter
@@ -181,7 +182,7 @@ export default class Context{
         this.response.setHeader("Content-Size", stats.size);
 
         const file = fs.createReadStream(name);
-        this.#streams.push(file);
+        this._streams.push(file);
         file.pipe(this.response);
 
         return this;
@@ -229,17 +230,14 @@ export default class Context{
      * 
      */
     waitForPipes():Promise<void>{
-        
-
         return new Promise((res, rej)=>{
-            const all:Array<Promise<void>> = this.#streams.map(async(stream)=>{
+            const all:Array<Promise<void>> = this._streams.map(async(stream)=>{
                 while(!stream.closed)
                     await sleep();
             });
 
             Promise.all(all).then(()=>res()).catch(rej);
         })
-        
     }
 
     /** Was Nothing Sent
@@ -247,7 +245,7 @@ export default class Context{
      * @returns {boolean}
      */
     nothingSent():boolean {
-        if(this.#htmlContent.length > 0 || this.#streams.length > 0)
+        if(this.#htmlContent.length > 0 || this._streams.length > 0)
             return false;
 
         return !this.#response.headersSent;
@@ -263,5 +261,22 @@ export default class Context{
             username: buffer[0],
             password: buffer[1]
         }
+    }
+
+    get query():string {
+        if(this._query !== undefined) {
+            if(this._query === "")
+                return "/";
+            return this._query;
+        }
+            
+        return this.url.pathname;
+    }
+
+    set query(value:string){
+        if(typeof value !== "string")
+            throw new TypeError("Query must be a string!");
+
+        this._query = value;
     }
 }

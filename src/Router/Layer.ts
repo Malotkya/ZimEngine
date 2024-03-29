@@ -20,11 +20,11 @@ export type Handler = (context:Context)=>Promise<void>|void;
 export default class Layer {
     #regex:RegExp
     #keys:Array<Key>
-    #initPath:string;
 
     protected _handler:Handler;
     protected _path:string;
     protected _options:any;
+    protected _shortcut:boolean;
 
     /** Constructor
      * 
@@ -34,16 +34,15 @@ export default class Layer {
      */
     constructor(path:string = "/", options:any = {end:false}, handler:Handler) {
         this.#regex = pathToRegexp(path, this.#keys = [], options);
-        this.#initPath = path;
         this._path = path;
         this._options = options;
         this._handler = handler;
+        this._shortcut = path === "/" && options.end === true;
     }
 
     private static init(path:string, options:any, handler:Handler|Layer):Layer {
         if(handler instanceof Layer){
             handler._options = options;
-            handler.initPath = path;
             return handler;
         } else if(typeof handler === "function"){
             return new Layer(path, options, handler);
@@ -100,17 +99,21 @@ export default class Layer {
     }
 
     async handle(context:Context) {
-        if(this.match(context))
-            await this._handler(context);
+        await this._handler(context);
     }
 
     /** Match Route
      * 
-     * @param {Context} context 
+     * @param {string} path 
      * @returns {bollean}
      */
     match(context:Context):boolean{
-        const path:string = context.url.pathname;
+        const path:string = context.query;
+
+        if(this._shortcut){
+            context.params = {};
+            return true;
+        }
 
         const match = path.match(this.#regex);
         if(match === null)
@@ -123,27 +126,8 @@ export default class Layer {
         }
 
         context.params = params;
+        context.query = path.replace(match[0], "");
         return true;
-    }
-
-    private set initPath(value:string){
-        this.#initPath = value;
-        this.path = value;
-    }
-
-    /** Path Setter
-     * 
-     */
-    public set path(value:string){
-        this._path = join(value, this.#initPath);
-        this.#regex = pathToRegexp(this._path, this.#keys = [], this._options);
-    }
-
-    /** Path Getter
-     * 
-     */
-    public get path():string {
-        return this._path;
     }
 }
 
