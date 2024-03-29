@@ -31,7 +31,7 @@ export default class Router extends Layer{
      * 
      * @param {any} options 
      */
-    constructor(options:any = {}) {
+    constructor(options:any = {end:true}) {
         super("/", options, ()=>{throw new Error("_handler called from Router!")});
         this.#methods = new Stack();
     }
@@ -59,7 +59,7 @@ export default class Router extends Layer{
      * @returns {Layer}
      */
     protected filter(args:Array<any>):Layer {
-        const middleware = super.filter(args);
+        const middleware = super.filter(args, this._options);
         if(Array.isArray(middleware))
             return new Route(this._path, middleware);
         

@@ -6,7 +6,7 @@ import Context from "../Context";
 import {join} from "../Util";
 import {pathToRegexp, Key} from "path-to-regexp";
 
-const SUB_LAYER_OPTS = {strict: false, end: true};
+const SUB_LAYER_OPTS = {strict: false, end: false};
 
 /** Handler Function Type
  * 
@@ -32,17 +32,18 @@ export default class Layer {
      * @param {any} options 
      * @param {Handler} handler 
      */
-    constructor(path:string = "/", options:any = {end:false}, handler:Handler) {
+    constructor(path:string = "/", options:any = SUB_LAYER_OPTS, handler:Handler) {
         this.#regex = pathToRegexp(path, this.#keys = [], options);
         this._path = path;
         this._options = options;
         this._handler = handler;
-        this._shortcut = path === "/" && options.end === true;
+        this._shortcut = path === "/" && options.end === false;
     }
 
     private static init(path:string, options:any, handler:Handler|Layer):Layer {
         if(handler instanceof Layer){
             handler._options = options;
+            handler.path = path;
             return handler;
         } else if(typeof handler === "function"){
             return new Layer(path, options, handler);
@@ -58,7 +59,7 @@ export default class Layer {
      * @param {Array<any>} args 
      * @returns {Layer}
      */
-    protected filter(args:Array<any>):Layer|Array<Layer>{
+    protected filter(args:Array<any>, options?:any):Layer|Array<Layer>{
         let path: string;
         let handler: Handler|Layer|Array<Handler|Layer>;
 
@@ -93,9 +94,9 @@ export default class Layer {
         }
     
         if(Array.isArray(handler)){
-            return handler.map(h=>Layer.init(path, SUB_LAYER_OPTS, h))
+            return handler.map(h=>Layer.init(path, options || SUB_LAYER_OPTS, h))
         }
-        return Layer.init(path, SUB_LAYER_OPTS, handler);
+        return Layer.init(path, options || SUB_LAYER_OPTS, handler);
     }
 
     async handle(context:Context) {
@@ -114,7 +115,6 @@ export default class Layer {
             context.params = {};
             return true;
         }
-
         const match = path.match(this.#regex);
         if(match === null)
             return false;
@@ -128,6 +128,12 @@ export default class Layer {
         context.params = params;
         context.query = path.replace(match[0], "");
         return true;
+    }
+
+    private set path(value:string){
+        this._path = value;
+        this.#regex = pathToRegexp(value, this.#keys = [], this._options);
+        this._shortcut = value === "/" && this._options.end === false;
     }
 }
 
