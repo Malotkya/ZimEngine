@@ -42,15 +42,7 @@ app.use("/About", about);
 
 const login = new Router();
 
-login.all((ctx)=>{
-    const auth = ctx.authorization();
-
-    if(!auth) {
-        ctx.response.setHeader("WWW-Authenticate", "Basic realm=ZimEngine")
-        throw 401;
-    }
-});
-
+login.auth("ZimEngine");
 login.get("/", (ctx)=>{
     const auth = ctx.authorization();
     const content = [
