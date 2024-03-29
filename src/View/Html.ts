@@ -70,8 +70,8 @@ export function compressContent(content:Content):string {
         for(let child of content)
             buffer += compressContent(child);
         return buffer;
-    } else if(content === null){
+    } else if(content === null || content === undefined){
         return "";
     }
-    return content;
+    return String(content);
 }
