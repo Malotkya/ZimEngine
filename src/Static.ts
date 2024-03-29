@@ -10,11 +10,7 @@ export default function Static(directory:string){
         throw new Error("Given path is a file!");
 
     return function serveStatic(ctx:Context){
-        const target:string = path.resolve(directory, ctx.url.pathname);
-
-        if(!fs.existsSync(target) || fs.statSync(target).isDirectory())
-            throw 404;
-
+        const target:string = path.join(directory, decodeURI(ctx.url.pathname));
         ctx.file(target);
     }
 }
