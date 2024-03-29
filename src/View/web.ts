@@ -36,7 +36,7 @@ window.zim.route = function route(href:string, body?:BodyData){
                 temp.append(name, String(value));
             }
             body = temp;
-        } else if( !(body instanceof FormData) ){
+        } else if( !(body instanceof FormData) && body !== undefined){
             const temp = new FormData();
             for(let name in body){
                 temp.append(name, String(body[name]));
@@ -45,8 +45,7 @@ window.zim.route = function route(href:string, body?:BodyData){
         }
 
         routeHandler(body).then(()=>{
-            if(anchor)
-                this.scroll(anchor);
+            this.scroll(anchor);
         }).catch(console.error);
     }
     
@@ -57,17 +56,22 @@ window.zim.route = function route(href:string, body?:BodyData){
  * @param {string} href 
  */
 window.zim.link = function link(href:string){
-    window.open(href, '_blank' , 'noopener,noreferrer');
+    if(typeof href === "string" && href !== ""){
+        window.open(href, '_blank' , 'noopener,noreferrer');
+    }
 }
+    
 
 /** Zim Engine Scroll
  * 
  * @param {string} id 
  */
 window.zim.scroll = function scroll(id:string){
-    const target = document.getElementById(id);
-    if(target)
-        target.scrollIntoView();
+    if(typeof id === "string" && id !== ""){
+        const target = document.getElementById(id);
+        if(target)
+            target.scrollIntoView();
+    }
 }
 
 /** Get Routing Info
@@ -113,6 +117,7 @@ async function routeHandler(body?:FormData):Promise<void>{
 
     const response = await fetch(window.location.pathname, {
         headers: { "Content-Type": "application/json" },
+        method: body? "POST": "GET",
         body: body
     });
 
