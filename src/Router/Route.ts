@@ -22,10 +22,10 @@ export default class Route extends Layer {
 
     /** Use Middleware or Route
      * 
-     * originaly: use(path:string|Array<string> = "", ...middleware:Handler|Route)
+     * originaly: use(path:string = "", ...middleware:Handler|Route)
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Router} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Route}
      */
     public use(...args: Array<any>): Route {

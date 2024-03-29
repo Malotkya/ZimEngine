@@ -72,8 +72,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     get(...args:Array<any>):Router{
@@ -83,8 +83,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     head(...args:Array<any>):Router{
@@ -94,8 +94,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     post(...args:Array<any>):Router{
@@ -105,8 +105,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     put(...args:Array<any>):Router{
@@ -116,8 +116,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     delete(...args:Array<any>):Router{
@@ -127,8 +127,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     options(...args:Array<any>):Router{
@@ -138,8 +138,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     patch(...args:Array<any>):Router{
@@ -149,8 +149,8 @@ export default class Router extends Layer{
 
     /** Get Method
      * 
-     * @param {string|Array<string>} path 
-     * @param {Middleware|Layer} middleware
+     * @param {string} path 
+     * @param {Handler|Layer|Array<Middleware|Layer>} middleware
      * @returns {Router}
      */
     all(...args:Array<any>):Router{
