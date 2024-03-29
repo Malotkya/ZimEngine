@@ -1,6 +1,8 @@
 const {App, Router, View} = require("../build");
 const {createElement:_} = require("../build/View/Html");
+const {default:Static} = require("../build/Static");
 const http = require("http");
+const path = require("path");
 
 const app = new App();
 app.view(new View([
@@ -15,6 +17,7 @@ app.view(new View([
         _("footer", _("p", "Good Bye!"))
     ]
 }));
+app.use(Static(path.join(__dirname, "static")));
 
 const home = new Router();
 const about = new Router();
