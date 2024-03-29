@@ -63,6 +63,17 @@ function generateHeadObject(tags:Array<ElementTag>):Dictionary<ElementTag>{
                 output["title"] = tag;
                 break;
 
+            case "charset":
+                if(output['charset'] !== undefined){
+                    throw new Error("Multiple charset tags where given!");
+                }
+                if(tag.content)
+                    tag.attributes = {charset: tag.content};
+                delete tag.content;
+                tag.self = true;
+                output["charset"] = tag;
+                break;
+
             case "style":
             case "script":
                 output[id] = tag;
@@ -118,6 +129,11 @@ function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<
                     original[name].content = update[name];
                     break;
 
+                case "charset":
+                    //@ts-ignore
+                    original[name].attributes["charset"] = update[name];
+                    break;
+
                 case "link":
                 case "style":
                 case "script":
@@ -152,6 +168,16 @@ function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<
                     }
                     break;
 
+                case "charset":
+                    original[name] = {
+                        name: name,
+                        attributes: { 
+                            charset: update["name"]
+                        },
+                        self: true
+                    }
+                    break;
+
                 case "title":
                 case "style":
                     original[name] = {
@@ -173,7 +199,7 @@ function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<
         }//End_If
     }
 
-    return Object.values(original).map(value=>value?createElement(value.name, value.attributes, value.self, value.content || null): "").join("");
+    return Object.values(original).map(value=>createElement(value.name, value.attributes, value.self, value.content || null)).join("");
 }
 
 /** Injected File Information.
