@@ -9,7 +9,7 @@ I am attempting to use as little external librarys as possible to prevent packag
 ## To Do
 1) Static Folder Implementation.
 2) Be able to incororporate other view engines.
-3) Easy Authentication
+3) ~~Easy Authentication~~
 4) Mulipart/Form Data handling
 5) POST body data handling
 6) Deep or Recursive Route(r)s that work.
