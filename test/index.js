@@ -4,7 +4,7 @@ const http = require("http");
 
 const app = new App();
 app.view(new View([
-    {name: "charset", attributes: {charset: "UTF-8"} },
+    {name: "charset", content:"UTF-8"},
     {name: "viewport", content: "width=device-wdith, initial-scale=1"},
     {name: "author", content: "Zim"},
     {name: "title", content: "Zim Engine Test"}
@@ -40,24 +40,27 @@ about.all((ctx)=>{
 app.use("/", home);
 app.use("/About", about);
 
-/*const login = new Router();
+const login = new Router();
 
 login.all((ctx)=>{
-    const authorization = ctx.request.headers.authorization;
-    console.log(authorization);
-    if(!authorization) {
+    const auth = ctx.authorization();
+
+    if(!auth) {
+        ctx.response.setHeader("WWW-Authenticate", "Basic realm=ZimEngine")
         throw 401;
     }
 });
 
-login.get("/User", (ctx)=>{
-    ctx.write("<h1>Welcome ${username}</h1>");
+login.get("/", (ctx)=>{
+    const auth = ctx.authorization();
+    const content = [
+        _("h2", `Welcome ${auth.username}`),
+    ]
+
+    ctx.render({content})
 });
 
 app.use("/Auth", login);
-app.use("/", (ctx)=>{
-    ctx.write("<h1>Hello World</h1>");
-});*/
 
 http.createServer(app.engine).listen(5000, ()=>{
     console.log("Test is Listening!");

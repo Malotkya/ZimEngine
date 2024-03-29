@@ -252,4 +252,16 @@ export default class Context{
 
         return !this.#response.headersSent;
     }
+
+    authorization():{username:string,password:string}|undefined{
+        const auth = this.#request.headers.authorization
+        if(auth===undefined)
+            return undefined;
+
+        const buffer = Buffer.from(auth.split(" ")[1], 'base64').toString().split(":");
+        return {
+            username: buffer[0],
+            password: buffer[1]
+        }
+    }
 }
