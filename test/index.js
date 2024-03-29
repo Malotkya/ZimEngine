@@ -17,7 +17,7 @@ app.view(new View([
         _("footer", _("p", "Good Bye!"))
     ]
 }));
-app.use(Static(path.join(__dirname, "static")));
+app.use("/Static", Static(path.join(__dirname, "static")));
 
 const home = new Router();
 const about = new Router();
