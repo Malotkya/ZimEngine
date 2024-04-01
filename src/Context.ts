@@ -7,7 +7,7 @@ import View, {ContentUpdate, Content} from "./View";
 import { sleep } from "./Util";
 import fs, { ReadStream } from "fs";
 import MimeTypes from "./MimeTypes";
-import { Body } from "./BodyParser";
+import { Body, FileData } from "./BodyParser";
 export {Request, Response};
 
 /** Context
@@ -24,6 +24,7 @@ export default class Context{
     #htmlContent:Array<Content>;
     #view:View|undefined;
     #body:Dictionary<string>;
+    #files:Dictionary<FileData>;
     private _streams:Array<ReadStream>;
     private _query:string|undefined;
 
@@ -44,10 +45,17 @@ export default class Context{
         for(const [name, value] of this.#url.searchParams.entries())
             this.#search[name] = value;
 
-        //Body Values
+        //Body/File Values
         this.#body = {};
+        this.#files = {};
         for( const [name, value] of body.entries()){
-            this.#body[name] = value;
+            if(typeof value === "string"){
+                this.#body[name] = value;
+            } else {
+                this.#body[name] = value.fileName;
+                this.#files[name] = value;
+            }
+            
         }
 
         //Defaults
