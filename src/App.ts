@@ -8,7 +8,9 @@ import Context from "./Context";
 import {Handler} from "./Router/Layer";
 import HttpError from "./HttpError";
 import View from "./View";
-import { BodyParser, Body } from "./BodyParser";
+import { BodyParser } from "./BodyParser";
+import { Writable } from "stream";
+import { format } from "util";
 
 /** Engine Type
  * 
@@ -29,6 +31,9 @@ export default class App extends Route{
     #errorHandler:ErrorHandler;
     #view:View|undefined;
 
+    static log:Writable = process.stdout;
+    static error:Writable = process.stderr;
+
     /** Constructor
      * 
      */
@@ -40,18 +45,23 @@ export default class App extends Route{
          * Done this way so that 'this' references this instance.
          */
         this.#engine = (incoming:IncomingMessage, response:ServerResponse) => {
-            let parse = new BodyParser(incoming.headers);
+            try {
+                let parse = new BodyParser(incoming.headers);
+                incoming.pipe(parse)
+                    .on("end", ()=>{
+                        const ctx = new Context(incoming, response, parse.body, this.#view);
+                        this.handle(ctx)
+                            .catch((err)=>{
+                                if(typeof err === "number")
+                                    err = new HttpError(err);
+                                this.#errorHandler(err, ctx);
+                            }).finally(()=>ctx.flush());
+                    });
 
-            incoming.pipe(parse)
-                .on("end", ()=>{
-                    const ctx = new Context(incoming, response, parse.body, this.#view);
-                    this.handle(ctx)
-                        .catch((err)=>{
-                            if(typeof err === "number")
-                                err = new HttpError(err);
-                            this.#errorHandler(err, ctx);
-                        }).finally(()=>ctx.flush());
-                });
+            } catch(err:any){
+                App.error.write(format("%o\n", err))
+            }
+            
         } 
 
         /** Defult 404 Handler
