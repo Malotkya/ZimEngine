@@ -1,4 +1,5 @@
-const {App, Route, Router} = require("../lib");
+const {App, Router} = require("../lib");
+const {default:Route} = require("../lib/Router/Route");
 const {default:Layer} = require("../lib/Router/Layer");
 const request = require('supertest');
 
