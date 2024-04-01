@@ -10,7 +10,7 @@ import HttpError from "./HttpError";
 import View from "./View";
 import { BodyParser } from "./BodyParser";
 import { Writable } from "stream";
-import { format } from "util";
+import util from "util";
 
 /** Engine Type
  * 
@@ -31,8 +31,24 @@ export default class App extends Route{
     #errorHandler:ErrorHandler;
     #view:View|undefined;
 
-    static log:Writable = process.stdout;
-    static error:Writable = process.stderr;
+    static log_stream:Writable = process.stdout;
+    static error_stream:Writable = process.stderr;
+
+    static print(stream:Writable, format:string, args:Array<any>){
+        if(typeof format !== "string"){
+            args.unshift(format);
+            format = "%o\n";
+        }
+        stream.write(util.format(format, ...args));
+    }
+
+    static error(format:any, ...args:Array<any>){
+        App.print(App.error_stream, format, args);
+    }
+
+    static log(format:any, ...args:Array<any>){
+        App.print(App.log_stream, format, args);
+    }
 
     /** Constructor
      * 
@@ -59,9 +75,8 @@ export default class App extends Route{
                     });
 
             } catch(err:any){
-                App.error.write(format("%o\n", err))
+                App.error(err);
             }
-            
         } 
 
         /** Defult 404 Handler
