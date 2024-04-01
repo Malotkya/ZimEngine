@@ -22,6 +22,28 @@ export interface FileData {
  */
 export type Body = Map<string, string|FileData>;
 
+/** Save Data Function Type
+ * 
+ */
+export type SaveFunction = (data:string, args:Dictionary<string>)=>FileData;
+
+/** Default Save Function
+ * 
+ */
+function saveFileDefault(data:string, args:Dictionary<string>):FileData{
+    const uploadDirectory = path.join(process.cwd(), "upload");
+    fs.mkdirSync(uploadDirectory, {recursive: true});
+
+    //Get additional file info and save.
+    const tempFile = path.join(uploadDirectory, String(Date.now()));
+    const contentType = args["Content-Type"];
+    const fileName = args["filename"];
+
+    fs.writeFileSync(tempFile, data);
+
+    return {tempFile, contentType, fileName};
+}
+
 /** Body Parser
  * 
  */
@@ -30,14 +52,14 @@ export class BodyParser extends Transform {
     _boundry:RegExp;
     _multipart:boolean;
     _data:Body;
-    _directory:string;
+    _save:SaveFunction;
 
     /** Constructor
      * 
      * @param {IncomingHttpHeaders} headers 
      * @param {any} opts 
      */
-    constructor(headers:IncomingHttpHeaders, opts:any={dir:"uploads"}){
+    constructor(headers:IncomingHttpHeaders, save:SaveFunction = saveFileDefault){
         super();
         const type = headers["content-type"];
         if(type && type.indexOf("multipart/form-data") >= 0) {
@@ -53,9 +75,7 @@ export class BodyParser extends Transform {
         }
         this._buffer = "";
         this._data = new Map();
-        this._directory = opts.dir;
-
-        fs.mkdirSync(this._directory, {recursive: true});
+        this._save = save;
     }
 
     /** Process Buffer
@@ -131,16 +151,10 @@ export class BodyParser extends Transform {
                 info: data
             }
         }
-    
-        //Get additional file info and save.
-        const tempFile = path.join(this._directory, String(Date.now()));
-        const contentType = headers["Content-Type"];
-        const fileName = headers["filename"];
-    
-        fs.writeFileSync(tempFile, data);
+
         return {
             name: headers["name"],
-            info: {tempFile, contentType, fileName}
+            info: this._save(data, headers)
         }
     }
 
