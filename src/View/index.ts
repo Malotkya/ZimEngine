@@ -70,6 +70,7 @@ function generateHeadObject(tags:Array<ElementTag>):Dictionary<ElementTag>{
                 if(tag.content)
                     tag.attributes = {charset: tag.content};
                 delete tag.content;
+                tag.name = "meta";
                 tag.self = true;
                 output["charset"] = tag;
                 break;
