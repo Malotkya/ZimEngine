@@ -10,21 +10,25 @@ import MimeTypes from "./MimeTypes";
 import { Body, FileData } from "./BodyParser";
 export {Request, Response};
 
+const HTML_MIME_TYPE = MimeTypes("html");
+const TXT_MIME_TYPE  = MimeTypes("txt");
+const JSON_MIME_TYPE = MimeTypes("json");
+
 /** Context
  * 
  * Wrapper Around Request/Response
  */
 export default class Context{
-    #request:Request;
-    #response:Response;
-    #url:URL;
-    #search:Dictionary<string>;
-    #params:Dictionary<string>;
-    #htmlHeaders:Dictionary<string>;
-    #htmlContent:Array<Content>;
-    #view:View|undefined;
-    #body:Dictionary<string>;
-    #files:Dictionary<FileData>;
+    private _request:Request;
+    private _response:Response;
+    private _url:URL;
+    private _search:Dictionary<string>;
+    private _params:Dictionary<string>;
+    private _htmlHeaders:Dictionary<string>;
+    private _htmlContent:Array<Content>;
+    private _view:View|undefined;
+    private _body:Dictionary<string>;
+    private _files:Dictionary<FileData>;
     private _streams:Array<ReadStream>;
     private _query:string|undefined;
 
@@ -36,33 +40,33 @@ export default class Context{
     constructor(request: Request, response: Response, body:Body, view?:View){
 
         //Getter Only Variables
-        this.#request = request;
-        this.#response = response;
-        this.#url = new URL(request.url || "/", `http://${request.headers.host}`);
+        this._request = request;
+        this._response = response;
+        this._url = new URL(request.url || "/", `http://${request.headers.host}`);
 
         //Search Values
-        this.#search = {};
-        for(const [name, value] of this.#url.searchParams.entries())
-            this.#search[name] = value;
+        this._search = {};
+        for(const [name, value] of this._url.searchParams.entries())
+            this._search[name] = value;
 
         //Body/File Values
-        this.#body = {};
-        this.#files = {};
+        this._body = {};
+        this._files = {};
         for( const [name, value] of body.entries()){
             if(typeof value === "string"){
-                this.#body[name] = value;
+                this._body[name] = value;
             } else {
-                this.#body[name] = value.fileName;
-                this.#files[name] = value;
+                this._body[name] = value.fileName;
+                this._files[name] = value;
             }
             
         }
 
         //Defaults
-        this.#params = {};
-        this.#htmlHeaders = {};
-        this.#htmlContent = [];
-        this.#view = view;
+        this._params = {};
+        this._htmlHeaders = {};
+        this._htmlContent = [];
+        this._view = view;
         this._streams = [];
     }
 
@@ -70,21 +74,21 @@ export default class Context{
      * 
      */
     get request():Request {
-        return this.#request;
+        return this._request;
     }
 
     /** Response Getter
      * 
      */
     get response():Response {
-        return this.#response;
+        return this._response;
     }
 
     /** Url Getter
      * 
      */
     get url():URL {
-        return this.#url;
+        return this._url;
     }
 
     /** Method Getter
@@ -98,28 +102,28 @@ export default class Context{
      * 
      */
     set params(value:Dictionary<string>){
-        this.#params = Object.create(value);
+        this._params = Object.create(value);
     }
 
     /** Params Getter
      * 
      */
     get params():Dictionary<string>{
-        return this.#params;
+        return this._params;
     }
 
     /** Search Getter
      * 
      */
     get search():Dictionary<string>{
-        return this.#search;
+        return this._search;
     }
 
     /** Body Getter
      * 
      */
     get body():Dictionary<string>{
-        return this.#body;
+        return this._body;
     }
 
     /** Set Status Code
@@ -138,7 +142,7 @@ export default class Context{
             throw new TypeError("Status code is out of range!");
         }
         
-        this.#response.statusCode = value;
+        this._response.statusCode = value;
         return this;
     }
 
@@ -148,10 +152,10 @@ export default class Context{
      * @returns {Context}
      */
     json(object:Object): Context{
-        if (!this.#response.getHeader("Content-Type")) {
-            this.#response.setHeader('Content-Type', MimeTypes("json"));
+        if (!this._response.getHeader("Content-Type")) {
+            this._response.setHeader('Content-Type', JSON_MIME_TYPE);
         }
-        this.#response.write(JSON.stringify(object));
+        this._response.write(JSON.stringify(object));
         return this;
     }
 
@@ -161,10 +165,10 @@ export default class Context{
      * @returns {this}
      */
     text(value:string): Context{
-        if (!this.#response.getHeader("Content-Type")) {
-            this.#response.setHeader('Content-Type', MimeTypes("txt"));
+        if (!this._response.getHeader("Content-Type")) {
+            this._response.setHeader('Content-Type', TXT_MIME_TYPE);
         }
-        this.#response.write(value);
+        this._response.write(value);
         return this;
     }
 
@@ -174,10 +178,10 @@ export default class Context{
      * @returns {this}
      */
     html(value:string): Context{
-        if (!this.#response.getHeader("Content-Type")) {
-            this.#response.setHeader('Content-Type', MimeTypes("html"));
+        if (!this._response.getHeader("Content-Type")) {
+            this._response.setHeader('Content-Type', HTML_MIME_TYPE);
         }
-        this.#response.write(value);
+        this._response.write(value);
         return this;
     }
 
@@ -187,7 +191,7 @@ export default class Context{
      * @returns {this}
      */
     write(chunk:any):Context{
-        this.#response.write(chunk);
+        this._response.write(chunk);
         return this;
     }
 
@@ -216,10 +220,10 @@ export default class Context{
      * @param {ContentUpdate} update 
      */
     render(update:ContentUpdate){
-        this.#htmlContent.push(update.content);
+        this._htmlContent.push(update.content);
 
         for(let name in update.head){
-            this.#htmlHeaders[name] = update.head[name];
+            this._htmlHeaders[name] = update.head[name];
         }
     }
 
@@ -229,24 +233,24 @@ export default class Context{
     async flush():Promise<void> {
         await this.waitForPipes();
 
-        if(this.#htmlContent.length > 0){
-            if(typeof this.#view === "undefined")
+        if(this._htmlContent.length > 0){
+            if(typeof this._view === "undefined")
                 throw new Error("No View to render content!");
 
-            const contentType = this.#request.headers["content-type"];
+            const contentType = this._request.headers["content-type"];
             const update:ContentUpdate = {
-                head: this.#htmlHeaders,
-                content: this.#htmlContent
+                head: this._htmlHeaders,
+                content: this._htmlContent
             };
         
             if(contentType && contentType.includes("json")) {
                 this.json(update);
             } else {
-                this.html(this.#view.render(update));
+                this.html(this._view.render(update));
             }
         }
 
-        this.#response.end();
+        this._response.end();
     }
 
     /** Wait for any File Streams to Close
@@ -268,14 +272,14 @@ export default class Context{
      * @returns {boolean}
      */
     nothingSent():boolean {
-        if(this.#htmlContent.length > 0 || this._streams.length > 0)
+        if(this._htmlContent.length > 0 || this._streams.length > 0)
             return false;
 
-        return !this.#response.headersSent;
+        return !this._response.headersSent;
     }
 
     authorization():{username:string,password:string}|undefined{
-        const auth = this.#request.headers.authorization
+        const auth = this._request.headers.authorization
         if(auth===undefined)
             return undefined;
 
