@@ -1,11 +1,14 @@
 {
-  "name": "weblibrary",
-  "version": "0.1.0",
+  "name": "zim-engine",
+  "version": "0.2.0",
   "description": "Combining front and backend rendering",
   "main": "lib/index.js",
   "scripts": {
-    "test": "tsc && jest",
-    "test:serve": "tsc && node ./test"
+    "build:dev": "tsc --sourceMap",
+    "build:prod": "rm -r lib && tsc",
+    "test": "npm run build:dev && jest",
+    "test:serve": "npm run build:dev && node ./test",
+    "deploy": "npm run build:prod && jest && npm publish"
   },
   "author": "Alex Malotky",
   "license": "ISC",
