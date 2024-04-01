@@ -42,7 +42,6 @@ export function createElement(name:string, attributes:Dictionary<string>|Content
         selfClosing = children.length === 0; //Overrides/sets false if children.
         attributes = {};
     }else if(typeof attributes !== "object" || Array.isArray(attributes)){
-        //@ts-ignore
         children.unshift(attributes);
         selfClosing = false; //If you add children, can't be self closing.
         attributes = {};
