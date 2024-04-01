@@ -12,7 +12,7 @@ import Context from "../Context";
 export default class Route extends Layer {
     #layers: Array<Layer>;
 
-    public constructor(path:string = "/", options:any={end:true}, layers:Array<Layer> = []){
+    public constructor(path:string = "/", options:any={end:false}, layers:Array<Layer> = []){
         super(path, options, ()=>{throw new Error("_handler called from Router!")});
             
         this.#layers = layers;
