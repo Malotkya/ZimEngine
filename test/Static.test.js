@@ -1,5 +1,5 @@
-const {default:App} = require("../build/App");
-const {default:Static} = require("../build/Static");
+const {default:App} = require("../lib/App");
+const {default:Static} = require("../lib/Static");
 const request = require('supertest');
 const fs = require("fs");
 const path = require("path");

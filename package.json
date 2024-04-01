@@ -2,7 +2,7 @@
   "name": "weblibrary",
   "version": "0.1.0",
   "description": "Combining front and backend rendering",
-  "main": "build/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "tsc && jest",
     "test:serve": "tsc && node ./test"

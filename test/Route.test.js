@@ -1,6 +1,5 @@
-const {App, Route, Router} = require("../build");
-const Layer_1 = require("../build/Router/Layer");
-const Layer = Layer_1.default;
+const {App, Route, Router} = require("../lib");
+const {default:Layer} = require("../lib/Router/Layer");
 const request = require('supertest');
 
 const app = new App();

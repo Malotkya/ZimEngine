@@ -1,6 +1,6 @@
-const {App, Router, View} = require("../build");
-const {createElement:_} = require("../build/View/Html");
-const {default:Static} = require("../build/Static");
+const {App, Router, View} = require("../lib");
+const {createElement:_} = require("../lib/View/Html");
+const {default:Static} = require("../lib/Static");
 const http = require("http");
 const path = require("path");
 

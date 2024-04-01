@@ -1,5 +1,5 @@
-const {default:View} = require("../build/View");
-const {default:App} = require("../build/App");
+const {default:View} = require("../lib/View");
+const {default:App} = require("../lib/App");
 
 test("View Init Test", ()=>{
     expect(new View()).not.toBe(undefined);
@@ -42,7 +42,7 @@ test("Hosting Script Page", done=>{
     const fs = require("fs");
     const path = require("path");
     const request = require('supertest');
-    const target = fs.readFileSync(path.join(__dirname, "..", "build", "view", "web.js")).toString()
+    const target = fs.readFileSync(path.join(__dirname, "..", "lib", "view", "web.js")).toString()
                     .replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
 
     const app = new App();
