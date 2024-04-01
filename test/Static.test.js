@@ -32,6 +32,7 @@ test("Static .png File", done=>{
 
 test("Static .mp4 File", done=>{
     const fileName = "/TEST VIDEO.mp4";
+    //TODO: Get video streaming working!
     //const file = fs.readFileSync(path.join(staticDir, fileName)).toString();
 
     request(app.engine)
