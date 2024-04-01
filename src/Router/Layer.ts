@@ -3,10 +3,31 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
-import {join} from "../Util";
 import {pathToRegexp, Key} from "path-to-regexp";
 
 const SUB_LAYER_OPTS = {strict: false, end: false};
+
+/** Sub Layer Handler Generator
+ * 
+ * Returns a handler functions that checks if the layer is a match and calls
+ * its handle function if it is.
+ * 
+ * @param {Layer} sub 
+ * @returns {Handler}
+ */
+function subLayerHandlerGenerator(sub:Layer):Handler{
+
+    /** Sub Layer Handler
+     * 
+     * @param {Context} ctx
+     */
+    return async function subLayerHandler(ctx:Context){
+        const query = ctx.query;
+        if(sub.match(ctx))
+            await sub.handle(ctx);
+        ctx.query = query;
+    }
+}
 
 /** Handler Function Type
  * 
@@ -42,9 +63,7 @@ export default class Layer {
 
     private static init(path:string, options:any, handler:Handler|Layer):Layer {
         if(handler instanceof Layer){
-            handler._options = options;
-            handler.path = path;
-            return handler;
+            return new Layer(path, options, subLayerHandlerGenerator(handler));
         } else if(typeof handler === "function"){
             return new Layer(path, options, handler);
         } else {
