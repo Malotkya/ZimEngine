@@ -7,6 +7,7 @@ import View, {ContentUpdate, Content} from "./View";
 import { sleep } from "./Util";
 import fs, { ReadStream } from "fs";
 import MimeTypes from "./MimeTypes";
+import { Body } from "./BodyParser";
 export {Request, Response};
 
 /** Context
@@ -22,6 +23,7 @@ export default class Context{
     #htmlHeaders:Dictionary<string>;
     #htmlContent:Array<Content>;
     #view:View|undefined;
+    #body:Dictionary<string>;
     private _streams:Array<ReadStream>;
     private _query:string|undefined;
 
@@ -30,17 +32,23 @@ export default class Context{
      * @param request 
      * @param response 
      */
-    constructor(request: Request, response: Response, view?:View){
+    constructor(request: Request, response: Response, body:Body, view?:View){
 
         //Getter Only Variables
         this.#request = request;
         this.#response = response;
         this.#url = new URL(request.url || "/", `http://${request.headers.host}`);
 
-        //Params Search Values
+        //Search Values
         this.#search = {};
         for(const [name, value] of this.#url.searchParams.entries())
             this.#search[name] = value;
+
+        //Body Values
+        this.#body = {};
+        for( const [name, value] of body.entries()){
+            this.#body[name] = value;
+        }
 
         //Defaults
         this.#params = {};
@@ -97,6 +105,13 @@ export default class Context{
      */
     get search():Dictionary<string>{
         return this.#search;
+    }
+
+    /** Body Getter
+     * 
+     */
+    get body():Dictionary<string>{
+        return this.#body;
     }
 
     /** Set Status Code

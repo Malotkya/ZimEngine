@@ -8,6 +8,7 @@ import Context from "./Context";
 import {Handler} from "./Router/Layer";
 import HttpError from "./HttpError";
 import View from "./View";
+import { BodyParser, Body } from "./BodyParser";
 
 /** Engine Type
  * 
@@ -39,13 +40,18 @@ export default class App extends Route{
          * Done this way so that 'this' references this instance.
          */
         this.#engine = (incoming:IncomingMessage, response:ServerResponse) => {
-            const ctx = new Context(incoming, response, this.#view);
-            this.handle(ctx)
-                .catch((err)=>{
-                    if(typeof err === "number")
-                        err = new HttpError(err);
-                    this.#errorHandler(err, ctx);
-                }).finally(()=>ctx.flush())
+            let parse = new BodyParser();
+
+            incoming.pipe(parse)
+                .on("end", ()=>{
+                    const ctx = new Context(incoming, response, parse.getBody(), this.#view);
+                    this.handle(ctx)
+                        .catch((err)=>{
+                            if(typeof err === "number")
+                                err = new HttpError(err);
+                            this.#errorHandler(err, ctx);
+                        }).finally(()=>ctx.flush());
+                });
         } 
 
         /** Defult 404 Handler
