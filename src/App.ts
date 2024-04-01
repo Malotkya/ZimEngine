@@ -40,11 +40,11 @@ export default class App extends Route{
          * Done this way so that 'this' references this instance.
          */
         this.#engine = (incoming:IncomingMessage, response:ServerResponse) => {
-            let parse = new BodyParser();
+            let parse = new BodyParser(incoming.headers);
 
             incoming.pipe(parse)
                 .on("end", ()=>{
-                    const ctx = new Context(incoming, response, parse.getBody(), this.#view);
+                    const ctx = new Context(incoming, response, parse.body, this.#view);
                     this.handle(ctx)
                         .catch((err)=>{
                             if(typeof err === "number")
