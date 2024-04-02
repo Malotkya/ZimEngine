@@ -8,13 +8,22 @@ import Context from "../Context";
 import fs from "fs";
 import path from "path";
 import MimeTypes from "../MimeTypes";
+import { dictionaryInclude } from "../Util";
 
 /** Content Update Interface
  * 
  */
 export interface ContentUpdate{
     content?:Content,
-    head?:Dictionary<string>
+    header: {
+        update: Dictionary<string>,
+        delete: Array<string>
+    }
+}
+
+export interface RenderUpdate {
+    content?:Content,
+    header?: Dictionary<string>
 }
 
 /** Render Content Function
@@ -113,26 +122,27 @@ function generateHeadObject(tags:Array<ElementTag>):Dictionary<ElementTag>{
     return output;
 }
 
-function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary<string>):string {
-    original = Object.assign({}, original);
+function combineHeadElements(original:Dictionary<ElementTag>, update:Dictionary<string> = {}):Dictionary<ElementTag> {
+    const output:Dictionary<ElementTag> = JSON.parse(JSON.stringify(original));
+
     for(let name in update){
         name = name.toLowerCase();
         //If Updating!
-        if(typeof original[name] !== "undefined"){
+        if(typeof output[name] !== "undefined"){
             switch (name){
                 case "base":
                     //@ts-ignore
-                    original[name].attributes["href"] = update[name];
+                    output[name].attributes["href"] = update[name];
                     break;
 
                 case "title":
                     //@ts-ignore
-                    original[name].content = update[name];
+                    output[name].content = update[name];
                     break;
 
                 case "charset":
                     //@ts-ignore
-                    original[name].attributes["charset"] = update[name];
+                    output[name].attributes["charset"] = update[name];
                     break;
 
                 case "link":
@@ -145,14 +155,14 @@ function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary
                 //Meta Tag Updates
                 default:
                     //@ts-ignore
-                    original[name].attributes["content"] = update[name];
+                    output[name].attributes["content"] = update[name];
                     break;
             }
         } else {
             switch (name){
                 case "base":
                 case "link":
-                    original[name] = {
+                    output[name] = {
                         name: name,
                         attributes: {
                             href: update["name"]
@@ -161,7 +171,7 @@ function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary
                     break;
 
                 case "script":
-                    original[name] = {
+                    output[name] = {
                         name: name,
                         attributes: {
                             src: update["name"]
@@ -170,7 +180,7 @@ function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary
                     break;
 
                 case "charset":
-                    original[name] = {
+                    output[name] = {
                         name: name,
                         attributes: { 
                             charset: update["name"]
@@ -181,7 +191,7 @@ function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary
 
                 case "title":
                 case "style":
-                    original[name] = {
+                    output[name] = {
                         name: name,
                         content: update["name"]
                     }
@@ -190,7 +200,7 @@ function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary
                 case "meta":
                     throw new Error("Unable to create meta with name: " + name);
                 default:
-                    original[name] = {
+                    output[name] = {
                         name: name,
                         attributes: {
                             content: update["name"]
@@ -200,7 +210,116 @@ function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary
         }//End_If
     }
 
-    return Object.values(original).map(value=>createElement(value.name, value.attributes, value.self, value.content || null)).join("");
+    return output;
+}
+
+function updateHeadElements(current:Dictionary<ElementTag>, update:Dictionary<string>|undefined, defaults:Dictionary<ElementTag>):[Dictionary<ElementTag>, Array<string>]{
+    const output:Dictionary<ElementTag> = {};
+    const remove:Array<string> = [];
+
+    update = update || {};
+
+    for(let name in current){
+        if(!dictionaryInclude(update, name)) {
+            if(dictionaryInclude(defaults, name)){
+                output[name] = JSON.parse(JSON.stringify(defaults[name]));
+            } else {
+                remove.push(name);
+            }
+            
+        }
+    }
+
+    for(let name in update){
+        switch (name){
+            case "base":
+            case "link":
+                output[name] = {
+                    name: name,
+                    attributes: {
+                        href: update["name"]
+                    }
+                }
+                break;
+    
+            case "script":
+                output[name] = {
+                    name: name,
+                    attributes: {
+                        src: update["name"]
+                    }
+                }
+                break;
+    
+            case "charset":
+                output[name] = {
+                    name: name,
+                    attributes: { 
+                        charset: update["name"]
+                    },
+                    self: true
+                }
+                break;
+    
+            case "title":
+            case "style":
+                output[name] = {
+                    name: name,
+                    content: update["name"]
+                }
+                break;
+                
+            case "meta":
+                throw new Error("Unable to create meta with name: " + name);
+            default:
+                output[name] = {
+                    name: name,
+                    attributes: {
+                        content: update["name"]
+                    }
+                }
+        }
+    }
+
+    return [output, remove];
+}
+
+function convertElementDictionaryToStringDictionary(input:Dictionary<ElementTag>):Dictionary<string>{
+    const output:Dictionary<string> = {};
+
+    for(let name in input){
+        switch (name.toLowerCase()){
+            case "base":
+            case "link":
+                //@ts-ignore
+                output[name] = input[name].attributes.href;
+                break;
+    
+            case "script":
+                //@ts-ignore
+                output[name] = input[name].attributes.src;
+                break;
+    
+            case "charset":
+                //@ts-ignore
+                output[name] = input[name].attributes.charset
+                break;
+
+            case "title":
+            case "style":
+                //@ts-ignore
+                output[name] = input[name].content
+                break;
+                
+            case "meta":
+                throw new Error("Unable to create meta with name: " + name);
+            default:
+                //@ts-ignore
+                output[name] = input[name].attributes.content;
+        }
+    }
+
+    return output;
 }
 
 /** Injected File Information.
@@ -215,7 +334,8 @@ const fileContent:string = fs.readFileSync(path.join(__dirname, "web.js")).toStr
 export default class View{
     #defaultHead:Dictionary<ElementTag>;
     #defaultContent:RenderContent;
-    #attribute:Dictionary<string>
+    #attribute:Dictionary<string>;
+    #currentHead:Dictionary<ElementTag>;
 
     /** Constructor
      * 
@@ -236,6 +356,7 @@ export default class View{
         this.#defaultContent = stationaryContent;
         this.#attribute = attributes;
         this.#defaultHead = generateHeadObject(headTags);
+        this.#currentHead = {};
         this.#defaultHead["injectedJS"] = {name: "script", attributes:{src:View.route, defer:""}};
     }
 
@@ -260,9 +381,24 @@ export default class View{
      * @param {ContentUpdate} update 
      * @returns {string}
      */
-    render(update:ContentUpdate):string{
-        const head:string = generateHeadElement(this.#defaultHead, update.head);
-        const body:Content = this.#defaultContent(update.content);
-        return HtmlDocument(this.#attribute, head, body);
+    render(update:RenderUpdate):string{
+        this.#currentHead = combineHeadElements(this.#defaultHead, update.header);
+        return HtmlDocument(
+            this.#attribute,
+            Object.values(this.#currentHead).map(value=>createElement(value.name, value.attributes, value.self, value.content || null)).join(""),
+            this.#defaultContent(update.content)
+            );
+    }
+
+    update(update:RenderUpdate):ContentUpdate{
+        const [newHeader, deleteHeader] = updateHeadElements(this.#currentHead, update.header, this.#defaultHead);
+        this.#currentHead = newHeader;
+        return {
+            content: update.content || "",
+            header: {
+                update: convertElementDictionaryToStringDictionary(newHeader),
+                delete: deleteHeader
+            }
+        }
     }
 }
