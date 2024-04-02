@@ -165,7 +165,7 @@ function combineHeadElements(original:Dictionary<ElementTag>, update:Dictionary<
                     output[name] = {
                         name: name,
                         attributes: {
-                            href: update["name"]
+                            href: update[name]
                         }
                     }
                     break;
@@ -174,7 +174,7 @@ function combineHeadElements(original:Dictionary<ElementTag>, update:Dictionary<
                     output[name] = {
                         name: name,
                         attributes: {
-                            src: update["name"]
+                            src: update[name]
                         }
                     }
                     break;
@@ -183,7 +183,7 @@ function combineHeadElements(original:Dictionary<ElementTag>, update:Dictionary<
                     output[name] = {
                         name: name,
                         attributes: { 
-                            charset: update["name"]
+                            charset: update[name]
                         },
                         self: true
                     }
@@ -193,7 +193,7 @@ function combineHeadElements(original:Dictionary<ElementTag>, update:Dictionary<
                 case "style":
                     output[name] = {
                         name: name,
-                        content: update["name"]
+                        content: update[name]
                     }
                     break;
                 
@@ -203,7 +203,7 @@ function combineHeadElements(original:Dictionary<ElementTag>, update:Dictionary<
                     output[name] = {
                         name: name,
                         attributes: {
-                            content: update["name"]
+                            content: update[name]
                         }
                     }
             }
@@ -237,7 +237,7 @@ function updateHeadElements(current:Dictionary<ElementTag>, update:Dictionary<st
                 output[name] = {
                     name: name,
                     attributes: {
-                        href: update["name"]
+                        href: update[name]
                     }
                 }
                 break;
@@ -246,7 +246,7 @@ function updateHeadElements(current:Dictionary<ElementTag>, update:Dictionary<st
                 output[name] = {
                     name: name,
                     attributes: {
-                        src: update["name"]
+                        src: update[name]
                     }
                 }
                 break;
@@ -255,7 +255,7 @@ function updateHeadElements(current:Dictionary<ElementTag>, update:Dictionary<st
                 output[name] = {
                     name: name,
                     attributes: { 
-                        charset: update["name"]
+                        charset: update[name]
                     },
                     self: true
                 }
@@ -265,7 +265,7 @@ function updateHeadElements(current:Dictionary<ElementTag>, update:Dictionary<st
             case "style":
                 output[name] = {
                     name: name,
-                    content: update["name"]
+                    content: update[name]
                 }
                 break;
                 
