@@ -12,3 +12,18 @@ export function sleep(n:number=1):Promise<void>{
         setTimeout(res, n)
     });
 }
+
+/** Does Dictionary Include Name
+ * 
+ * @param {Dictionary} dictionary 
+ * @param {string} name 
+ * @returns {boolean}
+ */
+export function dictionaryInclude(dictionary:Dictionary<any>, name:string):boolean{
+    for(let test in dictionary){
+        if(test === name)
+            return true;
+    }
+
+    return false;
+}
