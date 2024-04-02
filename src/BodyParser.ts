@@ -3,10 +3,10 @@
  * 
  * @author Alex Malotky
  */
-import { Transform, TransformCallback } from "stream";
-import { IncomingHttpHeaders, IncomingMessage } from "http";
-import fs from "fs";
-import path from "path";
+import { IncomingMessage } from "http";
+
+const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
+const DEFAULT_SIZE_LIMIT = 500000000; //500MB
 
 /** File Data Interface
  * 
@@ -29,7 +29,7 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
     const type = request.headers["content-type"];
     if(type && type.indexOf("multipart/form-data") >= 0) {
         multipart = true;
-        const match = type.match(/\d+$/);
+        const match = type.match(/\w+$/);
         if(match === null)
             throw new Error("Header is malformed.");
         boundry = new RegExp("-+"+match[0]); 
@@ -118,8 +118,15 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
 
     return new Promise((resolve, reject)=>{
         request.on("data", chunk=>{
-            buffer += String(chunk);
-            processBuffer();
+            try {
+                buffer += String(chunk);
+                if(buffer.length >= DEFAULT_SIZE_LIMIT)
+                    throw new Error("Upload size limit reached!");
+                processBuffer();
+            } catch (err){
+                reject(err);
+            }
+            
         });
 
         request.on("error", reject);
@@ -130,6 +137,6 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
 
         setTimeout(()=>{
             reject(new Error("Upload timeout limit reached!"))
-        }, 60000000) //One Minute
+        }, DEFAULT_TIME_LIMIT);
     });
 }
