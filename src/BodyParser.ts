@@ -127,5 +127,9 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
         request.on("end", ()=>{
             resolve(output);
         });
+
+        setTimeout(()=>{
+            reject(new Error("Upload timeout limit reached!"))
+        }, 60000000) //One Minute
     });
 }
