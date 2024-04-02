@@ -8,19 +8,27 @@ import Context from "./Context";
 import {Handler} from "./Router/Layer";
 import HttpError from "./HttpError";
 import View from "./View";
-import { BodyParser } from "./BodyParser";
+import BodyParser from "./BodyParser";
 import { Writable } from "stream";
 import util from "util";
 
 /** Engine Type
  * 
  */
-type Engine = (incoming:IncomingMessage, response:ServerResponse) => void;
+type Engine = (incoming:IncomingMessage, response:ServerResponse) => Promise<void>;
 
 /** Error Handler
  * 
  */
 export type ErrorHandler = (err:any, ctx:Context)=>Promise<void>|void;
+
+async function contextWrapper(incomingMessage:IncomingMessage, serverResponse:ServerResponse, view:View|undefined):Promise<any>{
+    try {
+        return new Context(incomingMessage, serverResponse, await BodyParser(incomingMessage), view);
+    } catch (err:any){
+        return err;
+    }
+}
 
 /** App Engine
  * 
@@ -60,22 +68,25 @@ export default class App extends Route{
          * 
          * Done this way so that 'this' references this instance.
          */
-        this.#engine = (incoming:IncomingMessage, response:ServerResponse) => {
+        this.#engine = async(incoming:IncomingMessage, response:ServerResponse) => {
+
+            let ctx:Context= await contextWrapper(incoming, response, this.#view);
             try {
-                let parse = new BodyParser(incoming.headers);
-                incoming.pipe(parse)
-                    .on("end", ()=>{
-                        const ctx = new Context(incoming, response, parse.body, this.#view);
-                        this.handle(ctx)
-                            .catch((err)=>{
-                                if(typeof err === "number")
-                                    err = new HttpError(err);
-                                this.#errorHandler(err, ctx);
-                            }).finally(()=>ctx.flush());
-                    });
+                //If error from body parser.
+                if( !(ctx instanceof Context) ){ 
+                    let err:Error = ctx;
+                    ctx = new Context(incoming, response, new Map(), this.#view);
+                    throw err;
+                }
+                await this.handle(ctx);
 
             } catch(err:any){
+                if(typeof err === "number")
+                    err = new HttpError(err);
                 App.error(err);
+                await this.#errorHandler(err, ctx);
+            } finally {
+                await ctx.flush();
             }
         } 
 
