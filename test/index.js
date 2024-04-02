@@ -32,12 +32,16 @@ home.all((ctx)=>{
 });
 
 about.all((ctx)=>{
+    const header = {
+        title: "This is updated!"
+    }
+
     const content = [
         _("h2", "About Me"),
         _("p", "This is where I will talk about me!")
     ]
 
-    ctx.render({content});
+    ctx.render({header, content});
 });
 
 app.use("/", home);
