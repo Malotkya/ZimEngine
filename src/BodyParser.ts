@@ -4,7 +4,7 @@
  * @author Alex Malotky
  */
 import { Transform, TransformCallback } from "stream";
-import { IncomingHttpHeaders } from "http";
+import { IncomingHttpHeaders, IncomingMessage } from "http";
 import fs from "fs";
 import path from "path";
 
@@ -13,7 +13,7 @@ import path from "path";
  */
 export interface FileData {
     fileName:string,
-    tempFile:string,
+    fileContent:Buffer,
     contentType:string,
 }
 
@@ -22,103 +22,27 @@ export interface FileData {
  */
 export type Body = Map<string, string|FileData>;
 
-/** Save Data Function Type
- * 
- */
-export type SaveFunction = (data:string, args:Dictionary<string>)=>FileData;
+export default function BodyParser(request:IncomingMessage):Promise<Body>{
+    let multipart:boolean = false;
+    let boundry:RegExp    = new RegExp("&");
 
-/** Default Save Function
- * 
- */
-function saveFileDefault(data:string, args:Dictionary<string>):FileData{
-    const uploadDirectory = path.join(process.cwd(), "upload");
-    fs.mkdirSync(uploadDirectory, {recursive: true});
-
-    //Get additional file info and save.
-    const tempFile = path.join(uploadDirectory, String(Date.now()));
-    const contentType = args["Content-Type"];
-    const fileName = args["filename"];
-
-    fs.writeFileSync(tempFile, data);
-
-    return {tempFile, contentType, fileName};
-}
-
-/** Body Parser
- * 
- */
-export class BodyParser extends Transform {
-    _buffer:string;
-    _boundry:RegExp;
-    _multipart:boolean;
-    _data:Body;
-    _save:SaveFunction;
-
-    /** Constructor
-     * 
-     * @param {IncomingHttpHeaders} headers 
-     * @param {any} opts 
-     */
-    constructor(headers:IncomingHttpHeaders, save:SaveFunction = saveFileDefault){
-        super();
-        const type = headers["content-type"];
-        if(type && type.indexOf("multipart/form-data") >= 0) {
-            this._multipart = true;
-            const match = type.match(/\d+$/);
-            if(match === null)
-                throw new Error("Header is malformed.");
-            this._boundry = new RegExp("-+"+match[0]);
-            
-        } else {
-            this._multipart = false;
-            this._boundry = new RegExp("&");
-        }
-        this._buffer = "";
-        this._data = new Map();
-        this._save = save;
+    const type = request.headers["content-type"];
+    if(type && type.indexOf("multipart/form-data") >= 0) {
+        multipart = true;
+        const match = type.match(/\d+$/);
+        if(match === null)
+            throw new Error("Header is malformed.");
+        boundry = new RegExp("-+"+match[0]); 
     }
-
-    /** Process Buffer
-     * 
-     * Loops through the buffer untill all boundrys are crossed.
-     */
-    processBuffer(){
-        let match = this._buffer.match(this._boundry);
-
-        while(match !== null){
-            const index = this._buffer.indexOf(match[0]);
-
-            if(index === 0){
-                this._buffer = this._buffer.substring(match[0].length);
-            } else {
-                this.processData(this._buffer.slice(0, index));
-                this._buffer = this._buffer.slice(index+match[0].length)
-            }
-
-            match = this._buffer.match(this._boundry);
-        }
-    }
-
-    /** Takes data as a string and process the information.
-     * 
-     * @param {string} data 
-     */
-    processData(data:string){
-        if(this._multipart){
-            const {name, info} = this.processMultipartData(data);
-            this._data.set(name, info);
-        } else {
-            const [name, value] = data.split("=");
-            this._data.set(name, value);
-        }
-    }
+    let buffer = "";
+    let output = new Map();
 
     /** Process Multipart Data 
      * 
      * @param {string} data 
      * @returns {name:string, info:FileData|string}
      */
-    processMultipartData(data:string):{name:string, info:FileData|string}{
+    const processMultipartData = (data:string):[string, FileData|string] => {
         //Multipart Headers Match
         const match = data.match(/[\d\D\n]*?\r\n\r\n/);
         if(match === null)
@@ -146,43 +70,62 @@ export class BodyParser extends Transform {
     
         //Detect if File
         if(headers["filename"] === undefined){
-            return {
-                name: headers["name"],
-                info: data
+            return [
+                headers["name"],
+                data
+            ]
+        }
+
+        const fileName = headers["filename"];
+        const contentType = headers["Content-Type"];
+        const fileContent = Buffer.from(data);
+
+        return [
+            headers["name"],
+            {fileName, contentType, fileContent}
+        ]
+    }
+
+    /** Takes data as a string and process the information.
+     * 
+     * @param {string} data 
+     */
+    const processData = (data:string) => {
+        const [name, value] = multipart? processMultipartData(data): data.split("=");
+        output.set(name, value);
+    }
+
+    /** Process Buffer
+     * 
+     * Loops through the buffer untill all boundrys are crossed.
+     */
+    const processBuffer = () =>{
+        let match = buffer.match(boundry);
+
+        while(match !== null){
+            const index = buffer.indexOf(match[0]);
+
+            if(index === 0){
+                buffer = buffer.substring(match[0].length);
+            } else {
+                processData(buffer.slice(0, index));
+                buffer = buffer.slice(index+match[0].length)
             }
-        }
 
-        return {
-            name: headers["name"],
-            info: this._save(data, headers)
+            match = buffer.match(boundry);
         }
     }
 
-    /** _transform Override
-     * 
-     * @param {any} chunk 
-     * @param {BufferEncoding} encoding 
-     * @param {TransformCallback} callback 
-     */
-    _transform(chunk: any, encoding: BufferEncoding, callback: TransformCallback): void {
-        this._buffer += Buffer.from(chunk, encoding).toString();
-        this.processBuffer();
-        callback();
-    }
+    return new Promise((resolve, reject)=>{
+        request.on("data", chunk=>{
+            buffer += String(chunk);
+            processBuffer();
+        });
 
-    /** _flush Override
-     * 
-     * @param {TransformCallback} callback 
-     */
-    _flush(callback: TransformCallback): void {
-        this.emit("end");
-        callback();
-    }
+        request.on("error", reject);
 
-    /** Body Getter
-     * 
-     */
-    get body():Body {
-        return this._data;
-    }
+        request.on("end", ()=>{
+            resolve(output);
+        });
+    });
 }
