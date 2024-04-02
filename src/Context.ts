@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import {IncomingMessage as Request, ServerResponse as Response} from "http";
-import View, {ContentUpdate, Content} from "./View";
+import View, {RenderUpdate, Content} from "./View";
 import { sleep } from "./Util";
 import fs, { ReadStream } from "fs";
 import MimeTypes from "./MimeTypes";
@@ -219,11 +219,11 @@ export default class Context{
      * 
      * @param {ContentUpdate} update 
      */
-    render(update:ContentUpdate){
+    render(update:RenderUpdate){
         this._htmlContent.push(update.content);
 
-        for(let name in update.head){
-            this._htmlHeaders[name] = update.head[name];
+        for(let name in update.header){
+            this._htmlHeaders[name] = update.header[name];
         }
     }
 
@@ -238,13 +238,13 @@ export default class Context{
                 throw new Error("No View to render content!");
 
             const contentType = this._request.headers["content-type"];
-            const update:ContentUpdate = {
-                head: this._htmlHeaders,
+            const update:RenderUpdate = {
+                header: this._htmlHeaders,
                 content: this._htmlContent
             };
         
             if(contentType && contentType.includes("json")) {
-                this.json(update);
+                this.json(this._view.update(update));
             } else {
                 this.html(this._view.render(update));
             }
