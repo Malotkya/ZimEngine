@@ -126,33 +126,66 @@ async function routeHandler(body?:FormData):Promise<void>{
 
     const update:ContentUpdate = await response.json();
 
-    for(let name in update.head){
+    for(let name in update.header.update){
         switch(name.toLowerCase()) {
             case "base":
-                findOrCreateElement(name, "head").setAttribute("href", update.head[name]);
+                findOrCreateElement(name, "head").setAttribute("href", update.header.update[name]);
                 break;
 
             case "title":
-                findOrCreateElement(name, "head").textContent = update.head[name];
+                findOrCreateElement(name, "head").textContent = update.header.update[name];
                 break;
 
             case "script":
             case "link":
-                findOrCreateElement(`$${name}[name='default']`, "head").setAttribute("href", update.head[name]);
+                findOrCreateElement(`${name}[name='default']`, "head").setAttribute("href", update.header.update[name]);
                 break;
 
             case "style":
-                findOrCreateElement(`$${name}[name='default']`, "head").textContent = update.head[name];
+                findOrCreateElement(`${name}[name='default']`, "head").textContent = update.header.update[name];
+                break;
+
+            case "meta":
+                console.warn("Unable to get meta tag: "+name);
                 break;
 
             //meta tags    
             default:
-                findOrCreateElement(`meta[name='${name}']`, "head").setAttribute("content", update.head[name])
+                findOrCreateElement(`meta[name='${name}']`, "head").setAttribute("content", update.header.update[name]);
                 break;
-    
+        }
+    }
+
+    const head = findOrCreateElement("head");
+    for(let name of update.header.delete){
+        let element:HTMLElement|null;
+        switch(name.toLocaleLowerCase()){
+            case "base":
+                element = head.querySelector(name);
+                break;
+
+            case "title":
+                element = head.querySelector(name);
+                break;
+
+            case "script":
+            case "link":
+            case "style":
+                element = head.querySelector(`${name}[name='default']`);
+                break;
+
             case "meta":
                 console.warn("Unable to get meta tag: "+name);
+                break;
+
+            //meta tags    
+            default:
+                element = head.querySelector(`meta[name='${name}']`); 
         }
+
+        //@ts-ignore
+        if(element)
+            head.removeChild(element);
     }
 
     const target = findOrCreateElement("main", "body");
