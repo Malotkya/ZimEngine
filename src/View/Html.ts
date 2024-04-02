@@ -6,7 +6,7 @@
 /** Types of Content
  * 
  */
-export type Content = string|Array<Content>|null;
+export type Content = string|Array<Content>|null|undefined;
 
 /** Generate HTML Document
  * 

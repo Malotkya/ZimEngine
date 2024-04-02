@@ -13,8 +13,8 @@ import MimeTypes from "../MimeTypes";
  * 
  */
 export interface ContentUpdate{
-    content:Content,
-    head:Dictionary<string>
+    content?:Content,
+    head?:Dictionary<string>
 }
 
 /** Render Content Function
@@ -113,7 +113,7 @@ function generateHeadObject(tags:Array<ElementTag>):Dictionary<ElementTag>{
     return output;
 }
 
-function generateHeadElement(original:Dictionary<ElementTag>, update:Dictionary<string>):string {
+function generateHeadElement(original:Dictionary<ElementTag>, update?:Dictionary<string>):string {
     original = Object.assign({}, original);
     for(let name in update){
         name = name.toLowerCase();
