@@ -9,7 +9,6 @@ import {Handler} from "./Router/Layer";
 import HttpError from "./HttpError";
 import View from "./View";
 import BodyParser from "./BodyParser";
-import { Writable } from "stream";
 import util from "util";
 
 /** Engine Type
@@ -22,12 +21,29 @@ type Engine = (incoming:IncomingMessage, response:ServerResponse) => Promise<voi
  */
 export type ErrorHandler = (err:any, ctx:Context)=>Promise<void>|void;
 
+/** Context Initalizer Wrapper
+ * 
+ * Attempts to initalizes the context with the BodyParser(), if it fails it will return the error instead of throwing an error.
+ * 
+ * @param {IncomingMessage} incomingMessage 
+ * @param {ServerResponse} serverResponse 
+ * @param {View} view 
+ * @returns {Context|Error}
+ */
 async function contextWrapper(incomingMessage:IncomingMessage, serverResponse:ServerResponse, view:View|undefined):Promise<any>{
     try {
         return new Context(incomingMessage, serverResponse, await BodyParser(incomingMessage), view);
     } catch (err:any){
         return err;
     }
+}
+
+/** Expected Logger Interface.
+ * 
+ */
+interface Logger {
+    log(value:string):void,
+    error(value:string):void
 }
 
 /** App Engine
@@ -38,31 +54,36 @@ export default class App extends Route{
     #notFound:Handler;
     #errorHandler:ErrorHandler;
     #view:View|undefined;
+    _logger:Logger;
 
-    static log_stream:Writable = process.stdout;
-    static error_stream:Writable = process.stderr;
-
-    static print(stream:Writable, format:string, args:Array<any>){
+    /** Print Format String
+     * 
+     * @param {Function} callback - Print Function
+     * @param {string} format 
+     * @param {Array<any>} args 
+     */
+    private static print(callback:Function, format:string, args:Array<any>):void{
         if(typeof format !== "string"){
             args.unshift(format);
-            format = "%o\n";
+            format = "%o";
         }
-        stream.write(util.format(format, ...args));
+        callback(util.format(format, ...args));
     }
 
-    static error(format:any, ...args:Array<any>){
-        App.print(App.error_stream, format, args);
+    private error(format:any, ...args:Array<any>):void{
+        App.print(this._logger.error, format, args);
     }
 
-    static log(format:any, ...args:Array<any>){
-        App.print(App.log_stream, format, args);
+    private log(format:any, ...args:Array<any>):void{
+        App.print(this._logger.log, format, args);
     }
 
     /** Constructor
      * 
      */
-    constructor(){
+    constructor(logger:Logger = console){
         super(undefined, undefined);
+        this._logger = logger;
 
         /** Main Engine
          * 
@@ -75,7 +96,7 @@ export default class App extends Route{
                 //If error from body parser.
                 if( !(ctx instanceof Context) ){ 
                     let err:Error = ctx;
-                    ctx = new Context(incoming, response, new Map(), this.#view);
+                    ctx = new Context(incoming, response, undefined, this.#view);
                     throw err;
                 }
                 await this.handle(ctx);
@@ -83,7 +104,7 @@ export default class App extends Route{
             } catch(err:any){
                 if(typeof err === "number")
                     err = new HttpError(err);
-                App.error(err);
+                this.error(err);
                 await this.#errorHandler(err, ctx);
             } finally {
                 await ctx.flush();
