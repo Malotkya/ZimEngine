@@ -104,7 +104,8 @@ export default class App extends Route{
             } catch(err:any){
                 if(typeof err === "number")
                     err = new HttpError(err);
-                this.error(err);
+                if( !(err instanceof HttpError) )
+                    this.error(err);
                 await this.#errorHandler(err, ctx);
             } finally {
                 await ctx.flush();
