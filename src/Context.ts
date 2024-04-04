@@ -37,7 +37,7 @@ export default class Context{
      * @param request 
      * @param response 
      */
-    constructor(request: Request, response: Response, body:Body, view?:View){
+    constructor(request: Request, response: Response, body:Body = new Map(), view?:View){
 
         //Getter Only Variables
         this._request = request;
