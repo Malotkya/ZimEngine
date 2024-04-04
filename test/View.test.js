@@ -28,7 +28,7 @@ test("Render View", ()=>{
     ]);
 
     const update = {
-        head: {
+        header: {
             title: "New Title",
         },
         content: "<h1>Hello World</h1>"
