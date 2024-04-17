@@ -5,10 +5,8 @@
 import HtmlDocument, {Content, createElement, compressContent} from "./Html";
 export {Content, createElement};
 import Context from "../Context";
-import fs from "fs";
-import path from "path";
+import { dictionaryInclude, getFile } from "../Util";
 import MimeTypes from "../MimeTypes";
-import { dictionaryInclude } from "../Util";
 
 /** Content Update Interface
  * 
@@ -322,12 +320,6 @@ function convertElementDictionaryToStringDictionary(input:Dictionary<ElementTag>
     return output;
 }
 
-/** Injected File Information.
- * 
- */
-const fileHeader:string = MimeTypes("js");
-const fileContent:string = fs.readFileSync(path.join(__dirname, "web.js")).toString().replace('Object.defineProperty(exports, "__esModule", { value: true });', '');
-
 /** View Class
  * 
  */
@@ -367,13 +359,9 @@ export default class View{
         return "/zim.js"
     }
 
-    /** Get File Name Handler
-     * 
-     * @param {Context} ctx 
-     */
-    static getFile(ctx:Context):void {
-        ctx.response.setHeader("Content-Type", fileHeader);
-        ctx.response.write(fileContent);
+    static async injectFile(ctx:Context){
+        ctx.response.setHeader("Content-Type", MimeTypes("js"));
+        ctx.write(await getFile("./web.js"));
     }
 
     /** Render Content Update
