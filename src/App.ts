@@ -4,11 +4,11 @@
  */
 import Route from "./Router/Route";
 import {IncomingMessage, ServerResponse} from "http";
+import IncomingRequest, {RequestType} from "./Context/IncomingRequest";
+import { ResponseInit } from "./Context/OutgoingResponse";
 import Context from "./Context";
-import {Handler} from "./Router/Layer";
 import HttpError from "./HttpError";
 import View from "./View";
-import BodyParser from "./BodyParser";
 import util from "util";
 
 /** Engine Type
@@ -20,23 +20,6 @@ type Engine = (incoming:IncomingMessage, response:ServerResponse) => Promise<voi
  * 
  */
 export type ErrorHandler = (err:any, ctx:Context)=>Promise<void>|void;
-
-/** Context Initalizer Wrapper
- * 
- * Attempts to initalizes the context with the BodyParser(), if it fails it will return the error instead of throwing an error.
- * 
- * @param {IncomingMessage} incomingMessage 
- * @param {ServerResponse} serverResponse 
- * @param {View} view 
- * @returns {Context|Error}
- */
-async function contextWrapper(incomingMessage:IncomingMessage, serverResponse:ServerResponse, view:View|undefined):Promise<any>{
-    try {
-        return new Context(incomingMessage, serverResponse, await BodyParser(incomingMessage), view);
-    } catch (err:any){
-        return err;
-    }
-}
 
 /** Expected Logger Interface.
  * 
@@ -51,7 +34,6 @@ interface Logger {
  */
 export default class App extends Route{
     #engine:Engine;
-    #notFound:Handler;
     #errorHandler:ErrorHandler;
     #view:View|undefined;
     _logger:Logger;
@@ -90,32 +72,8 @@ export default class App extends Route{
          * Done this way so that 'this' references this instance.
          */
         this.#engine = async(incoming:IncomingMessage, response:ServerResponse) => {
-
-            let ctx:Context= await contextWrapper(incoming, response, this.#view);
-            try {
-                //If error from body parser.
-                if( !(ctx instanceof Context) ){ 
-                    let err:Error = ctx;
-                    ctx = new Context(incoming, response, undefined, this.#view);
-                    throw err;
-                }
-                await this.handle(ctx);
-
-            } catch(err:any){
-                if(typeof err === "number")
-                    err = new HttpError(err);
-                if( !(err instanceof HttpError) )
-                    this.error(err);
-                await this.#errorHandler(err, ctx);
-            } finally {
-                await ctx.flush();
-            }
+            await this.fetch(new IncomingRequest(incoming), response);
         } 
-
-        /** Defult 404 Handler
-         * 
-         */
-        this.#notFound = (ctx:Context) => {throw 404};
 
         /** Default Error Handler
          * 
@@ -127,15 +85,7 @@ export default class App extends Route{
             } = err;
 
             ctx.status(status);
-
-            const contentType:string = ctx.request.headers["content-type"] || "unkown";
-            if(contentType.includes("json")) {
-                ctx.json({status, message});
-            } else if(contentType.includes("html")) {
-                ctx.html(message);
-            } else {
-                ctx.text(message);
-            }
+            ctx.text(message);
         }
     }
 
@@ -146,17 +96,7 @@ export default class App extends Route{
     async handle(context:Context){
         await super.handle(context);
         if( context.nothingSent() )
-            this.#notFound(context);
-    }
-
-    /** Not Found Setter
-     * 
-     * @param {Handler} callback 
-     */
-    notFound(callback:Handler){
-        if(typeof callback !== "function")
-            throw new TypeError("Handler must be a function!");
-        this.#notFound = callback;
+            throw 404;
     }
 
     /** Error Handler Setter
@@ -176,12 +116,47 @@ export default class App extends Route{
         return this.#engine;
     }
 
+    async fetch(request:RequestType, response:any):Promise<Response|undefined> {
+        let env:any;
+
+        if(response.ASSETS !== undefined){
+            env = response;
+            response = undefined;
+        }
+
+        //Test for assests
+        if(env) {
+            const asset:Response = await env.ASSETS.fetch(request);
+            if(asset.ok)
+                return asset;
+        }
+        
+        let ctx:Context= new Context(request, response, this.#view);
+        try {
+            await this.handle(ctx);
+        } catch(err:any){
+            if(typeof err === "number")
+                err = new HttpError(err);
+            if( !(err instanceof HttpError) )
+                    console.error(err);
+            await this.#errorHandler(err, ctx);
+        }
+        const [body, init, redirect] = ctx.flush();
+
+        if(response === undefined){
+            if(redirect)
+                return Response.redirect(redirect);
+            
+            return new Response(body, init)
+        }
+    }
+
     /** View Setter
      * 
      * @param {View} view
      */
     view(view:View){
         this.#view = view;
-        this.use(View.route, View.getFile);
+        this.use(View.route, View.injectFile);
     }
 }
