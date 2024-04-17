@@ -1,7 +1,8 @@
 import App from "./App";
-import Context, {Request, Response} from "./Context";
+import Context from "./Context";
 import Router from "./Router";
 import HttpError from "./HttpError";
 import View from "./View";
+import Static from "./Static";
 
-export {App, Context, Request, Response, Router, HttpError, View};
+export {App, Context, Router, HttpError, View, Static};
