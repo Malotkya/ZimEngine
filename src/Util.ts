@@ -45,11 +45,12 @@ export function dictionaryInclude(dictionary:Dictionary<any>, name:string):boole
  * @param {string} name 
  * @returns {string}
  */
-export async function getFile(name:string):Promise<string> {
+export function getFile(...args:Array<string>):string {
     if((typeof process !== 'undefined') && (process.release.name === 'node')){
-        const fs = await import("node:fs");
-        return fs.readFileSync(name).toString();
+        const fs = require("node:fs");
+        const path = require("node:path")
+        return fs.readFileSync(path.join(...args)).toString();
     }
 
-    return require(name);
+    return require(args[args.length-1]);
 }
