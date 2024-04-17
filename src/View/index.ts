@@ -5,8 +5,24 @@
 import HtmlDocument, {Content, createElement, compressContent} from "./Html";
 export {Content, createElement};
 import Context from "../Context";
-import { dictionaryInclude, getFile } from "../Util";
+import { dictionaryInclude, inNodeEnvironment } from "../Util";
 import MimeTypes from "../MimeTypes";
+
+/** Get File
+ * 
+ * Different IMplementation depending on environment.
+ * 
+ * @returns {string}
+ */
+export function getFile():string {
+    if(inNodeEnvironment()){
+        const fs = require("node:fs");
+        const path = require("node:path")
+        return fs.readFileSync(path.join(__dirname, "web.js")).toString();
+    }
+
+    return require("!raw-loader!./web.js");
+}
 
 /** Content Update Interface
  * 
@@ -320,6 +336,9 @@ function convertElementDictionaryToStringDictionary(input:Dictionary<ElementTag>
     return output;
 }
 
+const fileType = MimeTypes("js");
+const fileContent = getFile().replace(`Object.defineProperty(exports, "__esModule", { value: true });`, "");
+
 /** View Class
  * 
  */
@@ -360,8 +379,8 @@ export default class View{
     }
 
     static async injectFile(ctx:Context){
-        ctx.response.setHeader("Content-Type", MimeTypes("js"));
-        ctx.write(await getFile("./web.js"));
+        ctx.response.setHeader("Content-Type", fileType);
+        ctx.write(fileContent);
     }
 
     /** Render Content Update
