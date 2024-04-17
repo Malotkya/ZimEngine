@@ -21,9 +21,9 @@
     "dependencies": {
         "path-to-regexp": "^6.2.1"
     },
-    "repository": { 
-        "type": "git", 
-        "url": "https://github.com/Malotkya/ZimEngine" 
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Malotkya/ZimEngine"
     },
     "files": [
         "lib"
