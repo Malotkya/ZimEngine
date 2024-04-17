@@ -1,3 +1,4 @@
+const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 
 /** ZimEngine Webpack
@@ -47,7 +48,7 @@ module.exports = (props) => {
             }
         },
         optimization: {
-            minimize: inProduction,
+            minimize: props.inProduction,
             minimizer: [
                 new TerserPlugin()
             ],
