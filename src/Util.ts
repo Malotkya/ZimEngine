@@ -38,19 +38,13 @@ export function dictionaryInclude(dictionary:Dictionary<any>, name:string):boole
     return false;
 }
 
-/** Get File
- * 
- * Different IMplementation depending on environment.
- * 
- * @param {string} name 
- * @returns {string}
- */
-export function getFile(...args:Array<string>):string {
-    if((typeof process !== 'undefined') && (process.release.name === 'node')){
-        const fs = require("node:fs");
-        const path = require("node:path")
-        return fs.readFileSync(path.join(...args)).toString();
-    }
+export function inNodeEnvironment():boolean {
+    return (typeof process !== 'undefined') && (process.release.name === 'node')
+}
 
-    return require(args[args.length-1]);
+export function nodeImport(module:string):any {
+    if(!inNodeEnvironment())
+        throw new Error("Not in the Node Environment to import: "+module);
+
+    return require(module);
 }
