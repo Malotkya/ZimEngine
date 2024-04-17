@@ -5,7 +5,7 @@
 import HtmlDocument, {Content, createElement, compressContent} from "./Html";
 export {Content, createElement};
 import Context from "../Context";
-import { dictionaryInclude, inNodeEnvironment } from "../Util";
+import { dictionaryInclude, inNodeEnvironment, nodeImport } from "../Util";
 import MimeTypes from "../MimeTypes";
 
 /** Get File
@@ -16,12 +16,12 @@ import MimeTypes from "../MimeTypes";
  */
 export function getFile():string {
     if(inNodeEnvironment()){
-        const fs = require("node:fs");
-        const path = require("node:path")
+        const fs = nodeImport("fs");
+        const path = nodeImport("path")
         return fs.readFileSync(path.join(__dirname, "web.js")).toString();
     }
 
-    return require("!raw-loader!./web.js");
+    return require("!raw-loader!./web.js").default;
 }
 
 /** Content Update Interface
