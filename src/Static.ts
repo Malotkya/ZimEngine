@@ -1,11 +1,13 @@
-import fs from "fs";
-import path from "path";
 import Context from "./Context";
 import MimeTypes from "./MimeTypes";
+import { nodeImport } from "./Util";
 
 export default function Static(directory:string){
     if(typeof directory !== "string")
         throw new TypeError("Directory must be a string!");
+
+    const fs = nodeImport("fs");
+    const path = nodeImport("path");
 
     if(fs.statSync(directory).isFile())
         throw new Error("Given path is a file!");
