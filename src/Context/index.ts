@@ -2,13 +2,14 @@
  * 
  * @author Alex Malotky
  */
-import {IncomingMessage as Request, ServerResponse as Response} from "http";
-import View, {RenderUpdate, Content} from "./View";
-import { sleep } from "./Util";
-import fs, { ReadStream } from "fs";
-import MimeTypes from "./MimeTypes";
-import { Body, FileData } from "./BodyParser";
-export {Request, Response};
+import IncomingRequest, {RequestType} from "./IncomingRequest"
+import ResponseType, {ResponseInit} from "./OutgoingResponse";
+import View, {RenderUpdate, Content} from "../View";
+import MimeTypes from "../MimeTypes";
+import {HeadersInit} from "../Util";
+import { ServerResponse } from "http";
+
+export{IncomingRequest, ResponseType as OutgoingResponse};
 
 const HTML_MIME_TYPE = MimeTypes("html");
 const TXT_MIME_TYPE  = MimeTypes("txt");
@@ -19,68 +20,49 @@ const JSON_MIME_TYPE = MimeTypes("json");
  * Wrapper Around Request/Response
  */
 export default class Context{
-    private _request:Request;
-    private _response:Response;
+    private _request:RequestType;
+    private _response:ResponseType;
     private _url:URL;
-    private _search:Dictionary<string>;
-    private _params:Dictionary<string>;
+    
     private _htmlHeaders:Dictionary<string>;
     private _htmlContent:Array<Content>;
+
+    private _search:Dictionary<string>;
+    private _params:Dictionary<string>;
     private _view:View|undefined;
-    private _body:Dictionary<string>;
-    private _files:Dictionary<FileData>;
-    private _streams:Array<ReadStream>;
     private _query:string|undefined;
+
 
     /** Constructor
      * 
      * @param request 
      * @param response 
      */
-    constructor(request: Request, response: Response, body:Body = new Map(), view?:View){
+    constructor(request: RequestType, response?: ServerResponse, view?:View){
 
-        //Getter Only Variables
         this._request = request;
-        this._response = response;
-        this._url = new URL(request.url || "/", `http://${request.headers.host}`);
+        this._response = new ResponseType(response);
+
+        this._url = new URL(request.url || "/", `http://${request.headers.get("host")}`);
 
         //Search Values
         this._search = {};
         for(const [name, value] of this._url.searchParams.entries())
             this._search[name] = value;
 
-        //Body/File Values
-        this._body = {};
-        this._files = {};
-        for( const [name, value] of body.entries()){
-            if(typeof value === "string"){
-                this._body[name] = value;
-            } else {
-                this._body[name] = value.fileName;
-                this._files[name] = value;
-            }
-            
-        }
 
         //Defaults
         this._params = {};
         this._htmlHeaders = {};
         this._htmlContent = [];
         this._view = view;
-        this._streams = [];
     }
 
-    /** Request Getter
-     * 
-     */
-    get request():Request {
+    get request():RequestType {
         return this._request;
     }
 
-    /** Response Getter
-     * 
-     */
-    get response():Response {
+    get response():ResponseType {
         return this._response;
     }
 
@@ -94,8 +76,8 @@ export default class Context{
     /** Method Getter
      * 
      */
-    get method():string|undefined {
-        return this.request.method;
+    get method():string {
+        return this._request.method;
     }
 
     /** Params Setter
@@ -119,13 +101,6 @@ export default class Context{
         return this._search;
     }
 
-    /** Body Getter
-     * 
-     */
-    get body():Dictionary<string>{
-        return this._body;
-    }
-
     /** Set Status Code
      * 
      * @param {number} value 
@@ -142,7 +117,7 @@ export default class Context{
             throw new TypeError("Status code is out of range!");
         }
         
-        this._response.statusCode = value;
+        this._response.status = value;
         return this;
     }
 
@@ -191,27 +166,7 @@ export default class Context{
      * @returns {this}
      */
     write(chunk:any):Context{
-        this._response.write(chunk);
-        return this;
-    }
-
-    file(name:string):Context{
-        if(!fs.existsSync(name))
-            throw 404;
-        
-        const stats = fs.statSync(name);
-        const contentType = MimeTypes(name.substring(name.lastIndexOf(".")));
-        
-        if(stats.isDirectory())
-            throw 404;
-
-        this.response.setHeader("Content-Type", contentType)
-        this.response.setHeader("Content-Size", stats.size);
-
-        const file = fs.createReadStream(name);
-        this._streams.push(file);
-        file.pipe(this.response);
-
+        this._response.write(String(chunk));;
         return this;
     }
 
@@ -230,14 +185,12 @@ export default class Context{
     /** Flush Update Content
      * 
      */
-    async flush():Promise<void> {
-        await this.waitForPipes();
-
+    flush():ResponseInit {
         if(this._htmlContent.length > 0){
             if(typeof this._view === "undefined")
                 throw new Error("No View to render content!");
 
-            const contentType = this._request.headers["content-type"];
+            const contentType = this._request.headers.get("content-type");
             const update:RenderUpdate = {
                 header: this._htmlHeaders,
                 content: this._htmlContent
@@ -250,36 +203,18 @@ export default class Context{
             }
         }
 
-        this._response.end();
+        return this._response.end();
     }
 
-    /** Wait for any File Streams to Close
-     * 
-     */
-    waitForPipes():Promise<void>{
-        return new Promise((res, rej)=>{
-            const all:Array<Promise<void>> = this._streams.map(async(stream)=>{
-                while(!stream.closed)
-                    await sleep();
-            });
-
-            Promise.all(all).then(()=>res()).catch(rej);
-        })
-    }
-
-    /** Was Nothing Sent
-     * 
-     * @returns {boolean}
-     */
     nothingSent():boolean {
-        if(this._htmlContent.length > 0 || this._streams.length > 0)
+        if(this._htmlContent.length > 0)
             return false;
 
         return !this._response.headersSent;
     }
 
     authorization():{username:string,password:string}|undefined{
-        const auth = this._request.headers.authorization
+        const auth = this._request.headers.get("authorization");
         if(auth===undefined)
             return undefined;
 
