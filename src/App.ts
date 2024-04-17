@@ -9,7 +9,6 @@ import { ResponseInit } from "./Context/OutgoingResponse";
 import Context from "./Context";
 import HttpError from "./HttpError";
 import View from "./View";
-import util from "util";
 
 /** Engine Type
  * 
@@ -25,8 +24,8 @@ export type ErrorHandler = (err:any, ctx:Context)=>Promise<void>|void;
  * 
  */
 interface Logger {
-    log(value:string):void,
-    error(value:string):void
+    log(...data: any[]):void,
+    error(...data: any[]):void
 }
 
 /** App Engine
@@ -37,28 +36,6 @@ export default class App extends Route{
     #errorHandler:ErrorHandler;
     #view:View|undefined;
     _logger:Logger;
-
-    /** Print Format String
-     * 
-     * @param {Function} callback - Print Function
-     * @param {string} format 
-     * @param {Array<any>} args 
-     */
-    private static print(callback:Function, format:string, args:Array<any>):void{
-        if(typeof format !== "string"){
-            args.unshift(format);
-            format = "%o";
-        }
-        callback(util.format(format, ...args));
-    }
-
-    private error(format:any, ...args:Array<any>):void{
-        App.print(this._logger.error, format, args);
-    }
-
-    private log(format:any, ...args:Array<any>):void{
-        App.print(this._logger.log, format, args);
-    }
 
     /** Constructor
      * 
@@ -138,7 +115,7 @@ export default class App extends Route{
             if(typeof err === "number")
                 err = new HttpError(err);
             if( !(err instanceof HttpError) )
-                    console.error(err);
+                    this._logger.error(err);
             await this.#errorHandler(err, ctx);
         }
         const [body, init, redirect] = ctx.flush();
