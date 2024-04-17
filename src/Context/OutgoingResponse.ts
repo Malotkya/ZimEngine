@@ -80,7 +80,7 @@ export default class OutgoingResponse {
         if(this._server)
             return this._server.headersSent
 
-        return typeof this._status === "number"
+        return this._headers.entries.length > 0 || this._body.length > 0;
     }
 
     end():ResponseInit{
@@ -91,7 +91,7 @@ export default class OutgoingResponse {
         return [
             this._body,
             {
-                status: this._status || 500,
+                status: this._status || 200,
                 headers: this._headers
             },
             this._redirect
