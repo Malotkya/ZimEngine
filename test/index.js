@@ -1,5 +1,5 @@
 const {App, Router, View} = require("../lib");
-const {createElement:_} = require("../lib/View/Html");
+const {createContent:_} = require("../lib/View/Html");
 const {default:Static} = require("../lib/Static");
 const http = require("http");
 const path = require("path");
@@ -25,7 +25,8 @@ const about = new Router();
 home.all((ctx)=>{
     const content = [
         _("h2", "Home Page"),
-        _("a", {href:"/About"}, "About Me")
+        _("a", {href:"/About"}, "About Me"),
+        _("a", {href:"/Bad"}, "Bad Link")
     ]
 
     ctx.render({content})
