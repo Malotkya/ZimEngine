@@ -121,11 +121,24 @@ async function routeHandler(body?:FormData):Promise<void>{
         body: body
     });
 
-    if(!response.ok || response.headers.get("Content-Type") !== "application/json")
+    if( response.headers.get("Content-Type") !== "application/json" || !attemptUpdate(await response.json()) ){
         window.location.reload();
+    }
 
-    const update:ContentUpdate = await response.json();
+    
+    isRouting = false;
+}
 
+function attemptUpdate(update:ContentUpdate):boolean {
+    //Validate Header Exists
+    if(update.header === undefined)
+        return false;
+
+    //Validate Header Content
+    if(!Array.isArray(update.header.update) || !Array.isArray(update.header.delete))
+        return false;
+
+    //Update Headers
     for(let name in update.header.update){
         switch(name.toLowerCase()) {
             case "base":
@@ -156,6 +169,7 @@ async function routeHandler(body?:FormData):Promise<void>{
         }
     }
 
+    //Remove Headers
     const head = findOrCreateElement("head");
     for(let name of update.header.delete){
         let element:HTMLElement|null;
@@ -188,10 +202,11 @@ async function routeHandler(body?:FormData):Promise<void>{
             head.removeChild(element);
     }
 
+    //Update body
     const target = findOrCreateElement("main", "body");
     target.innerHTML = "";
     insertContent(target, update.content);
-    isRouting = false;
+    return true;
 }
 
 /** Insert Content 
