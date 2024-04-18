@@ -1,4 +1,4 @@
-const {default:HtmlDcoument, createElement:_} = require("../lib/View/Html");
+const {default:HtmlDcoument, createContent:_} = require("../lib/View/Html");
 
 test("HTTP: Single Normal Element", ()=>{
     expect(_("a", {href:"/link"}, "Basic Link"))
