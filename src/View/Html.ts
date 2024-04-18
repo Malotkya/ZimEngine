@@ -17,9 +17,9 @@ export type Content = string|Array<Content>|null|undefined;
  */
 export default function HtmlDocument(att:Dictionary<string>, head:string, body:Content):string{
     return "<!DOCTYPE html>"+
-        createElement("html", att, 
-            createElement("head", head),
-            createElement("body", body)
+        createContent("html", att, 
+            createContent("head", head),
+            createContent("body", body)
         );
 }
 
@@ -31,7 +31,7 @@ export default function HtmlDocument(att:Dictionary<string>, head:string, body:C
  * @param {Array<Content>} children 
  * @returns {string}
  */
-export function createElement(name:string, attributes:Dictionary<string>|Content = {}, selfClosing?:boolean|Content, ...children:Array<Content>):string {
+export function createContent(name:string, attributes:Dictionary<string>|Content = {}, selfClosing?:boolean|Content, ...children:Array<Content>):string {
     
     if(typeof selfClosing !== "boolean" && typeof selfClosing !== "undefined") {
         children.unshift(selfClosing);

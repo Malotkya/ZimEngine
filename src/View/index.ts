@@ -2,8 +2,8 @@
  * 
  * @author Alex Malotky
  */
-import HtmlDocument, {Content, createElement, compressContent} from "./Html";
-export {Content, createElement};
+import HtmlDocument, {Content, createContent, compressContent} from "./Html";
+export {Content, createContent};
 import Context from "../Context";
 import { dictionaryInclude, inNodeEnvironment, nodeImport } from "../Util";
 import MimeTypes from "../MimeTypes";
@@ -392,7 +392,7 @@ export default class View{
         this.#currentHead = combineHeadElements(this.#defaultHead, update.header);
         return HtmlDocument(
             this.#attribute,
-            Object.values(this.#currentHead).map(value=>createElement(value.name, value.attributes, value.self, value.content || null)).join(""),
+            Object.values(this.#currentHead).map(value=>createContent(value.name, value.attributes, value.self, value.content || null)).join(""),
             this.#defaultContent(update.content)
             );
     }
