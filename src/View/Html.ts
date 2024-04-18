@@ -23,7 +23,7 @@ export default function HtmlDocument(att:Dictionary<string>, head:string, body:C
         );
 }
 
-/** Create HTML Element
+/** Create HTML Content
  * 
  * @param {string} name 
  * @param {Dictionary<string>} attributes 
