@@ -11,7 +11,3 @@ I am attempting to use as little external librarys as possible to prevent packag
 ### Front End
 1) Submit form using fetch
 2) Handle errors without reloading page.
-
-### Back End
-1) Be able to incorporate other views
-2) Static folder that supports audio/video streaming
