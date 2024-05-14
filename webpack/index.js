@@ -27,7 +27,7 @@ module.exports = (props) => {
                     exclude: /node_modules/,
                 },
                 {
-                    test: /\.scss$/,
+                    test: /\.s?css$/,
                     type:'asset/source',
                     exclude: /node_modules/,
                     use: 'sass-loader'
@@ -59,5 +59,19 @@ module.exports = (props) => {
                 module: /Util.js$/
             },
         ],
+        externals: {
+            'node:assert': 'node:assert',
+            'node:async_hooks': 'node:async_hooks',
+            'node:buffer': 'node:buffer',
+            'node:crypto': 'node:crypto',
+            'node:diagnostics_channel': 'node:diagnostics_channel',
+            'node:events': 'node:events',
+            'node:path': 'node:path',
+            'node:process': 'node:process',
+            'node:stream': 'node:stream',
+            'node:string_decoder': 'node:string_decoder',
+            'node:test': 'node:test',
+            'node:util': 'node:util'
+        }
     };
 };
