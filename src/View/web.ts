@@ -135,7 +135,7 @@ function attemptUpdate(update:ContentUpdate):boolean {
         return false;
 
     //Validate Header Content
-    if(!Array.isArray(update.header.update) || !Array.isArray(update.header.delete))
+    if((typeof update.header.update !== "object") || !Array.isArray(update.header.delete))
         return false;
 
     //Update Headers
