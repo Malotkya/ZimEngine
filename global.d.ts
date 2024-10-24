@@ -1,13 +1,18 @@
+declare module '*.md' {
+    const content: string;
+    export default content;
+}
+
+declare module '*.scss' {
+    const content: string;
+    export default content;
+}
+
 interface Dictionary<t> {
     [index:string]:t
 }
 
-type BodyData = Dictionary<string>|FormData|Map<string,string>
+type Env = unknown;
+type User = unknown;
 
-declare interface Window {
-    zim: {
-        route: (href:string, body?:BodyData)=>void
-        link: (href:string)=>void
-        scroll: (target:string)=>void
-    }
-}
+declare const VERSION = "#.#.#.?"
