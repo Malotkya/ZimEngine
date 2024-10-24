@@ -1,5 +1,27 @@
 const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
+const fs = require("fs");
+const json5 = require("json5");
+const {DefinePlugin} = require("webpack");
+
+const tsconfig = fs.readFileSync(path.join(process.cwd(), "tsconfig.json")).toString();
+const package  = fs.readFileSync(path.join(process.cwd(), "package.json")).toString();
+
+const {version} = json5.parse(package);
+
+function getAliases(){
+    const {paths} = json5.parse(tsconfig).compilerOptions;
+    const alias = {};
+
+    for(let item in paths) {
+        const key = item.replace("/*", "");
+        const name = paths[item][0].replace("/*", "");
+       
+        alias[key] = path.resolve(process.cwd(), name);
+    }
+
+    return alias;
+}
 
 /** ZimEngine Webpack
  * 
@@ -11,7 +33,7 @@ module.exports = (props) => {
         mode: props.inProduction? "production": "development",
         target: "es2020",
         entry: [
-            path.join(props.source_directory, 'index.ts'),
+            path.join(props.source_directory, 'worker.ts'),
         ],
         devtool: props.inProduction? undefined: 'source-map',
         module: {
@@ -19,10 +41,19 @@ module.exports = (props) => {
                 {
                     test: /\.tsx?$/,
                     use: 'ts-loader',
-                    exclude: /node_modules/
+                    exclude: [
+                        /node_modules/,
+                        /Engine\/Web/,
+                        /Engine\/View\/RenderEnvironment/
+                    ]
                 },
                 {
                     test: /.html$/i,
+                    type:'asset/source',
+                    exclude: /node_modules/,
+                },
+                {
+                    test: /.md$/i,
                     type:'asset/source',
                     exclude: /node_modules/,
                 },
@@ -39,6 +70,7 @@ module.exports = (props) => {
         },
         resolve: {
             extensions: ['.ts', '.js', ".html", ".scss"],
+            alias: getAliases()
         },
         output: {
             filename: '_worker.js',
@@ -47,18 +79,24 @@ module.exports = (props) => {
                 type: 'module'
             }
         },
+        plugins: [
+            new DefinePlugin({
+                VERSION: JSON.stringify(version)
+            })
+        ],
         optimization: {
             minimize: props.inProduction,
             minimizer: [
-                new TerserPlugin()
+                new TerserPlugin({
+                    terserOptions: {
+                        mangle: {
+                            reserved: ["env", "event"]
+                        }
+                    }
+                })
             ],
             usedExports: true
         },
-        ignoreWarnings: [
-            {
-                module: /Util.js$/
-            },
-        ],
         externals: {
             'node:assert': 'node:assert',
             'node:async_hooks': 'node:async_hooks',
