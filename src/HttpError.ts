@@ -10,7 +10,7 @@
  * @param {number} value 
  * @returns {string}
  */
-function getMessage(value:number):string {
+export function getMessage(value:number):string|null {
     if(value < 400)
         return "Redirected";
 
@@ -128,7 +128,7 @@ function getMessage(value:number):string {
     if(value === 511)
         return "Netowrk Authentication Required"
 
-    return "Internal Server Error";
+    return null;
 }
 
 /** Http Error
@@ -152,7 +152,7 @@ export default class HttpError extends Error{
             message = "Status is not an error!"
         }
 
-        super(message || getMessage(value));
+        super(message || getMessage(value) || "Internal Server Error");
         this.#status = value;
     }
 

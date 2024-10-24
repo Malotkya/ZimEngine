@@ -1,69 +1,87 @@
-/** /Context
+/** /Engine/Context
  * 
  * @author Alex Malotky
  */
-import IncomingRequest, {RequestType} from "./IncomingRequest"
-import ResponseType, {ResponseInit} from "./OutgoingResponse";
-import View, {RenderUpdate, Content} from "../View";
-import MimeTypes from "../MimeTypes";
-import {HeadersInit} from "../Util";
-import { ServerResponse } from "http";
+import View, {RenderUpdate} from "../View";
+import ProtoResponse from "./ProtoResponse";
+import Authorization from "Engine/Authorization";
+import { HEADER_KEY, HEADER_VALUE } from "Engine/Util";
 
-export{IncomingRequest, ResponseType as OutgoingResponse};
-
-const HTML_MIME_TYPE = MimeTypes("html");
-const TXT_MIME_TYPE  = MimeTypes("txt");
-const JSON_MIME_TYPE = MimeTypes("json");
+const HTML_MIME_TYPE = "text/html";
+const TXT_MIME_TYPE  = "text/plain";
+const JSON_MIME_TYPE = "application/json";
 
 /** Context
  * 
  * Wrapper Around Request/Response
  */
 export default class Context{
-    private _request:RequestType;
-    private _response:ResponseType;
+    private _request:Request;
+    private _response:ProtoResponse;
     private _url:URL;
-    
-    private _htmlHeaders:Dictionary<string>;
-    private _htmlContent:Array<Content>;
-
-    private _search:Dictionary<string>;
-    private _params:Dictionary<string>;
+    private _env:Env;
     private _view:View|undefined;
-    private _query:string|undefined;
+    private _auth:Authorization|undefined;
+    private _form:Map<string, string>;
 
+    private _search:Map<string, string>;
+    private _params:Map<string, string>;
+    private _query:string|undefined;
 
     /** Constructor
      * 
      * @param request 
      * @param response 
      */
-    constructor(request: RequestType, response?: ServerResponse, view?:View){
-
+    constructor(request: Request, data:FormData, env:Env, view?:View, auth?:Authorization){
         this._request = request;
-        this._response = new ResponseType(response);
-
-        this._url = new URL(request.url || "/", `http://${request.headers.get("host")}`);
-
-        //Search Values
-        this._search = {};
-        for(const [name, value] of this._url.searchParams.entries())
-            this._search[name] = value;
-
+        this._response = new ProtoResponse();
+        this._env = env;
+        this._url = new URL(request.url);
+        this._view = view;
+        this._auth = auth;
 
         //Defaults
-        this._params = {};
-        this._htmlHeaders = {};
-        this._htmlContent = [];
-        this._view = view;
+        this._search = new Map();
+        this._params = new Map();
+        this._form = new Map();
+
+        //Search Values
+        for(const [name, value] of this._url.searchParams.entries())
+            this._search.set(name, value);
+
+        //Form Value
+        data.forEach((value, key)=>{
+            this._form.set(key, value.toString())
+        });
     }
 
-    get request():RequestType {
+    /** Request Getter
+     * 
+     */
+    get request():Request {
         return this._request;
     }
 
-    get response():ResponseType {
+    /** Response Getter
+     * 
+     */
+    get response():ProtoResponse {
         return this._response;
+    }
+
+    /** Form Data Getter
+     * 
+     */
+    get formData():Map<string, string> {
+        return this._form;
+    }
+
+    /** Environment Getter
+     * 
+     */
+    get env():Env {
+        return this._env;
     }
 
     /** Url Getter
@@ -80,33 +98,26 @@ export default class Context{
         return this._request.method;
     }
 
-    /** Params Setter
-     * 
-     */
-    set params(value:Dictionary<string>){
-        this._params = Object.create(value);
-    }
-
     /** Params Getter
      * 
      */
-    get params():Dictionary<string>{
+    get params():Map<string, string>{
         return this._params;
     }
 
     /** Search Getter
      * 
      */
-    get search():Dictionary<string>{
+    get search():Map<string, string>{
         return this._search;
     }
 
     /** Set Status Code
      * 
      * @param {number} value 
-     * @returns {Context}
+     * @returns {this}
      */
-    status(value:number):Context {
+    status(value:number):this {
         if(typeof value !== "number") {
             value = Number(value);
         }
@@ -121,16 +132,34 @@ export default class Context{
         return this;
     }
 
+    /** Write Chunk to Response
+     * 
+     * @param {any} chunk 
+     * @returns {this}
+     */
+    write(chunk:any):this {
+        this._response.write(chunk);
+        return this;
+    }
+
+    /** End Response
+     * 
+     */
+    end():void {
+        this._response.end();
+    }
+
     /** Set Json Content
      * 
      * @param {Object} object 
-     * @returns {Context}
+     * @returns {this}
      */
-    json(object:Object): Context{
-        if (!this._response.getHeader("Content-Type")) {
-            this._response.setHeader('Content-Type', JSON_MIME_TYPE);
+    json(object:Object):this{
+        if (!this._response.headers.get("Content-Type")) {
+            this._response.headers.set('Content-Type', JSON_MIME_TYPE);
         }
         this._response.write(JSON.stringify(object));
+        this._response.end();
         return this;
     }
 
@@ -139,11 +168,12 @@ export default class Context{
      * @param {string} value 
      * @returns {this}
      */
-    text(value:string): Context{
-        if (!this._response.getHeader("Content-Type")) {
-            this._response.setHeader('Content-Type', TXT_MIME_TYPE);
+    text(value:string):this{
+        if (!this._response.headers.get("Content-Type")) {
+            this._response.headers.set('Content-Type', TXT_MIME_TYPE);
         }
         this._response.write(value);
+        this._response.end();
         return this;
     }
 
@@ -153,78 +183,50 @@ export default class Context{
      * @returns {this}
      */
     html(value:string): Context{
-        if (!this._response.getHeader("Content-Type")) {
-            this._response.setHeader('Content-Type', HTML_MIME_TYPE);
+        if (!this._response.headers.get("Content-Type")) {
+            this._response.headers.set('Content-Type', HTML_MIME_TYPE);
         }
         this._response.write(value);
+        this._response.end();
         return this;
     }
 
-    /** Write Chunk
+    /** Expects Render
      * 
-     * @param {string} chunk 
-     * @returns {this}
+     * Checks headers to test if request is expecting render object.
+     * 
+     * @returns {boolean}
      */
-    write(chunk:any):Context{
-        this._response.write(String(chunk));;
-        return this;
+    expectsRender():boolean {
+        return this._request.headers.get(HEADER_KEY) === HEADER_VALUE;
     }
 
     /** Reunder Update Content
      * 
-     * @param {ContentUpdate} update 
+     * @param {ContentUpdate} value 
      */
-    render(update:RenderUpdate){
-        this._htmlContent.push(update.content);
+    render(value:RenderUpdate){
+        if(this._view === undefined)
+            throw new Error("No view to render with!");
+        this._response.headers.set(HEADER_KEY, HEADER_VALUE);
 
-        for(let name in update.header){
-            this._htmlHeaders[name] = update.header[name];
+        if(this.expectsRender()) {
+            this.json(this._view.update(value));
+        } else {
+            this.html(this._view.render(value));
         }
     }
 
     /** Flush Update Content
      * 
      */
-    flush():ResponseInit {
-        if(this._htmlContent.length > 0){
-            if(typeof this._view === "undefined")
-                throw new Error("No View to render content!");
-
-            const contentType = this._request.headers.get("content-type");
-            const update:RenderUpdate = {
-                header: this._htmlHeaders,
-                content: this._htmlContent
-            };
-        
-            if(contentType && contentType.includes("json")) {
-                this.json(this._view.update(update));
-            } else {
-                this.html(this._view.render(update));
-            }
-        }
-
-        return this._response.end();
+    flush():Promise<Response> {
+        return this._response.flush();
     }
 
-    nothingSent():boolean {
-        if(this._htmlContent.length > 0)
-            return false;
-
-        return !this._response.headersSent;
-    }
-
-    authorization():{username:string,password:string}|undefined{
-        const auth = this._request.headers.get("authorization");
-        if(auth===undefined)
-            return undefined;
-
-        const buffer = Buffer.from(auth.split(" ")[1], 'base64').toString().split(":");
-        return {
-            username: buffer[0],
-            password: buffer[1]
-        }
-    }
-
+    /** Query Getter
+     * 
+     */
     get query():string {
         if(this._query !== undefined) {
             if(this._query === "")
@@ -235,10 +237,62 @@ export default class Context{
         return this.url.pathname;
     }
 
+    /** Query Setter
+     * 
+     */
     set query(value:string){
         if(typeof value !== "string")
             throw new TypeError("Query must be a string!");
 
+        if(value === "")
+            value = "/";
+
         this._query = value;
+    }
+
+    /** Get Authorization
+     * 
+     * @returns {Promise<User|null>}
+     */
+    async getAuth():Promise<User|null> {
+        if(this._auth === undefined || this._auth.get() === undefined)
+            return null;
+
+        return await this._auth.get()(this._request);
+    }
+
+    async setAuth(user:User|null):Promise<void> {
+        if(this._auth === undefined || this._auth.set() === undefined)
+            return;
+
+        await this._auth.set()(this._response, user);
+    }
+
+    /** Redirect
+     * 
+     * @param url 
+     * @param status 
+     */
+    redirect(url:string|URL, status?:number){
+        if(url === "back"){
+            url = this._request.headers.get("Referrer") || "/";
+        }
+        
+        if(this._request.headers.get(HEADER_KEY) === HEADER_VALUE){
+            if(url instanceof URL){
+                url = url.pathname;
+            }
+
+            this.render({
+                redirect: url
+            })
+        } else {
+
+            if(typeof url === "string"){
+                url = new URL(this._request.url.replace(/(^https?:\/\/.*?:\d{0,4})(.*)$/, "$1"+url));
+            }
+            this._response.redirect(url, status);
+
+        }
     }
 }
