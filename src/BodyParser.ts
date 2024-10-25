@@ -4,25 +4,31 @@
  * @author Alex Malotky
  */
 import { IncomingMessage } from "http";
+import { isCloudflareRequest } from "./Util";
 
 const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
 const DEFAULT_SIZE_LIMIT = 500000000; //500MB
 
-/** File Data Interface
- * 
- */
-export interface FileData {
-    fileName:string,
-    fileContent:Buffer,
-    contentType:string,
-}
+export type BodyData = Map<string, string|Blob>;
 
-/** Body Type
- * 
- */
-export type Body = Map<string, string|FileData>;
+export default function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
 
-export default function BodyParser(request:IncomingMessage):Promise<Body>{
+    if(isCloudflareRequest(request)){
+        return new Promise(res=>{
+            request.formData().then((data)=>{
+                const map = new Map<string, string|Blob>();
+                data.forEach((value, key)=>{
+                    map.set(key, value);
+                });
+
+                res(map)
+            }).catch(e=>{
+                console.warn(e);
+                res(new Map());
+            })
+        });
+    }
+    
     let multipart:boolean = false;
     let boundry:RegExp    = new RegExp("&");
 
@@ -42,7 +48,7 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
      * @param {string} data 
      * @returns {name:string, info:FileData|string}
      */
-    const processMultipartData = (data:string):[string, FileData|string] => {
+    const processMultipartData = (data:string):[string, string|Blob] => {
         //Multipart Headers Match
         const match = data.match(/[\d\D\n]*?\r\n\r\n/);
         if(match === null)
@@ -69,20 +75,16 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
             throw new Error("No name given in multipart data!");
     
         //Detect if File
-        if(headers["filename"] === undefined){
-            return [
+        if(headers["filename"] !== undefined){
+            [
                 headers["name"],
-                data
+                new Blob([data], { type: "text/plain" })
             ]
         }
 
-        const fileName = headers["filename"];
-        const contentType = headers["Content-Type"];
-        const fileContent = Buffer.from(data);
-
         return [
             headers["name"],
-            {fileName, contentType, fileContent}
+            data
         ]
     }
 
@@ -116,7 +118,7 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
         }
     }
 
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve)=>{
         request.on("data", chunk=>{
             try {
                 buffer += String(chunk);
@@ -124,19 +126,24 @@ export default function BodyParser(request:IncomingMessage):Promise<Body>{
                     throw new Error("Upload size limit reached!");
                 processBuffer();
             } catch (err){
-                reject(err);
+                console.warn(err);
+                resolve(new Map())
             }
             
         });
 
-        request.on("error", reject);
+        request.on("error", (err)=>{
+            console.warn(err);
+            resolve(new Map());
+        });
 
         request.on("end", ()=>{
             resolve(output);
         });
 
         setTimeout(()=>{
-            reject(new Error("Upload timeout limit reached!"))
+            console.warn(new Error("Upload timeout limit reached!"));
+            resolve(new Map());
         }, DEFAULT_TIME_LIMIT);
     });
 }
