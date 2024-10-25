@@ -56,8 +56,6 @@ export default class Router extends Layer{
                         return;
                 } 
             }
-    
-            throw 404;
         }
     }
 

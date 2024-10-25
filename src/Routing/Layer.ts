@@ -20,9 +20,7 @@ export default class Layer {
     constructor(path:string, opts:PathToRegexpOptions, middleware:Middleware)
     constructor(){
         this._path = "/";
-        this._opts = {
-            end: false
-        }
+        this._opts = {}
 
         switch(arguments.length){
             case 0:
@@ -62,7 +60,7 @@ export default class Layer {
             this._shortcut = true;
             this._path += "path";
         } else if(this._path === "/"){
-            this._shortcut = !(this._opts.end === true)
+            this._shortcut = this._opts.end === false
         } else {
             this._shortcut = false;
         }
