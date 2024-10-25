@@ -102,7 +102,7 @@ export default class Engine extends Routing {
             case 1:
                 switch(typeof arguments[0]){
                     case "function":
-                        super.all(arguments[0]);
+                        super.use(arguments[0]);
                         break;
 
                     case "object":
@@ -117,11 +117,8 @@ export default class Engine extends Routing {
             default:
                 switch(typeof arguments[1]){
                     case "function":
-                        super.all(arguments[1]);
-                        break;
-
                     case "object":
-                        this._methods.add("ALL", arguments[1]);
+                        super.all(arguments[0], arguments[1]);
                         break;
 
                     default:
