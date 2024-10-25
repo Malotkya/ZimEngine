@@ -42,7 +42,7 @@ export default class Router extends Layer{
      * @param {Context} context 
      */
     async handle(context:Context):Promise<void> {
-        if(this.match(context)){
+        if(this.match(context) !== null){
 
             for(const {name, layer} of this._methods) {
                 if(name === "MIDDLEWARE"){

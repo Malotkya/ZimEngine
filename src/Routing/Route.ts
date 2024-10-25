@@ -18,7 +18,7 @@ export default class Route extends Layer {
     async handle(context: Context):Promise<void> {
         const match = this.match(context);
 
-        if(match){
+        if(match !== null){
             for(const layer of this.#layers) {
                 await layer.handle(context);
                 if(context.response.commited())

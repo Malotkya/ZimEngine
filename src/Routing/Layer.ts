@@ -71,7 +71,7 @@ export default class Layer {
         try {
             const match = this.match(context);
 
-            if(match) {
+            if(match !== null) {
                 await this._handler(context);
                 context.query = match;
             }
@@ -82,9 +82,7 @@ export default class Layer {
 
     protected match(context:Context):string|null {
         if(this._shortcut){
-            const path = context.query;
-            context.query = "";
-            return path;
+            return "";
         }
 
 
