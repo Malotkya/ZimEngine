@@ -18,7 +18,7 @@ import { createElement } from "./View/Html/Element";
 import Content from "./View/Html/Content";
 import HttpError from "./HttpError";
 import BodyParser from "./BodyParser";
-export {Router, Context, createElement, HttpError, View};
+export {Router, Context, createElement, HttpError, View, Authorization};
 export type {Content, Middleware, RenderEnvironment};
 
 export default class Engine extends Routing {
@@ -53,9 +53,6 @@ export default class Engine extends Routing {
         if(typeof value.get() !== "function")
             throw new TypeError("Authentication Getter is not set!");
 
-        if(typeof value.set() !== "function")
-            throw new TypeError("Authentication Setter is not set!");
-
         this._auth = value;
     }
 
@@ -77,8 +74,8 @@ export default class Engine extends Routing {
         return (await this.start(req, undefined, env))!;
     }
 
-    async server(req:NodeRequeset, res:NodeResponse) {
-        await this.start(req, res);
+    get server() {
+        return async(req:NodeRequeset, res:NodeResponse)=>await this.start(req, res);
     }
 
     private async start(req:Request|NodeRequeset, res:NodeResponse|undefined, env?:Env):Promise<Response|undefined> {
