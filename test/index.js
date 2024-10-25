@@ -20,7 +20,7 @@ app.view(new View({},{
 }));
 const auth = new Authorization();
 auth.get(async(req)=>{
-    req.headers.get("Authorization")
+    const auth = req.headers.get("Authorization")
     if(auth===undefined)
         return null;
 
@@ -46,7 +46,7 @@ home.all((ctx)=>{
 
     ctx.render({
         body: {main}
-    })
+    });
 });
 
 about.all((ctx)=>{
@@ -69,11 +69,11 @@ app.use(about);
 const login = new Router("/Auth");
 
 login.get("/", async(ctx)=>{
-    const auth = await ctx.auth();
+    const auth = await ctx.getAuth();
 
     if(auth === null){
         ctx.response.headers.set('WWW-Authenticate', 'Basic realm="401"')
-        ctx.status(401).write('Authentication required.');
+        ctx.status(401).text('Authentication required.');
         return;
     }
     const main = [
