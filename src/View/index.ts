@@ -19,7 +19,7 @@ import { version } from "../../package.json";
  */
 function getFile():string {
     if(inCloudfareWorker()){
-        return require("!raw-loader!./web.js").default;
+        return require("!raw-loader!./Web.js").default;
     }
 
     const fs = nodeImport("fs");
