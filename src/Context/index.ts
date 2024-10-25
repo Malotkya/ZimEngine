@@ -7,13 +7,14 @@ import OutgoingResponse, {NodeResponse} from "./OutgoingResponse";
 import IncomingRequest, {NodeRequeset} from "./IncomingRequest";
 import Authorization from "../Authorization";
 import { BodyData } from "../BodyParser";
-import { HEADER_KEY, HEADER_VALUE } from "../Util";
+import MimeTypes from "../MimeTypes";
+import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
 
 export type {NodeRequeset, NodeResponse};
 
-const HTML_MIME_TYPE = "text/html";
-const TXT_MIME_TYPE  = "text/plain";
-const JSON_MIME_TYPE = "application/json";
+const HTML_MIME_TYPE = MimeTypes("html");
+const TXT_MIME_TYPE  = MimeTypes("txt");
+const JSON_MIME_TYPE = MimeTypes("json");
 
 /** Context
  * 
@@ -41,7 +42,9 @@ export default class Context{
         this._request = new IncomingRequest(request);
         this._response = new OutgoingResponse(response);
         this._env = env;
-        this._url = new URL(this._request.url);
+        this._url = inCloudfareWorker()
+            ? new URL( this._request.url)
+            : new URL( request.url || "/", `http://${this._request.headers.get("host")}`);
         this._view = view;
         this._auth = auth;
 
