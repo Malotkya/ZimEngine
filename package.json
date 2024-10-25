@@ -5,7 +5,7 @@
     "main": "lib/index.js",
     "scripts": {
         "build:dev": "tsc --sourceMap",
-        "build:prod": "rm -r lib && tsc",
+        "build:prod": "rimraf lib && tsc",
         "test": "npm run build:dev && jest",
         "test:serve": "npm run build:dev && node ./test",
         "deploy": "npm run build:prod && jest && npm publish"
@@ -15,11 +15,12 @@
     "devDependencies": {
         "@types/node": "^20.11.30",
         "jest": "^29.7.0",
+        "rimraf": "^6.0.1",
         "supertest": "^6.3.4",
         "typescript": "^5.4.3"
     },
     "dependencies": {
-        "path-to-regexp": "^6.2.1"
+        "path-to-regexp": "^8.2.0"
     },
     "repository": {
         "type": "git",
