@@ -6,7 +6,6 @@ import Context from "../Context";
 import { pathToRegexp, Key, PathToRegexpOptions } from "path-to-regexp";
 
 export type Middleware = (context:Context)=>Promise<void>|void;
-export type EndPoint = (context:Context)=>Promise<Response|void>|Response|void;
 
 export interface Params{
     [name:string]:string
@@ -19,12 +18,12 @@ export interface Match {
 
 export default class Layer {
     private _shortcut:boolean;
-    private _handler:Middleware|EndPoint;
+    private _handler:Middleware;
     private _regex:RegExp;
     private _keys:Array<Key>;
 
     constructor(middleware:Middleware)
-    constructor(path:string, middleware:Middleware|EndPoint)
+    constructor(path:string, middleware:Middleware)
     constructor(path:string, opts:PathToRegexpOptions, middleware:Middleware)
     constructor(){
         let path:string = "/";
@@ -73,15 +72,10 @@ export default class Layer {
         this._keys = keys;
     }
 
-    async handle(context:Context):Promise<Response|void>{
+    async handle(context:Context):Promise<void>{
         try {
             if(this.match(context)) {
-                const response = await this._handler(context);
-                if(response)
-                    return response;
-
-                if(context.response.commited())
-                    return await context.flush();
+                await this._handler(context);
             }
         } catch (e){
             throw e;

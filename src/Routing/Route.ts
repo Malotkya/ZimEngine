@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
-import Layer, { EndPoint, Middleware } from "./Layer";
+import Layer, { Middleware } from "./Layer";
 
 const ROUTE_ERROR = ()=>{throw new Error("_handler called from Route!")}
 
@@ -15,7 +15,7 @@ export default class Route extends Layer {
         this.#layers = [];
     }
 
-    async handle(context: Context):Promise<Response|void> {
+    async handle(context: Context):Promise<void> {
         const match = this._match(context);
         const path = context.query;
         context.params.clear();
@@ -27,17 +27,17 @@ export default class Route extends Layer {
             }
 
             for(const layer of this.#layers) {
-                const response = await layer.handle(context);
-                if(response)
-                    return response;
+                await layer.handle(context);
+                if(context.response.commited())
+                    return;
             }
         }
 
         context.query = path;
     }
 
-    use(middleware:Middleware|EndPoint):Route
-    use(path:string, handler:EndPoint):Route
+    use(middleware:Middleware):Route
+    use(path:string, handler:Middleware):Route
     use(){
         let layer:Layer;
         switch(typeof arguments[0]){

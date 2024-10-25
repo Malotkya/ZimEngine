@@ -6,7 +6,7 @@ import Routing from "./Routing";
 import Layer from "./Routing/Layer";
 import Context, {NodeRequeset, NodeResponse} from "./Context";
 import View from "./View";
-import { EndPoint, Middleware } from "./Routing/Layer";
+import { Middleware } from "./Routing/Layer";
 import Authorization from "./Authorization";
 import RenderEnvironment from "./View/RenderEnvironment";
 import { inCloudfareWorker } from "./Util";
@@ -85,8 +85,8 @@ export default class Engine extends Routing {
         return await this.handle(context);
     }
 
-    use(handler:Middleware|EndPoint|Layer): void
-    use(path:string, endpoint:EndPoint|Layer):void
+    use(handler:Middleware|Layer): void
+    use(path:string, endpoint:Middleware|Layer):void
     use(){
         switch(arguments.length){
             case 0:

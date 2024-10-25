@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
-import Layer, {EndPoint, Middleware} from "./Layer";
+import Layer, {Middleware} from "./Layer";
 
 const ROUTER_ERROR = ()=>{throw new Error("_handler called from Router!")}
 
@@ -47,7 +47,7 @@ export default class Router extends Layer{
      * 
      * @param {Context} context 
      */
-    async handle(context:Context):Promise<Response|void> {
+    async handle(context:Context):Promise<void> {
         const match = this._match(context);
         const path = context.query;
         context.params.clear();
@@ -60,13 +60,13 @@ export default class Router extends Layer{
 
             for(const {name, layer} of this._methods) {
                 if(name === "MIDDLEWARE"){
-                    const response = await layer.handle(context);
-                    if(response)
-                        return response
+                    await layer.handle(context);
+                    if(context.response.commited())
+                        return;
                 } else if(name === context.method || name === "ALL") {
-                    const response = await layer.handle(context);
-                    if(response)
-                        return response;
+                    await layer.handle(context);
+                    if(context.response.commited())
+                        return;
                 } 
             }
     
@@ -118,8 +118,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    get(handler:EndPoint):Router
-    get(path:string, handler:EndPoint):Router
+    get(handler:Middleware):Router
+    get(path:string, handler:Middleware):Router
     get():Router{
         this._methods.add("GET", this._filter(arguments));
         return this;
@@ -131,8 +131,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    head(handler:EndPoint):Router
-    head(path:string, handler:EndPoint):Router
+    head(handler:Middleware):Router
+    head(path:string, handler:Middleware):Router
     head():Router{
         this._methods.add("HEAD", this._filter(arguments));
         return this;
@@ -144,8 +144,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    post(handler:EndPoint):Router
-    post(path:string, handler:EndPoint):Router
+    post(handler:Middleware):Router
+    post(path:string, handler:Middleware):Router
     post():Router{
         this._methods.add("POST", this._filter(arguments));
         return this;
@@ -157,8 +157,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    put(handler:EndPoint):Router
-    put(path:string, handler:EndPoint):Router
+    put(handler:Middleware):Router
+    put(path:string, handler:Middleware):Router
     put():Router{
         this._methods.add("PUT", this._filter(arguments));
         return this;
@@ -170,8 +170,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    delete(handler:EndPoint):Router
-    delete(path:string, handler:EndPoint):Router
+    delete(handler:Middleware):Router
+    delete(path:string, handler:Middleware):Router
     delete():Router{
         this._methods.add("DELETE", this._filter(arguments));
         return this;
@@ -183,8 +183,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    options(handler:EndPoint):Router
-    options(path:string, handler:EndPoint):Router
+    options(handler:Middleware):Router
+    options(path:string, handler:Middleware):Router
     options():Router{
         this._methods.add("OPTIONS", this._filter(arguments));
         return this;
@@ -196,8 +196,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    patch(handler:EndPoint):Router
-    patch(path:string, handler:EndPoint):Router
+    patch(handler:Middleware):Router
+    patch(path:string, handler:Middleware):Router
     patch():Router{
         this._methods.add("PATCH", this._filter(arguments));
         return this;
@@ -209,8 +209,8 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    all(handler:EndPoint):Router
-    all(path:string, handler:EndPoint):Router
+    all(handler:Middleware):Router
+    all(path:string, handler:Middleware):Router
     all():Router{
         this._methods.add("ALL", this._filter(arguments));
         return this;

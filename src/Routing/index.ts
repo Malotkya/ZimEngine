@@ -29,6 +29,7 @@ export default class Routing extends Router{
      * @param {Context} context 
      * @returns {Promise<Response>}
      */
+    //@ts-ignore
     async handle(context:Context):Promise<Response|undefined>{
         try {
             for(const {name, layer} of this._methods){
@@ -36,10 +37,7 @@ export default class Routing extends Router{
                     await layer.handle(context);
                 } else if(name === context.method || name === "ALL") {
                     
-                    const response = await layer.handle(context);
-                    if(response)
-                        return response;
-
+                    await layer.handle(context);
                     if(context.response.commited())
                         return await context.flush();
                 }
