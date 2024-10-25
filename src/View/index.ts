@@ -9,6 +9,7 @@ import {AttributeList} from "./Html/Attributes";
 import { nodeImport, inCloudfareWorker } from "../Util";
 import MimeTypes from "../MimeTypes";
 import Context from "../Context";
+import { version } from "../../package.json";
 
 /** Get File
  * 
@@ -53,7 +54,7 @@ export default class View{
     #defaultContent:RenderFunction;
     #attribute:AttributeList;
 
-    static readonly injectedFileRoute = "/zim.js";
+    static readonly injectedFileRoute = `/zim.js?${version}`;
     static readonly injectedFileType = MimeTypes("js");
     static readonly injectedFileContent = getFile()
         .replace(`Object.defineProperty(exports, "__esModule", { value: true });`, "");
