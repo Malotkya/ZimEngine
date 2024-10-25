@@ -1,6 +1,6 @@
-import { FetchUpdate } from "./View";
-import RenderEnvironment from "./View/RenderEnvironment";
-import { getRouteInfo } from "./View/RenderEnvironment/Util";
+import { FetchUpdate } from ".";
+import RenderEnvironment from "./RenderEnvironment";
+import { getRouteInfo } from "./RenderEnvironment/Util";
 
 const env = new RenderEnvironment();
 
