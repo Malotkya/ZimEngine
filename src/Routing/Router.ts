@@ -4,6 +4,7 @@
  */
 import Context from "../Context";
 import Layer, {Middleware} from "./Layer";
+import { joinPath } from "../Util";
 
 const ROUTER_ERROR = ()=>{throw new Error("_handler called from Router!")}
 
@@ -32,7 +33,7 @@ export default class Router extends Layer{
      * 
      * @param {any} options 
      */
-    constructor(path:string) {
+    constructor(path:string = "/") {
         super(path, {end: false}, ROUTER_ERROR);
         this._methods = new Stack();
     }
@@ -74,7 +75,8 @@ export default class Router extends Layer{
                         return new Layer(args[0], args[1]);
 
                     case "object":
-                        return new Layer(args[0], (ctx)=>args[1].handle(ctx));
+                        args[1].path = joinPath(args[0], args[1].path)
+                        return args[1];
 
                     default:
                         throw new TypeError("Middlware must be a function or Layer!");
