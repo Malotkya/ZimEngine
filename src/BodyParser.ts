@@ -9,26 +9,56 @@ import { isCloudflareRequest } from "./Util";
 const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
 const DEFAULT_SIZE_LIMIT = 500000000; //500MB
 
-export type BodyData = Map<string, string|Blob>;
+export type BodyData = Map<string, string>;
+type RawBodyData = Map<string, string|Blob>;
 
-export default function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
-
-    if(isCloudflareRequest(request)){
-        return new Promise(res=>{
-            request.formData().then((data)=>{
-                const map = new Map<string, string|Blob>();
-                data.forEach((value, key)=>{
-                    map.set(key, value);
-                });
-
-                res(map)
-            }).catch(e=>{
-                console.warn(e);
-                res(new Map());
-            })
-        });
+/** Clean Body Data
+ * 
+ * @param {RawBodyData} data 
+ * @returns {Promise<BodyData>}
+ */
+export async function cleanBodyData(data: RawBodyData):Promise<BodyData> {
+    for(let [key, value] of data){
+        if(value instanceof Blob){
+            data.set(key, await value.text());
+        }
     }
-    
+
+    //@ts-ignore
+    return data;
+}
+
+/** Process Cloudflare Request
+ * 
+ * @param {Request} request 
+ * @returns {Promise<RawBodyData>}
+ */
+function processCloudflareRequest(request:Request):Promise<RawBodyData> {
+    return new Promise(res=>{
+        if(request.headers.get("Content-Type")?.includes("FormData") === false) {
+            return res(new Map());
+        }
+
+        request.formData().then((data)=>{
+            const map = new Map<string, string|Blob>();
+            data.forEach((value, key)=>{
+                map.set(key, value);
+            });
+
+            res(map)
+        }).catch(e=>{
+            console.warn(e);
+            res(new Map());
+        })
+    });
+}
+
+/** Process Node Request
+ * 
+ * @param {IncomingMessage} request 
+ * @returns {Promise<RawBodyData>}
+ */
+function processNodeRequest(request:IncomingMessage):Promise<RawBodyData> {
     let multipart:boolean = false;
     let boundry:RegExp    = new RegExp("&");
 
@@ -146,4 +176,12 @@ export default function BodyParser(request:IncomingMessage|Request):Promise<Body
             resolve(new Map());
         }, DEFAULT_TIME_LIMIT);
     });
+}
+
+export default async function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
+    return cleanBodyData(
+        isCloudflareRequest(request)
+            ? (await processCloudflareRequest(request))
+            : (await processNodeRequest(request))
+    )
 }
