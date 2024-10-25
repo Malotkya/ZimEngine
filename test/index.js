@@ -1,67 +1,90 @@
-const {App, Router, View} = require("../lib");
-const {createContent:_} = require("../lib/View/Html");
+const {default:Engine, Router, View, Authorization, createElement:_} = require("../lib");
 const {default:Static} = require("../lib/Static");
 const http = require("http");
 const path = require("path");
 
-const app = new App();
-app.view(new View([
-    {name: "charset", content:"UTF-8"},
-    {name: "viewport", content: "width=device-wdith, initial-scale=1"},
-    {name: "author", content: "Zim"},
-    {name: "title", content: "Zim Engine Test"}
-], function wireFrame(content){
+const app = new Engine();
+app.view(new View({},{
+    title: "Zim Engine Test",
+    meta: [
+        {charset: "utf-8"},
+        {name: "viewport", content: "width=device-width, initial-scale=1"},
+    {name: "author", content: "Zim"}
+    ]
+}, function wireFrame(args){
     return [
         _("header", _("h1", "Hello World")),
-        _("main", content),
+        _("main", {id: "main"}, args["main"]),
         _("footer", _("p", "Good Bye!"))
     ]
 }));
+const auth = new Authorization();
+auth.get(async(req)=>{
+    req.headers.get("Authorization")
+    if(auth===undefined)
+        return null;
+
+    const buffer = Buffer.from(auth.split(" ")[1], 'base64').toString().split(":");
+    return {
+        username: buffer[0],
+        password: buffer[1]
+    }
+});
+app.auth(auth);
+
 app.use("/Static", Static(path.join(__dirname, "static")));
 
-const home = new Router();
-const about = new Router();
+const home = new Router("/");
+const about = new Router("/About");
 
 home.all((ctx)=>{
-    const content = [
+    const main = [
         _("h2", "Home Page"),
         _("a", {href:"/About"}, "About Me"),
         _("a", {href:"/Bad"}, "Bad Link")
     ]
 
-    ctx.render({content})
+    ctx.render({
+        body: {main}
+    })
 });
 
 about.all((ctx)=>{
-    const header = {
-        title: "This is updated!"
-    }
-
-    const content = [
-        _("h2", "About Me"),
-        _("p", "This is where I will talk about me!")
-    ]
-
-    ctx.render({header, content});
+    ctx.render({
+        head: {
+            title: "This is updated!"
+        },
+        body: {
+            main: [
+                _("h2", "About Me"),
+                _("p", "This is where I will talk about me!")
+            ]
+        }
+    });
 });
 
-app.use("/", home);
-app.use("/About", about);
+app.use(home);
+app.use(about);
 
-const login = new Router();
+const login = new Router("/Auth");
 
-login.auth("ZimEngine");
-login.get("/", (ctx)=>{
-    const auth = ctx.authorization();
-    const content = [
+login.get("/", async(ctx)=>{
+    const auth = await ctx.auth();
+
+    if(auth === null){
+        ctx.response.headers.set('WWW-Authenticate', 'Basic realm="401"')
+        ctx.status(401).write('Authentication required.');
+        return;
+    }
+    const main = [
         _("h2", `Welcome ${auth.username}`),
     ]
 
-    ctx.render({content})
+    ctx.render({body: {main}})
 });
 
-app.use("/Auth", login);
+app.use(login);
 
-http.createServer(app.engine).listen(5000, ()=>{
+http.createServer(app.server).listen(5000, ()=>{
     console.log("Test is Listening!");
 })
