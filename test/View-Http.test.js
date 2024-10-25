@@ -1,13 +1,19 @@
-const {default:HtmlDcoument, createContent:_} = require("../lib/View/Html");
+const {createElement:_} = require("../lib");
+const {HtmlDocument} = require("../lib/View/Html");
+const {compileElement} = require("../lib/View/Html/Element");
 
 test("HTTP: Single Normal Element", ()=>{
-    expect(_("a", {href:"/link"}, "Basic Link"))
-        .toBe("<a href='/link'>Basic Link</a>");
+    const element = _("a", {href:"/link"}, "Basic Link");
+
+    expect(compileElement(element))
+        .toBe("<a href=\"/link\">Basic Link</a>");
 });
 
 test("HTTP: Single Self Closed Element", ()=>{
-    expect(_("input", {name:"txtName", value:"UserName"}, true))
-        .toBe("<input name='txtName' value='UserName'/>");
+    const element = _("input", {name:"txtName", value:"UserName"});
+
+    expect(compileElement(element))
+        .toBe("<input name=\"txtName\" value=\"UserName\"/>");
 });
 
 test("HTTP: Object for child element", ()=>{
@@ -15,21 +21,18 @@ test("HTTP: Object for child element", ()=>{
     for(let i=0; i<5; i++){
         list.push(_("li", i))
     }
-    expect(_("ol", list))
+
+    expect(compileElement(_("ol", list)))
         .toBe("<ol><li>0</li><li>1</li><li>2</li><li>3</li><li>4</li></ol>");
 });
 
-test("HTTP: Self close overide", ()=>{
-    expect(_("parent", true,
-        _("child", true)
-    )).toBe("<parent><child/></parent>");
-});
-
 test("HTTP: Null Child", ()=>{
-    expect(_("null", null)).toBe("<null></null>");
+    const element = _("null", null);
+
+    expect(compileElement(element)).toBe("<null></null>");
 });
 
 test("HTTP Document Test", ()=>{
-    expect(HtmlDcoument({}, _("title", "Test"), _("h1", "Hello World")))
+    expect(HtmlDocument({}, {title: "Test"}, _("h1", "Hello World")))
         .toBe("<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Hello World</h1></body></html>")
 })
