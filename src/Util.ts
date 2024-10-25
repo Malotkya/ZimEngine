@@ -46,3 +46,17 @@ export function isCloudflareRequest(request:any):request is Request {
 export function inCloudfareWorker():boolean {
     return typeof navigator !== "undefined" && navigator.userAgent === 'Cloudflare-Workers'
 }
+
+/** Detect Node Environment
+ * 
+ */
+export function inNodeEnvironment():boolean {
+    return (typeof process !== 'undefined') && (process.release.name === 'node')
+}
+
+export function nodeImport(module:string):any {
+    if(!inNodeEnvironment())
+        throw new Error("Not in the Node Environment to import: "+module);
+
+    return require(module);
+}
