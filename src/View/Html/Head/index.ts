@@ -165,5 +165,5 @@ export default function Head(init:HeadInit, att:HeadAttributes = {}):HTMLElement
         content += Script(i);
     }
 
-    return "<head "+buildAttributesString(att)+">"+content+"</head>";
+    return "<head"+buildAttributesString(att)+">"+content+"</head>";
 }

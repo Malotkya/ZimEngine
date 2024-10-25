@@ -11,7 +11,7 @@ export type HTMLInit = HTMLAttributes;
 export {createElement, compressContent};
 
 function html(init:HTMLInit, head:HTMLElement, body:HTMLElement):HTMLElement {
-    return "<html "+buildAttributesString(init)+">"+head+body+"</html>";
+    return "<html"+buildAttributesString(init)+">"+head+body+"</html>";
 }
 
 /**
