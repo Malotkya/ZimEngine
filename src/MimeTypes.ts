@@ -9,8 +9,9 @@
  * @returns {string}
  */
 export default function MimeTypes(extension:string):string {
-    if(extension.charAt(0) === ".")
-        extension = extension.substring(1).toLowerCase();
+    const index = extension.lastIndexOf(".")+1;
+    if(index > 0)
+        extension = extension.substring(index).toLowerCase();
     else
         extension = extension.toLowerCase();
 
