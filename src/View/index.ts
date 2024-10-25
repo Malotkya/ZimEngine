@@ -9,7 +9,8 @@ import {AttributeList} from "./Html/Attributes";
 import { nodeImport, inCloudfareWorker } from "../Util";
 import MimeTypes from "../MimeTypes";
 import Context from "../Context";
-import { version } from "../../package.json";
+
+const { version } = require("../../package.json");
 
 /** Get File
  * 
@@ -54,9 +55,10 @@ export default class View{
     #defaultContent:RenderFunction;
     #attribute:AttributeList;
 
-    static readonly injectedFileRoute = `/zim.js?${version}`;
-    static readonly injectedFileType = MimeTypes("js");
-    static readonly injectedFileContent = getFile()
+    static readonly injectFilePath = "/zim.js";
+    private static readonly injectedFileRoute = `/zim.js?${version}`;
+    private static readonly injectedFileType = MimeTypes("js");
+    private static readonly injectedFileContent = getFile()
         .replace(`Object.defineProperty(exports, "__esModule", { value: true });`, "");
 
     static injectFile(ctx:Context){
@@ -81,6 +83,10 @@ export default class View{
 
         if(typeof renderContent !== "function")
             throw new TypeError("Render Content must be in the form of a function!");
+
+        if(headInit.scripts === undefined)
+            headInit.scripts = [];
+        headInit.scripts.push({src: View.injectedFileRoute, defer: true});
 
         this.#defaultContent = renderContent;
         this.#attribute = attributes;
