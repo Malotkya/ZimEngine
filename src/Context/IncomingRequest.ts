@@ -1,45 +1,41 @@
 import { IncomingMessage } from "node:http"
-import BodyParser, {Body, FileData} from "../BodyParser"
-import {Data, HeadersInit} from "../Util";
+import { isCloudflareRequest } from "../Util";
 
-export interface RequestType {
-    method: string,
-    url:string,
-    headers:Data<string|undefined>
-    formData():Promise<Data<string|FileData>>,
-}
+export type {IncomingMessage as NodeRequeset};
 
-
-
-export default class IncomingRequest implements RequestType {
-    private _message:IncomingMessage;
-    private _data:Body|undefined;
+export default class IncomingRequest {
     private _headers:Map<string, string>;
+    private _url:string;
+    private _method:string;
 
-    constructor(message: IncomingMessage) {
-        this._message = message;
-
+    constructor(message: IncomingMessage|Request) {
         this._headers = new Map();
-        for(let name in message.headers){
-            this._headers.set(name, String(message.headers[name]))
+        this._url = message.url!;
+        this._method = message.method!.toUpperCase();
+
+        if( isCloudflareRequest(message) ){
+            message.headers.forEach((value, key)=>{
+                this._headers.set(key, value);
+            });
+        } else {
+            for(const key in message.headers) {
+                let value = message.headers[key]!;
+                if(Array.isArray(value))
+                    value = value.join(" ");
+                this._headers.set(key, value);
+            }
         }
     }
 
     get method():string {
-        return this._message.method || "unknown";
+        return this._method;
     }
 
     get url():string {
-        return this._message.url || "undefined";
+        return this._url;
     }
 
-    get headers():HeadersInit {
+    get headers() {
         return this._headers;
-    }
-
-    async formData(): Promise<Data<string|FileData>> {
-        if(this._data === undefined)
-            this._data = await BodyParser(this._message);
-        return this._data;
     }
 }
