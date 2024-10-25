@@ -42,15 +42,7 @@ export default class Router extends Layer{
      * @param {Context} context 
      */
     async handle(context:Context):Promise<void> {
-        const match = this._match(context);
-        const path = context.query;
-        context.params.clear();
-
-        if(match){
-            context.query = context.query.replace(match.path, "");
-            for(let name in match.params){
-                context.params.set(name, match.params[name]);
-            }
+        if(this.match(context)){
 
             for(const {name, layer} of this._methods) {
                 if(name === "MIDDLEWARE"){
@@ -66,8 +58,6 @@ export default class Router extends Layer{
     
             throw 404;
         }
-
-        context.query = path;
     }
 
     private _filter(args:IArguments):Layer {

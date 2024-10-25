@@ -16,24 +16,17 @@ export default class Route extends Layer {
     }
 
     async handle(context: Context):Promise<void> {
-        const match = this._match(context);
-        const path = context.query;
-        context.params.clear();
+        const match = this.match(context);
 
         if(match){
-            context.query = context.query.replace(match.path, "");
-            for(let name in match.params){
-                context.params.set(name, match.params[name]);
-            }
-
             for(const layer of this.#layers) {
                 await layer.handle(context);
                 if(context.response.commited())
                     return;
             }
-        }
 
-        context.query = path;
+            context.query = match;
+        }
     }
 
     use(middleware:Middleware):Route

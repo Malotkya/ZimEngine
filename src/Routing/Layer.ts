@@ -7,15 +7,6 @@ import { pathToRegexp, Key, PathToRegexpOptions } from "path-to-regexp";
 
 export type Middleware = (context:Context)=>Promise<void>|void;
 
-export interface Params{
-    [name:string]:string
-}
-
-export interface Match {
-    path:string
-    params:Params
-}
-
 export default class Layer {
     private _shortcut:boolean;
     private _handler:Middleware;
@@ -28,7 +19,9 @@ export default class Layer {
     constructor(path:string, opts:PathToRegexpOptions, middleware:Middleware)
     constructor(){
         let path:string = "/";
-        let opts:Object = {};
+        let opts:PathToRegexpOptions = {
+            end: false
+        }
 
         switch(arguments.length){
             case 0:
@@ -76,33 +69,24 @@ export default class Layer {
 
     async handle(context:Context):Promise<void>{
         try {
-            if(this.match(context)) {
+            const match = this.match(context);
+
+            if(match) {
                 await this._handler(context);
+                context.query = match;
             }
         } catch (e){
             throw e;
         }
     }
 
-    match(context:Context) {
+    protected match(context:Context):string|null {
         if(this._shortcut){
-            return true;   
+            const path = context.query;
+            context.query = "";
+            return path;
         }
 
-        const match = this._match(context);
-        if(match){
-            for(let name in match.params){
-                context.params.set(name, match.params[name]);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    protected _match(context:Context):Match|null {
-        const result:Params = {};
 
         const match = context.query.match(this._regex);
         if(match == null)
@@ -110,13 +94,12 @@ export default class Layer {
 
         
         for(let index=1; index<match.length; index++){
-            result[this._keys[index-1].name] = decodeURIComponent(match[index]);
+            context.params.set(this._keys[index-1].name, decodeURIComponent(match[index]))
         }
 
-        return {
-            path: match[0],
-            params: result
-        };
+        const path = context.query;
+        context.query = context.query.replace(match[0], "");
+        return path;
     }
 
     get path():string{
