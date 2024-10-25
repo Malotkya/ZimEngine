@@ -95,6 +95,7 @@ export default class OutgoingResponse extends Transform{
      */
     _flush(callback: TransformCallback): void {
         this.working = false;
+        this.emit("close");
         callback()
     }
 
