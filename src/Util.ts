@@ -30,3 +30,19 @@ export function dictionaryInclude(dictionary:Dictionary<any>, name:string):boole
 
     return false;
 }
+
+/** Is Cloudfare Request
+ * 
+ * @param {any} request 
+ * @returns {boolean}
+ */
+export function isCloudflareRequest(request:any):request is Request {
+    return typeof request.formData === "function"
+}
+
+/** Detect Cloudflare Environment
+ * 
+ */
+export function inCloudfareWorker():boolean {
+    return navigator.userAgent === 'Cloudflare-Workers'
+}
