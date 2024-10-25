@@ -12,7 +12,11 @@ interface Dictionary<t> {
     [index:string]:t
 }
 
-type Env = unknown;
+interface Env {
+    ASSETS?: Fetcher
+    [key:string]:any
+}
+
 type User = unknown;
 
 declare const VERSION = "#.#.#.?"
