@@ -21,6 +21,7 @@ export default class Layer {
     private _handler:Middleware;
     private _regex:RegExp;
     private _keys:Array<Key>;
+    private _path:string;
 
     constructor(middleware:Middleware)
     constructor(path:string, middleware:Middleware)
@@ -70,6 +71,7 @@ export default class Layer {
         const {regexp, keys} = pathToRegexp(path, opts);
         this._regex = regexp;
         this._keys = keys;
+        this._path = path;
     }
 
     async handle(context:Context):Promise<void>{
@@ -115,5 +117,9 @@ export default class Layer {
             path: match[0],
             params: result
         };
+    }
+
+    get path():string{
+        return this._path;
     }
 }

@@ -27,7 +27,6 @@ class Stack extends Array<{name:string, layer:Layer}>{
  */
 export default class Router extends Layer{
     protected _methods:Stack;
-    private _path: string;
 
     /** Constructor
      * 
@@ -36,11 +35,6 @@ export default class Router extends Layer{
     constructor(path:string) {
         super(path, {end: false}, ROUTER_ERROR);
         this._methods = new Stack();
-        this._path = path;
-    }
-
-    get path(){
-        return this._path;
     }
 
     /** Handle Request Override
