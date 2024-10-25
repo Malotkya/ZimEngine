@@ -35,6 +35,8 @@ export default class Routing extends Router{
             for(const {name, layer} of this._methods){
                 if(name === "MIDDLEWARE"){
                     await layer.handle(context);
+                    if(context.response.commited())
+                        return await context.flush();
                 } else if(name === context.method || name === "ALL") {
                     
                     await layer.handle(context);
