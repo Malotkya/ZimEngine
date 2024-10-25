@@ -1,13 +1,10 @@
-import { inCloudfareWorker } from "./Util";
+import { nodeImport } from "./Util";
 import MimeTypes from "./MimeTypes";
 import Context from "./Context";
 
 export default function Static(dir:string) {
-    if(inCloudfareWorker())
-        throw new Error("Cannot use static in cloudflare worker!");
-
-    const fs = require(/*webpackIgnore: true*/"node:fs");
-    const path = require(/*webpackIgnore: true*/"node:path");
+    const fs   = nodeImport("fs");
+    const path = nodeImport("node:path");
 
     return async function handleStaticFile(ctx:Context){
         if(ctx.method !== "GET" && ctx.method !== "HEAD") {
