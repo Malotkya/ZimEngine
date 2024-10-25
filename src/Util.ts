@@ -60,3 +60,22 @@ export function nodeImport(module:string):any {
 
     return require(module);
 }
+
+/** Join Paths
+ * 
+ * @param paths 
+ */
+export function joinPath(...paths:Array<string>):string {
+    return "/"+paths.map(part=>{
+        if(part === "/")
+            return "";
+
+        if(part.charAt(0) === "/")
+            part = part.slice(1);
+
+        if(part.charAt(part.length-1) === "/")
+            part = part.slice(-1);
+
+        return part;
+    }).filter(s=>s).join("/")
+}
