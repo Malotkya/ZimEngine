@@ -6,8 +6,8 @@ import Context from "../Context";
 import Router from "./Router";
 import HttpError from "../HttpError";
 
-type Handler = (context:Context)=>Promise<Response>|Response;
-type ErrorHandler = (error:any, context:Context)=>Promise<Response>|Response;
+type Handler = (context:Context)=>Promise<void>|void;
+type ErrorHandler = (error:any, context:Context)=>Promise<void>|void;
 
 export default class Routing extends Router{
     private notFoundHandler:Handler;
@@ -19,8 +19,8 @@ export default class Routing extends Router{
     constructor(){
         super("Main Routing");
         this.notFoundHandler = (ctx:Context) => {throw new HttpError(404, `${ctx.url.pathname} was not found!`)};
-        this.errorHandler = (e:any) => {
-            return new Response(e.message || String(e), {status: e.statusCode || e.code || e.status || 500})
+        this.errorHandler = (e:any, ctx:Context) => {
+            ctx.status(e.statusCode || e.code || e.status || 500).write(e.message || String(e)).end();
         }
     }
 
@@ -29,7 +29,7 @@ export default class Routing extends Router{
      * @param {Context} context 
      * @returns {Promise<Response>}
      */
-    async handle(context:Context):Promise<Response>{
+    async handle(context:Context):Promise<Response|undefined>{
         try {
             for(const {name, layer} of this._methods){
                 if(name === "MIDDLEWARE"){
@@ -45,18 +45,20 @@ export default class Routing extends Router{
                 }
             }
 
-            return await this.notFoundHandler(context);
+            await this.notFoundHandler(context);
         } catch (route_err:any){
             try {
                 if(route_err === 404 || route_err.code === 404 || route_err.status === 404){
-                    return await this.notFoundHandler(context);
+                    await this.notFoundHandler(context);
+                } else {
+                    throw route_err;
                 }
-                throw route_err;
             } catch (error){
-                return await this.errorHandler(error, context);
+                await this.errorHandler(error, context);
             }
-            
         }
+
+        return context.flush();
     }
 
     /** Not Found Handler Setter
