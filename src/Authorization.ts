@@ -1,7 +1,8 @@
-import ProtoResponse from "./Context/ProtoResponse"
+import OutgoingResponse from "./Context/OutgoingResponse"
+import IncomingRequest from "./Context/IncomingRequest";
 
-export type AuthGet = (request:Request) => Promise<User|null>|User|null
-export type AuthSet = (response:ProtoResponse, user:User|null) => Promise<void>|void;
+export type AuthGet = (request:IncomingRequest) => Promise<User|null>|User|null
+export type AuthSet = (response:OutgoingResponse, user:User|null) => Promise<void>|void;
 
 export default class Authorization{
     private _getter:AuthGet|undefined;
