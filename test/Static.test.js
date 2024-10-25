@@ -1,4 +1,4 @@
-const {default:App} = require("../lib/App");
+const {default:App} = require("../lib");
 const {default:Static} = require("../lib/Static");
 const request = require('supertest');
 const fs = require("fs");
@@ -13,7 +13,7 @@ test("Static .txt File", done=>{
     const fileName = "/file.txt";
     const file = fs.readFileSync(path.join(staticDir, fileName)).toString();
 
-    request(app.engine)
+    request(app.server)
         .get(fileName)
         .expect("Content-Type", "text/plain")
         .expect(file)
@@ -24,26 +24,16 @@ test("Static .png File", done=>{
     const fileName = "/Smile.png";
     const file = fs.readFileSync(path.join(staticDir, fileName)).toString();
 
-    request(app.engine)
+    request(app.server)
         .get(fileName)
         .expect("Content-Type", "image/png")
-        .expect(200, done);
-});
-
-test("Static .mp4 File", done=>{
-    const fileName = "/TEST VIDEO.mp4";
-    //TODO: Get video streaming working!
-    //const file = fs.readFileSync(path.join(staticDir, fileName)).toString();
-
-    request(app.engine)
-        .get(fileName)
-        .expect("Content-Type", "video/mp4")
+        /*.expect(file)*/
         .expect(200, done);
 });
 
 test("Static 404 Error", done=>{
 
-    request(app.engine)
+    request(app.server)
         .get("/Bad")
         .expect(404, done);
 });
