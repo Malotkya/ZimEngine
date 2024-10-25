@@ -34,8 +34,9 @@ export async function cleanBodyData(data: RawBodyData):Promise<BodyData> {
  * @returns {Promise<RawBodyData>}
  */
 function processCloudflareRequest(request:Request):Promise<RawBodyData> {
-    return new Promise(res=>{
-        if(request.headers.get("Content-Type")?.includes("FormData") === false) {
+    return new Promise((res, rej)=>{
+        const content = request.headers.get("Content-Type");
+        if (content === null || !content.includes("FormData")) {
             return res(new Map());
         }
 
@@ -46,10 +47,7 @@ function processCloudflareRequest(request:Request):Promise<RawBodyData> {
             });
 
             res(map)
-        }).catch(e=>{
-            console.warn(e);
-            res(new Map());
-        })
+        }).catch(rej)
     });
 }
 
@@ -148,7 +146,7 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData> {
         }
     }
 
-    return new Promise((resolve)=>{
+    return new Promise((resolve, reject)=>{
         request.on("data", chunk=>{
             try {
                 buffer += String(chunk);
@@ -156,24 +154,19 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData> {
                     throw new Error("Upload size limit reached!");
                 processBuffer();
             } catch (err){
-                console.warn(err);
-                resolve(new Map())
+                reject(err);
             }
             
         });
 
-        request.on("error", (err)=>{
-            console.warn(err);
-            resolve(new Map());
-        });
+        request.on("error", reject);
 
         request.on("end", ()=>{
             resolve(output);
         });
 
         setTimeout(()=>{
-            console.warn(new Error("Upload timeout limit reached!"));
-            resolve(new Map());
+            reject(new Error("Upload timeout limit reached!"));
         }, DEFAULT_TIME_LIMIT);
     });
 }
