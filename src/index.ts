@@ -4,11 +4,12 @@
  */
 import Routing from "./Routing";
 import Layer from "./Routing/Layer";
-import Context from "./Context";
+import Context, {NodeRequeset, NodeResponse} from "./Context";
 import View from "./View";
 import { EndPoint, Middleware } from "./Routing/Layer";
 import Authorization from "./Authorization";
 import RenderEnvironment from "./View/RenderEnvironment";
+import { inCloudfareWorker } from "./Util";
 
 
 //Exports
@@ -16,17 +17,24 @@ import Router from "./Routing/Router";
 import { createElement } from "./View/Html/Element";
 import Content from "./View/Html/Content";
 import HttpError from "./HttpError";
+import BodyParser from "./BodyParser";
 export {Router, Context, createElement, HttpError, View};
 export type {Content, Middleware, RenderEnvironment};
 
 export default class Engine extends Routing {
     private _view:View|undefined;
     private _auth:Authorization|undefined;
+    private _env:Env;
 
     constructor(){
         super();
+        this._env = {};
     }
 
+    /** View Setter
+     * 
+     * @param {View} value 
+     */
     view(value:View){
         if( !(value instanceof View) )
             throw new Error("Value must be an instance of View!");
@@ -34,6 +42,10 @@ export default class Engine extends Routing {
         this._view = value;
     }
 
+    /** Auth Setter
+     * 
+     * @param {View} value 
+     */
     auth(value:Authorization) {
         if( !(value instanceof Authorization) )
             throw new TypeError("Value must be an instance of Authorization!");
@@ -47,21 +59,33 @@ export default class Engine extends Routing {
         this._auth = value;
     }
 
-    async fetch(request:Request, env:Env):Promise<Response> {
+    env(key:string, value:any) {
+        if(inCloudfareWorker())
+            throw new Error("Cannot setup envrionment in cloudflare worker!");
 
-        const asset = await env.ASSETS.fetch(request.clone());
+        this._env[key] = value;
+    }
 
-        if(asset.status < 400)
-            return asset;
+    async fetch(req:Request, env:Env):Promise<Response> {
 
-        let data:FormData|undefined;
-        try {
-            data = await request.formData()
-        } catch (e){
-            data = new FormData();
+        if(env.ASSETS){
+            const assetResponse = await env.ASSETS.fetch(req.clone());
+            if(assetResponse.status < 400)
+                return assetResponse;
         }
 
-        return await this.handle(new Context(request, data, env, this._view, this._auth,));
+        return (await this.start(req, undefined, env))!;
+    }
+
+    async server(req:NodeRequeset, res:NodeResponse) {
+        await this.start(req, res);
+    }
+
+    private async start(req:Request|NodeRequeset, res:NodeResponse|undefined, env?:Env):Promise<Response|undefined> {
+        const body = await BodyParser(req);
+        const context = new Context(req, res, body, env || this._env, this._view, this._auth);
+
+        return await this.handle(context);
     }
 
     use(handler:Middleware|EndPoint|Layer): void
