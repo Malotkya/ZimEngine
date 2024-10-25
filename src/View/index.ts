@@ -58,8 +58,7 @@ export default class View{
     static readonly injectFilePath = "/zim.js";
     private static readonly injectedFileRoute = `/zim.js?${version}`;
     private static readonly injectedFileType = MimeTypes("js");
-    private static readonly injectedFileContent = getFile()
-        .replace(`Object.defineProperty(exports, "__esModule", { value: true });`, "");
+    private static readonly injectedFileContent = getFile();
 
     static injectFile(ctx:Context){
         ctx.response.headers.set("Content-Type", View.injectedFileType);
