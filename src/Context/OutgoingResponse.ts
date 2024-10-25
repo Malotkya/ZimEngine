@@ -145,6 +145,8 @@ export default class OutgoingResponse extends Transform{
                 }
                 for(const chunk of this.#body)
                     this.#server.write(chunk);
+
+                this.#server.end();
             }
             
             return undefined;
