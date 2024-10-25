@@ -13,13 +13,14 @@ export default class Layer {
     private _regex:RegExp;
     private _keys:Array<Key>;
     private _path:string;
+    private _opts:PathToRegexpOptions;
 
     constructor(middleware:Middleware)
     constructor(path:string, middleware:Middleware)
     constructor(path:string, opts:PathToRegexpOptions, middleware:Middleware)
     constructor(){
-        let path:string = "/";
-        let opts:PathToRegexpOptions = {
+        this._path = "/";
+        this._opts = {
             end: false
         }
 
@@ -41,7 +42,7 @@ export default class Layer {
                     throw new TypeError("Middleware must be a function!");
 
                 this._handler = arguments[1];
-                path = arguments[0];
+                this._path = arguments[0];
                 break;
 
             default:
@@ -53,18 +54,22 @@ export default class Layer {
                     throw new TypeError("Middleware must be a function!");
 
                 this._handler = arguments[2];
-                path = arguments[0];
-                opts = arguments[1];
+                this._path = arguments[0];
+                this._opts = arguments[1];
                 break;
         }
-        this._shortcut = path === "*";
-        if(this._shortcut)
-            path += "path";
+        if( this._path === "*"){
+            this._shortcut = true;
+            this._path += "path";
+        } else if(this._path === "/"){
+            this._shortcut = !(this._opts.end === true)
+        } else {
+            this._shortcut = false;
+        }
 
-        const {regexp, keys} = pathToRegexp(path, opts);
+        const {regexp, keys} = pathToRegexp(this._path, this._opts);
         this._regex = regexp;
         this._keys = keys;
-        this._path = path;
     }
 
     async handle(context:Context):Promise<void>{
@@ -100,7 +105,23 @@ export default class Layer {
         return path;
     }
 
-    get path():string{
+    get path():string {
         return this._path;
+    }
+
+    set path(value:string) {
+        this._path = value;
+        this._shortcut = false;
+
+        const {regexp, keys} = pathToRegexp(value, this._opts);
+        this._keys = keys;
+        this._regex = regexp;
+    }
+
+    update(value:PathToRegexpOptions){
+        this._opts = value;
+        const {regexp, keys} = pathToRegexp(this._path, value);
+        this._keys = keys;
+        this._regex = regexp;
     }
 }
