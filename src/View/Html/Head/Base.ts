@@ -20,5 +20,5 @@ export default function Base(value:BaseInit):HTMLElement {
     const href = value.href? `href="${value.href} "`: "";
     const target = value.target? `target="${value.target} "`: "";
 
-    return "<base "+target+href+"/>";
+    return "<base"+target+href+"/>";
 }

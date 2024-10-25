@@ -31,5 +31,5 @@ export default function Script(value:ScriptInit):HTMLElement {
     const content = value.value;
     value.value = "";
 
-    return "<script "+buildAttributesString(value)+">"+(content || "")+"</script>";
+    return "<script"+buildAttributesString(value)+">"+(content || "")+"</script>";
 }

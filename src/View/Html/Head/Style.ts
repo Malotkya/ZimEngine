@@ -28,5 +28,5 @@ export default function Style(value:StyleInit):HTMLElement {
     const content = value.value;
     value.value = "";
 
-    return "<style "+buildAttributesString(value)+">"+content+"</style>";
+    return "<style"+buildAttributesString(value)+">"+content+"</style>";
 }
