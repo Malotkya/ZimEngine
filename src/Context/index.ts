@@ -3,9 +3,13 @@
  * @author Alex Malotky
  */
 import View, {RenderUpdate} from "../View";
-import ProtoResponse from "./ProtoResponse";
-import Authorization from "Engine/Authorization";
-import { HEADER_KEY, HEADER_VALUE } from "Engine/Util";
+import OutgoingResponse, {NodeResponse} from "./OutgoingResponse";
+import IncomingRequest, {NodeRequeset} from "./IncomingRequest";
+import Authorization from "../Authorization";
+import { BodyData } from "../BodyParser";
+import { HEADER_KEY, HEADER_VALUE } from "../Util";
+
+export type {NodeRequeset, NodeResponse};
 
 const HTML_MIME_TYPE = "text/html";
 const TXT_MIME_TYPE  = "text/plain";
@@ -16,13 +20,13 @@ const JSON_MIME_TYPE = "application/json";
  * Wrapper Around Request/Response
  */
 export default class Context{
-    private _request:Request;
-    private _response:ProtoResponse;
+    private _request:IncomingRequest;
+    private _response:OutgoingResponse;
     private _url:URL;
     private _env:Env;
     private _view:View|undefined;
     private _auth:Authorization|undefined;
-    private _form:Map<string, string>;
+    private _form:BodyData;
 
     private _search:Map<string, string>;
     private _params:Map<string, string>;
@@ -33,11 +37,11 @@ export default class Context{
      * @param request 
      * @param response 
      */
-    constructor(request: Request, data:FormData, env:Env, view?:View, auth?:Authorization){
-        this._request = request;
-        this._response = new ProtoResponse();
+    constructor(request: NodeRequeset|Request, response:NodeResponse|undefined, data:BodyData, env:Env, view?:View, auth?:Authorization){
+        this._request = new IncomingRequest(request);
+        this._response = new OutgoingResponse(response);
         this._env = env;
-        this._url = new URL(request.url);
+        this._url = new URL(this._request.url);
         this._view = view;
         this._auth = auth;
 
@@ -59,21 +63,21 @@ export default class Context{
     /** Request Getter
      * 
      */
-    get request():Request {
+    get request():IncomingRequest {
         return this._request;
     }
 
     /** Response Getter
      * 
      */
-    get response():ProtoResponse {
+    get response():OutgoingResponse {
         return this._response;
     }
 
     /** Form Data Getter
      * 
      */
-    get formData():Map<string, string> {
+    get formData():BodyData {
         return this._form;
     }
 
@@ -220,7 +224,7 @@ export default class Context{
     /** Flush Update Content
      * 
      */
-    flush():Promise<Response> {
+    flush():Promise<Response|undefined> {
         return this._response.flush();
     }
 
