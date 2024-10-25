@@ -6,6 +6,28 @@ import {HtmlDocument, HTMLInit} from "./Html";
 import Content, {toUpdate} from "./Html/Content";
 import { HeadInit, HeadUpdate, mergeUpdateToInit, mergeUpdateToUpdate } from "./Html/Head";
 import {AttributeList} from "./Html/Attributes";
+import { nodeImport, inCloudfareWorker } from "../Util";
+import MimeTypes from "../MimeTypes";
+import Context from "../Context";
+
+/** Get File
+ * 
+ * Different Implementation depending on environment.
+ * 
+ * @returns {string}
+ */
+function getFile():string {
+    if(inCloudfareWorker()){
+        return require("!raw-loader!./web.js").default;
+    }
+
+    const fs = nodeImport("fs");
+    const path = nodeImport("path");
+
+    return fs.readFileSync(
+        path.join(__dirname, "Web.js")
+    ).toString();
+}
 
 export type RenderFunction = (update:Dictionary<Content>)=>Content;
 
@@ -30,6 +52,17 @@ export default class View{
     #defaultHead:HeadInit;
     #defaultContent:RenderFunction;
     #attribute:AttributeList;
+
+    static readonly injectedFileRoute = "/zim.js";
+    static readonly injectedFileType = MimeTypes("js");
+    static readonly injectedFileContent = getFile()
+        .replace(`Object.defineProperty(exports, "__esModule", { value: true });`, "");
+
+    static injectFile(ctx:Context){
+        ctx.response.headers.set("Content-Type", View.injectedFileType);
+        ctx.write(View.injectedFileContent);
+        ctx.end();
+    }
 
     /** Constructor
      * 

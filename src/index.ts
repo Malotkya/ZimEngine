@@ -39,6 +39,13 @@ export default class Engine extends Routing {
         if( !(value instanceof View) )
             throw new Error("Value must be an instance of View!");
 
+        if(this._methods.length === 0 || this._methods.at(0)!.layer.path !== View.injectedFileRoute) {
+            this._methods.unshift({
+                name: "ALL",
+                layer: new Layer(View.injectedFileRoute, View.injectFile)
+            });
+        }
+        
         this._view = value;
     }
 
