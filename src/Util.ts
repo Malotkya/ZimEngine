@@ -44,5 +44,5 @@ export function isCloudflareRequest(request:any):request is Request {
  * 
  */
 export function inCloudfareWorker():boolean {
-    return navigator.userAgent === 'Cloudflare-Workers'
+    return typeof navigator !== "undefined" && navigator.userAgent === 'Cloudflare-Workers'
 }
