@@ -37,7 +37,7 @@ export default class View{
      * @param {RenderFunction} stationaryContent 
      * @param {AttributeList} attributes 
      */
-    constructor(attributes:HTMLInit = {}, headInit:HeadInit = {}, stationaryContent:RenderFunction){
+    constructor(attributes:HTMLInit = {}, headInit:HeadInit = {}, renderContent:RenderFunction = ()=>undefined){
 
         if(typeof attributes !== "object")
             throw new TypeError("Invalid Attributes!");
@@ -45,10 +45,10 @@ export default class View{
         if(typeof headInit !== "object")
             throw new TypeError("Invalid Head Attributes");
 
-        if(typeof stationaryContent !== "function")
-            throw new TypeError("Stationary content must be in the form of a function!");
+        if(typeof renderContent !== "function")
+            throw new TypeError("Render Content must be in the form of a function!");
 
-        this.#defaultContent = stationaryContent;
+        this.#defaultContent = renderContent;
         this.#attribute = attributes;
         this.#defaultHead = headInit;
     }
