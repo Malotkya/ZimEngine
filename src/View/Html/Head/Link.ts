@@ -30,5 +30,5 @@ export default function Link(value:LinkInit):HTMLElement {
     if(value.href === undefined)
         throw new Error("Link must have a href!");
 
-    return "<link"+buildAttributesString(value)+"/>";
+    return "<link "+buildAttributesString(value)+"/>";
 }

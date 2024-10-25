@@ -59,7 +59,7 @@ export function toString(name:string, value:Attribute|undefined):string {
             if(!isNaN(value))
                 return " "+name+"=\""+value+"\"";
             console.warn("NaN passed as Attribute value!");
-            return name+"=\"NaN\" ";
+            return " "+name+"=\"NaN\" ";
 
         case "boolean":
             return " "+name;

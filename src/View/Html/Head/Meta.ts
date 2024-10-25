@@ -35,7 +35,7 @@ export default function Meta(value:MetaInit):HTMLElement {
         throw new Error("Meta must have a name or http-equiv!");
     }
 
-    return "<meta"+name+content+"/>";
+    return "<meta "+name+content+"/>";
 }
 
 /** Update Meta Tags
