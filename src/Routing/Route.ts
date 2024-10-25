@@ -29,11 +29,15 @@ export default class Route extends Layer {
         }
     }
 
-    use(middleware:Middleware):Route
+    use(middleware:Middleware|Layer):Route
     use(path:string, handler:Middleware):Route
     use(){
         let layer:Layer;
         switch(typeof arguments[0]){
+            case "object":
+                layer = arguments[0];
+                break;
+
             case "function":
                 layer = new Layer("/", arguments[0])
                 break;
