@@ -24,41 +24,53 @@ export default class Routing extends Router{
         }
     }
 
+    /** Routing Wrappper
+     * 
+     * @param {Context} context 
+     * @param {any} error
+     * @returns {Promise<Response>}
+     */
+    async route(context:Context, error?:any):Promise<Response|undefined>{
+        try {
+            if(error)
+                throw error;
+
+            await this.handle(context);
+        } catch (e){
+            await this.errorHandler(e, context);
+        }
+
+        return await context.flush();
+    }
+
     /** Handle Routing
      * 
      * @param {Context} context 
-     * @returns {Promise<Response>}
+     * @returns {Promise<void>}
      */
-    //@ts-ignore
-    async handle(context:Context):Promise<Response|undefined>{
+    async handle(context:Context):Promise<void>{
         try {
             for(const {name, layer} of this._methods){
                 if(name === "MIDDLEWARE"){
                     await layer.handle(context);
                     if(context.response.commited())
-                        return await context.flush();
+                        return;
                 } else if(name === context.method || name === "ALL") {
                     
                     await layer.handle(context);
                     if(context.response.commited())
-                        return await context.flush();
+                        return;
                 }
             }
 
             await this.notFoundHandler(context);
         } catch (route_err:any){
-            try {
-                if(route_err === 404 || route_err.code === 404 || route_err.status === 404){
-                    await this.notFoundHandler(context);
-                } else {
-                    throw route_err;
-                }
-            } catch (error){
-                await this.errorHandler(error, context);
+            if(route_err === 404 || route_err.code === 404 || route_err.status === 404){
+                await this.notFoundHandler(context);
+            } else {
+                throw route_err;
             }
         }
-
-        return context.flush();
     }
 
     /** Not Found Handler Setter
