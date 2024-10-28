@@ -126,7 +126,7 @@ export function getMessage(value:number):string|null {
         return "Not Extended";
 
     if(value === 511)
-        return "Netowrk Authentication Required"
+        return "Network Authentication Required"
 
     return null;
 }
