@@ -5,7 +5,7 @@
 import Routing from "./Routing";
 import Layer from "./Routing/Layer";
 import Context, {NodeRequeset, NodeResponse} from "./Context";
-import View from "./View";
+import View, {RenderUpdate} from "./View";
 import { Middleware } from "./Routing/Layer";
 import Authorization from "./Authorization";
 import RenderEnvironment from "./View/RenderEnvironment";
@@ -19,7 +19,7 @@ import Content from "./View/Html/Content";
 import HttpError from "./HttpError";
 import BodyParser from "./BodyParser";
 export {Router, Context, createElement, HttpError, View, Authorization};
-export type {Content, Middleware, RenderEnvironment};
+export type {Content, Middleware, RenderEnvironment, RenderUpdate};
 
 export default class Engine extends Routing {
     private _view:View|undefined;
