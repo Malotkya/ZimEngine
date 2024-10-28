@@ -51,16 +51,11 @@ export default class Context{
         //Defaults
         this._search = new Map();
         this._params = new Map();
-        this._form = new Map();
+        this._form = data;
 
         //Search Values
         for(const [name, value] of this._url.searchParams.entries())
             this._search.set(name, value);
-
-        //Form Value
-        data.forEach((value, key)=>{
-            this._form.set(key, value.toString())
-        });
     }
 
     /** Request Getter
