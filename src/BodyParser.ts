@@ -47,7 +47,7 @@ function parseHeaders(value:string):Dictionary<string> {
                 value = value.trim();
             }
             if(value.indexOf('"') >= 0){
-                headers[name.trim()] = value.substring(1, value.length-2);
+                headers[name.trim()] = value.substring(1, value.length-1);
             } else {
                 headers[name.trim()] = value;
             }
