@@ -17,7 +17,10 @@ type RawBodyData = Map<string, string|Blob>;
  * @param {RawBodyData} data 
  * @returns {Promise<BodyData>}
  */
-export async function cleanBodyData(data: RawBodyData):Promise<BodyData> {
+export async function cleanBodyData(data: RawBodyData|Error):Promise<BodyData|Error> {
+    if(data instanceof Error)
+        return data;
+
     for(let [key, value] of data){
         if(value instanceof Blob){
             data.set(key, await value.text());
@@ -28,12 +31,38 @@ export async function cleanBodyData(data: RawBodyData):Promise<BodyData> {
     return data;
 }
 
+/** Parse Headers from String
+ * 
+ * @param {string} value 
+ */
+function parseHeaders(value:string):Dictionary<string> {
+    const headers:Dictionary<string> = {};
+
+    for(const header of value.split(/;|\n/g)){
+        if(header.trim() !== "") {
+            let [name, value] = header.split(/:|=/g);
+            if(value === undefined){
+                value = "";
+            } else {
+                value = value.trim();
+            }
+            if(value.indexOf('"') >= 0){
+                headers[name.trim()] = value.substring(1, value.length-2);
+            } else {
+                headers[name.trim()] = value;
+            }
+        }
+    }
+
+    return headers;
+}
+
 /** Process Cloudflare Request
  * 
  * @param {Request} request 
  * @returns {Promise<RawBodyData>}
  */
-function processCloudflareRequest(request:Request):Promise<RawBodyData> {
+function processCloudflareRequest(request:Request):Promise<RawBodyData|Error> {
     return new Promise((res, rej)=>{
         const content = request.headers.get("Content-Type");
         if (content === null || !content.includes("FormData")) {
@@ -56,17 +85,17 @@ function processCloudflareRequest(request:Request):Promise<RawBodyData> {
  * @param {IncomingMessage} request 
  * @returns {Promise<RawBodyData>}
  */
-function processNodeRequest(request:IncomingMessage):Promise<RawBodyData> {
+function processNodeRequest(request:IncomingMessage):Promise<RawBodyData|Error> {
     let multipart:boolean = false;
     let boundry:RegExp    = new RegExp("&");
 
     const type = request.headers["content-type"];
     if(type && type.indexOf("multipart/form-data") >= 0) {
-        multipart = true;
-        const match = type.match(/\w+$/);
-        if(match === null)
+        const header = parseHeaders(type);
+        if(header["boundary"] === undefined)
             throw new Error("Header is malformed.");
-        boundry = new RegExp("-+"+match[0]); 
+        boundry = new RegExp(header["boundary"].replace(/-+/, "-+"));
+        multipart = true;
     }
     let buffer = "";
     let output = new Map();
@@ -83,20 +112,8 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData> {
             throw new Error("Malformed Multipart Data!");
     
         //Seperate Header from data/info
-        let headers:Dictionary<string> = {};
+        const headers = parseHeaders(match[0])
         data = data.substring(match[0].length);
-        
-        //Parse Headers
-        for(const header of match[0].split(/;|\n/g)){
-            if(header.trim() !== "") {
-                const [name, value] = header.split(/:|=/g);
-                if(value.indexOf('"') >= 0){
-                    headers[name.trim()] = value.substring(1, value.length-2);
-                } else {
-                    headers[name.trim()] = value.trim();
-                }
-            }
-        }
     
         //Make sure name is found.
         if(headers["name"] === undefined)
@@ -146,7 +163,20 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData> {
         }
     }
 
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve)=>{
+
+        /** Reject Replacement that instead resolves the error.
+         * 
+         * @param {any} e 
+         */
+        const reject = (e:any) => {
+            if( !(e instanceof Error) ) {
+                e = new Error(String(e));
+            }
+
+            resolve(e);
+        }
+
         request.on("data", chunk=>{
             try {
                 buffer += String(chunk);
@@ -171,7 +201,7 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData> {
     });
 }
 
-export default async function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
+export default async function BodyParser(request:IncomingMessage|Request):Promise<BodyData|Error>{
     return cleanBodyData(
         isCloudflareRequest(request)
             ? (await processCloudflareRequest(request))
