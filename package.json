@@ -33,6 +33,20 @@
         "type": "git",
         "url": "https://github.com/Malotkya/ZimEngine"
     },
+    "exports": {
+        "./HttpError": {
+            "import": "./lib/HttpError.js",
+            "types": "./lib/HttpError.d.ts"
+        },
+        "./Static": {
+            "import": "./lib/Static.js",
+            "types": "./lib/Static.d.ts"
+        },
+        ".": {
+            "import": "./lib/index.js",
+            "types": "./lib/index.d.ts"
+        }
+    },
     "files": [
         "lib",
         "webpack"
