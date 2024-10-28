@@ -50,7 +50,7 @@ function getAliases(){
  */
 module.exports = (args) => {
     const {
-        typescript = false,
+        typescript = args.sourceFile? args.sourceFile.includes(".ts"): false,
         inProduction = false,
         buildTarget = path.resolve(process.cwd(), "build"),
         sourceFile = path.resolve(process.cwd(), "src", `worker.${typescript? "ts": "js"}`),
