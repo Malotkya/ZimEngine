@@ -86,10 +86,14 @@ export default class Engine extends Routing {
     }
 
     private async start(req:Request|NodeRequeset, res:NodeResponse|undefined, env?:Env):Promise<Response|undefined> {
-        const body = await BodyParser(req);
+        let error:any;
+        let body = await BodyParser(req);
+        if( body instanceof Error ) {
+            error = body;
+            body = new Map();
+        }
         const context = new Context(req, res, body, env || this._env, this._view, this._auth);
-
-        return await this.handle(context);
+        return await this.route(context, error);
     }
 
     use(handler:Middleware|Layer): void
