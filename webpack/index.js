@@ -4,48 +4,81 @@ const fs = require("fs");
 const json5 = require("json5");
 const {DefinePlugin} = require("webpack");
 
-const tsconfig = fs.readFileSync(path.join(process.cwd(), "tsconfig.json")).toString();
-const package  = fs.readFileSync(path.join(process.cwd(), "package.json")).toString();
+//Import TSConfig File
+const tsconfigFileName = path.join(process.cwd(), "tsconfig.json");
+const tsconfig = fs.existsSync(tsconfigFileName)? fs.readFileSync(tsconfigFileName).toString(): "";
 
+//Import Package File
+const package  = fs.readFileSync(path.join(process.cwd(), "package.json")).toString();
 const {version} = json5.parse(package);
 
+/** Get Typescript Aliases
+ * 
+ * @returns {Object}
+ */
 function getAliases(){
-    const {paths} = json5.parse(tsconfig).compilerOptions;
     const alias = {};
 
-    for(let item in paths) {
-        const key = item.replace("/*", "");
-        const name = paths[item][0].replace("/*", "");
-       
-        alias[key] = path.resolve(process.cwd(), name);
+    try {
+        const {paths} = json5.parse(tsconfig).compilerOptions;
+    
+        for(let item in paths) {
+            const key = item.replace("/*", "");
+            const name = paths[item][0].replace("/*", "");
+        
+            alias[key] = path.resolve(process.cwd(), name);
+        }
+    } catch (e){
+        //Do nothing!
     }
-
+    
     return alias;
 }
 
 /** ZimEngine Webpack
  * 
- * @param {{inProduction:boolean, source_directory:string, build_directory:string}} props 
+ * @param {{
+ *      inProduction:boolean,
+ *      typescript:boolean,
+ *      sourceFile:string,
+ *      buildTarget:string,
+ *      alias:Object, 
+ *      definitions:Object,
+ *      terserOptions:Object
+ *  }} args 
  * @returns {Object}
  */
-module.exports = (props) => {
+module.exports = (args) => {
+    const {
+        typescript = false,
+        inProduction = false,
+        buildTarget = path.resolve(process.cwd(), "build"),
+        sourceFile = path.resolve(process.cwd(), "src", `worker.${typescript? "ts": "js"}`),
+        alias = getAliases(),
+        definitions = {},
+        terserOptions = {}
+    } = args;
+
+    if(terserOptions.mangle === undefined){
+        terserOptions.mangle = {}
+    }
+    if(terserOptions.mangle.reserved === undefined){
+        terserOptions.mangle.reserved = ["env", "event"];
+    } else {
+        terserOptions.mangle.reserved.push("env", "event");
+    }
+
     return {
-        mode: props.inProduction? "production": "development",
+        mode: inProduction? "production": "development",
         target: "es2020",
-        entry: [
-            path.join(props.source_directory, 'worker.ts'),
-        ],
-        devtool: props.inProduction? undefined: 'source-map',
+        entry: sourceFile,
+        devtool: inProduction? undefined: 'source-map',
         module: {
             rules: [
                 {
-                    test: /\.tsx?$/,
-                    use: 'ts-loader',
-                    exclude: [
-                        /node_modules/,
-                        /Engine\/Web/,
-                        /Engine\/View\/RenderEnvironment/
-                    ]
+                    test: typescript? /\.ts$/: /\.js$/,
+                    exclude: /node_modules/,
+                    use: typescript? 'ts-loader': undefined
                 },
                 {
                     test: /.html$/i,
@@ -69,31 +102,26 @@ module.exports = (props) => {
             outputModule: true
         },
         resolve: {
-            extensions: ['.ts', '.js', ".html", ".scss"],
-            alias: getAliases()
+            extensions: ['.ts', '.js', ".md", ".scss"],
+            alias: alias
         },
         output: {
             filename: '_worker.js',
-            path: props.build_directory,
+            path: buildTarget,
             library: {
                 type: 'module'
             }
         },
         plugins: [
             new DefinePlugin({
+                ...definitions,
                 VERSION: JSON.stringify(version)
             })
         ],
         optimization: {
-            minimize: props.inProduction,
+            minimize: inProduction,
             minimizer: [
-                new TerserPlugin({
-                    terserOptions: {
-                        mangle: {
-                            reserved: ["env", "event"]
-                        }
-                    }
-                })
+                new TerserPlugin({terserOptions})
             ],
             usedExports: true
         },
