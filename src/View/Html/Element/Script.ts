@@ -1,6 +1,6 @@
-/** /Engine/View/Html/Attributes/Map/SampleOutput
+/** /View/Html/Elements/Script
 * 
-* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/samp
+* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
 * 
 * @author Alex Malotky
 */

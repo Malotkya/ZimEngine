@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/Canvas
+/** /View/Html/Elements/Canvas
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas
  * 

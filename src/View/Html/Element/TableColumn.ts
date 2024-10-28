@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/TableColumn
+/** /View/Html/Elements/TableColumn
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col
  * 

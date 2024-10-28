@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/InsertedText
+/** /View/Html/Elements/InsertedText
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
  * 

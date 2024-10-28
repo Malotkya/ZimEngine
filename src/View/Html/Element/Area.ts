@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/Area
+/** /View/Html/Elements/Area
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area
  * 

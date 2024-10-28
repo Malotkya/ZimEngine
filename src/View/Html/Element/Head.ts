@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/Head
+/** /View/Html/Elements/Head
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head
  * @author Alex Malotky

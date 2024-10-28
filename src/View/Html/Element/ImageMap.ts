@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/ImageMap
+/** /View/Html/Elements/ImageMap
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/map
  * 

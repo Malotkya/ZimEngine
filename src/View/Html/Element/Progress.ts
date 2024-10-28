@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/Progress
+/** /View/Html/Elements/Progress
 * 
 * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress
 * 

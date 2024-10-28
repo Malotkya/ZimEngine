@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/Slot
+/** /View/Html/Elements/Slot
 * 
 * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
 * 

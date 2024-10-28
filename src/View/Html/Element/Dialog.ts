@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/Dialog
+/** /View/Html/Elements/Dialog
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
  * 

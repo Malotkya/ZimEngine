@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Attributes/Map/TableColumnGroup
+/** /View/Html/Elements/TableColumnGroup
  * 
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
  * 
