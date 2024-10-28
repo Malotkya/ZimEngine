@@ -85,6 +85,38 @@ login.get("/", async(ctx)=>{
 
 app.use(login);
 
+const BodyTest = new Router("/FormTest");
+app.use(BodyTest);
+
+BodyTest.post((ctx)=>{
+    const list = [];
+
+    for( const [key, value] of ctx.formData.entries()) {
+        list.push(("p",
+            `${key}: ${value}`
+        ));
+    }
+
+    ctx.render({
+        body: {
+            main: _("section",
+                list
+            )
+        }
+    })
+});
+
+BodyTest.get((ctx)=>{
+    ctx.render({
+        body: {
+            main: _("form", {method: "POST"},
+                _("input", {name: "test"}),
+                _("button", "Submit")
+            )
+        }
+    })
+})
+
 http.createServer(app.server).listen(5000, ()=>{
     console.log("Test is Listening!");
 })
