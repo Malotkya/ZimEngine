@@ -1,6 +1,6 @@
 {
     "name": "zim-engine",
-    "version": "0.7.0",
+    "version": "0.7.5",
     "description": "Combining front and backend rendering",
     "main": "lib/index.js",
     "scripts": {
