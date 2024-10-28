@@ -43,7 +43,7 @@
             "types": "./lib/Static.d.ts"
         },
         "./Webpack": {
-            "import": "./webpack"
+            "require": "./webpack"
         },
         ".": {
             "import": "./lib/index.js",
