@@ -64,8 +64,8 @@ function parseHeaders(value:string):Dictionary<string> {
  */
 function processCloudflareRequest(request:Request):Promise<RawBodyData|Error> {
     return new Promise((res, rej)=>{
-        const content = request.headers.get("Content-Type");
-        if (content === null || !content.includes("FormData")) {
+        const content = request.headers.get("Content-Type")?.toLocaleLowerCase();
+        if (content === undefined || !content.includes("form-data")) {
             return res(new Map());
         }
 
@@ -89,8 +89,8 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData|Error> 
     let multipart:boolean = false;
     let boundry:RegExp    = new RegExp("&");
 
-    const type = request.headers["content-type"];
-    if(type && type.indexOf("multipart/form-data") >= 0) {
+    const type = request.headers["content-type"]?.toLocaleLowerCase();
+    if(type && type.indexOf("form-data") >= 0) {
         const header = parseHeaders(type);
         if(header["boundary"] === undefined)
             throw new Error("Header is malformed.");
