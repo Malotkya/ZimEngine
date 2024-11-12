@@ -1,6 +1,6 @@
 {
     "name": "zim-engine",
-    "version": "0.7.5",
+    "version": "0.7.7",
     "description": "Combining front and backend rendering",
     "main": "lib/index.js",
     "scripts": {
@@ -43,7 +43,7 @@
             "types": "./lib/Static.d.ts"
         },
         "./Webpack": {
-            "require": "./webpack"
+            "require": "./webpack/index.js"
         },
         ".": {
             "import": "./lib/index.js",
