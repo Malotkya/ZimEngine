@@ -7,7 +7,7 @@ const path = require("path");
 const staticDir = path.join(__dirname, "static");
 
 const app = new App();
-app.use(Static(staticDir));
+app.use(Static("/", staticDir));
 
 test("Static .txt File", done=>{
     const fileName = "/file.txt";

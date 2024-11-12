@@ -32,7 +32,7 @@ auth.get(async(req)=>{
 });
 app.auth(auth);
 
-app.use("/Static", Static(path.join(__dirname, "static")));
+app.use(Static("/Static", path.join(__dirname, "static")));
 
 const home = new Router("/");
 const about = new Router("/About");
