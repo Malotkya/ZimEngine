@@ -41,17 +41,17 @@ export default class RenderEnvironment {
      * @param {FormData} body 
      * @returns {Promise<string>}
      */
-    async handler(body?:FormData):Promise<string>{
+    async handler(url:string|URL = window.location.href, body?:FormData):Promise<string>{
         this._routing = true;
-        const {anchor, path} = getRouteInfo(window.location.href);
+        const {anchor, path} = getRouteInfo(url);
 
         try {
             const data = await RenderEnvironment.fetch(path, {body});
             if(data.redirect){
-                window.history.pushState({}, "", data.redirect);
-                return this.handler();
+                return this.handler(data.redirect);
             }
             await this.update(data);
+            window.history.pushState({}, "", url);
         } catch (e){
             RenderEnvironment.error(e);
         }
@@ -60,9 +60,9 @@ export default class RenderEnvironment {
 
         if(this._delay){
             const {url, body} = this._delay;
-            window.history.pushState({}, "", url);
+            
             this._delay = undefined;
-            return this.handler(body);
+            return this.handler(url, body);
         }
 
         return anchor;
@@ -75,9 +75,8 @@ export default class RenderEnvironment {
      */
     route(url:string|URL, body?:FormData){
         if(!this._routing) {
-            window.history.pushState({}, "", url);
             this.clear();
-            this.handler(body).then(anchor=>{
+            this.handler(url, body).then(anchor=>{
                 this.scroll(anchor);
             })
         } else {
