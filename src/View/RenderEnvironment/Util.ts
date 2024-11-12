@@ -73,7 +73,14 @@ export function findOrCreateElement(name?:string, ...parents:Array<string>): HTM
  * @param {string} href 
  * @returns {{path:string, anchor:string}}
  */
-export function getRouteInfo(href:string):{path:string, anchor:string} {
+export function getRouteInfo(href:string|URL):{path:string, anchor:string} {
+    if(href instanceof URL){
+        return {
+            path: href.pathname,
+            anchor: href.hash.substring(1)
+        }
+    }
+
     let regex:string = "(https?://" + location.hostname;
 
     const port:string = location.port;
