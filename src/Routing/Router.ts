@@ -43,7 +43,7 @@ export default class Router extends Layer{
      * @param {Context} context 
      */
     async handle(context:Context):Promise<void> {
-        if(this.match(context) !== null){
+        if(this.match(context)){
 
             for(const {name, layer} of this._methods) {
                 if(name === "MIDDLEWARE"){
@@ -62,18 +62,24 @@ export default class Router extends Layer{
     private _filter(args:IArguments):Layer {
         switch(typeof args[0]){
             case "object":
+                args[0].prefix(this.path);
                 return args[0];
 
             case "function":
-                return new Layer("/", args[0])
+                const l = new Layer("/", args[0]);
+                l.prefix(this.path);
+                return l;
 
             case "string":
                 switch(typeof args[1]) {
                     case "function":
-                        return new Layer(args[0], args[1]);
+                        const l = new Layer(args[0], args[1]);
+                        l.prefix(this.path);
+                        return l;
 
                     case "object":
                         args[1].path = joinPath(args[0], args[1].path)
+                        args[1].prefix(this.path);
                         return args[1];
 
                     default:

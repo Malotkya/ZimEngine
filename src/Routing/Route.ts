@@ -16,16 +16,12 @@ export default class Route extends Layer {
     }
 
     async handle(context: Context):Promise<void> {
-        const match = this.match(context);
-
-        if(match !== null){
+        if(this.match(context)){
             for(const layer of this.#layers) {
                 await layer.handle(context);
                 if(context.response.commited())
                     return;
             }
-
-            context.query = match;
         }
     }
 
@@ -53,7 +49,15 @@ export default class Route extends Layer {
                 throw new TypeError("Path must be a string!");
         }
 
+        layer.prefix(this.path);
         this.#layers.push(layer);
         return this;
+    }
+
+    prefix(value:string){
+        super.prefix(value);
+        for(const l of this.#layers) {
+            l.prefix(this.path);
+        }
     }
 }

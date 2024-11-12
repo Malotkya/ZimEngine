@@ -31,7 +31,6 @@ export default class Context{
 
     private _search:Map<string, string>;
     private _params:Map<string, string>;
-    private _query:string|undefined;
 
     /** Constructor
      * 
@@ -224,32 +223,6 @@ export default class Context{
      */
     flush():Promise<Response|undefined> {
         return this._response.flush();
-    }
-
-    /** Query Getter
-     * 
-     */
-    get query():string {
-        if(this._query !== undefined) {
-            if(this._query === "")
-                return "/";
-            return this._query;
-        }
-            
-        return this.url.pathname;
-    }
-
-    /** Query Setter
-     * 
-     */
-    set query(value:string){
-        if(typeof value !== "string")
-            throw new TypeError("Query must be a string!");
-
-        if(value === "")
-            value = "/";
-
-        this._query = value;
     }
 
     /** Get Authorization

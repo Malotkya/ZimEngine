@@ -4,6 +4,7 @@
  */
 import Context from "../Context";
 import { pathToRegexp, Key, PathToRegexpOptions } from "path-to-regexp";
+import { joinPath } from "../Util";
 
 export type Middleware = (context:Context)=>Promise<void>|void;
 
@@ -13,6 +14,7 @@ export default class Layer {
     private _regex:RegExp;
     private _keys:Array<Key>;
     private _path:string;
+    private _prefix:string;
     private _opts:PathToRegexpOptions;
 
     constructor(middleware:Middleware)
@@ -21,6 +23,7 @@ export default class Layer {
     constructor(){
         this._path = "/";
         this._opts = {}
+        this._prefix = "";
 
         switch(arguments.length){
             case 0:
@@ -72,35 +75,30 @@ export default class Layer {
 
     async handle(context:Context):Promise<void>{
         try {
-            const match = this.match(context);
-
-            if(match !== null) {
+            if(this.match(context)) {
                 await this._handler(context);
-                context.query = match;
             }
         } catch (e){
             throw e;
         }
     }
 
-    protected match(context:Context):string|null {
+    protected match(context:Context):boolean {
         if(this._shortcut){
-            return "";
+            return true;
         }
 
 
-        const match = context.query.match(this._regex);
+        const match = context.url.pathname.match(this._regex);
         if(match == null)
-            return null;
+            return false;
 
         
         for(let index=1; index<match.length; index++){
             context.params.set(this._keys[index-1].name, decodeURIComponent(match[index]))
         }
 
-        const path = context.query;
-        context.query = context.query.replace(match[0], "");
-        return path;
+        return true;
     }
 
     get path():string {
@@ -110,7 +108,15 @@ export default class Layer {
     set path(value:string) {
         this._path = value;
         this._shortcut = false;
+        value = joinPath(this._prefix, this._path);
+        const {regexp, keys} = pathToRegexp(value, this._opts);
+        this._keys = keys;
+        this._regex = regexp;
+    }
 
+    prefix(value:string) {
+        this._prefix = value;
+        value = joinPath(value, this._path);
         const {regexp, keys} = pathToRegexp(value, this._opts);
         this._keys = keys;
         this._regex = regexp;
