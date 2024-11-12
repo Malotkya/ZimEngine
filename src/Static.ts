@@ -2,8 +2,10 @@ import { nodeImport } from "./Util";
 import MimeTypes from "./MimeTypes";
 import Context from "./Context";
 import OutgoingResponse from "./Context/OutgoingResponse";
+import Layer from "./Routing/Layer";
+import { joinPath } from "./Util";
 
-export default function Static(dir:string) {
+export default function Static(route:string, dir:string):Layer {
     const fs   = nodeImport("fs");
     const path = nodeImport("node:path");
 
@@ -15,12 +17,12 @@ export default function Static(dir:string) {
         });
     }
 
-    return async function handleStaticFile(ctx:Context){
+    return new Layer(joinPath(route, "/*query"), {end: false}, async function handleStaticFile(ctx:Context){
         if(ctx.method !== "GET" && ctx.method !== "HEAD") {
             return;
         }
 
-        const target:string = path.join(dir, ctx.query);
+        const target:string = path.join(dir, ctx.params.get("query"));
 
         if( fs.existsSync(target) === false) {
             return;
@@ -38,6 +40,6 @@ export default function Static(dir:string) {
 
         await pipeWrappper(target, ctx.response);
         ctx.end();
-    }
+    });
 }
 
