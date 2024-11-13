@@ -28,6 +28,7 @@ export default class Context{
     private _view:View|undefined;
     private _auth:Authorization|undefined;
     private _form:BodyData;
+    private _query:string;
 
     private _search:Map<string, string>;
     private _params:Map<string, string>;
@@ -51,6 +52,7 @@ export default class Context{
         this._search = new Map();
         this._params = new Map();
         this._form = data;
+        this._query = "/";
 
         //Search Values
         for(const [name, value] of this._url.searchParams.entries())
@@ -111,6 +113,26 @@ export default class Context{
      */
     get search():Map<string, string>{
         return this._search;
+    }
+
+    /** Query Getter
+     * 
+     */
+    get query():string {
+        return this._query;
+    }
+
+    /** Query Setter
+     * 
+     */
+    set query(value:string) {
+        if(value.charAt(0) !== "/") {
+            value = "/"+value;
+        }
+        if(value.charAt(value.length-1) === "/")
+            value = value.substring(0, value.length-1);
+            
+        this._query = value;
     }
 
     /** Set Status Code
