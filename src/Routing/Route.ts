@@ -49,7 +49,7 @@ export default class Route extends Layer {
                 throw new TypeError("Path must be a string!");
         }
 
-        layer.prefix(this.path);
+        layer.prefix(this.totalPath());
         this.#layers.push(layer);
         return this;
     }
@@ -57,7 +57,7 @@ export default class Route extends Layer {
     prefix(value:string){
         super.prefix(value);
         for(const l of this.#layers) {
-            l.prefix(this.path);
+            l.prefix(this.totalPath());
         }
     }
 }

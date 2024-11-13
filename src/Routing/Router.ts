@@ -6,7 +6,7 @@ import Context from "../Context";
 import Layer, {Middleware} from "./Layer";
 import { joinPath } from "../Util";
 
-const ROUTER_ERROR = ()=>{throw new Error("_handler called from Router!")}
+const ROUTER_ERROR = ()=>{throw new Error("_handler called from Router!")};
 
 /** Method Stack
  * 
@@ -60,54 +60,57 @@ export default class Router extends Layer{
     }
 
     private _filter(args:IArguments):Layer {
+        let output:Layer;
         switch(typeof args[0]){
-            case "object":
-                args[0].prefix(this.path);
-                return args[0];
-
             case "function":
-                const l = new Layer("/", args[0]);
-                l.prefix(this.path);
-                return l;
+                output = new Layer("/", args[0]);
+                break;
 
             case "string":
                 switch(typeof args[1]) {
                     case "function":
-                        const l = new Layer(args[0], args[1]);
-                        l.prefix(this.path);
-                        return l;
+                        output = new Layer(args[0], args[1]);
+                        break;
 
                     case "object":
-                        args[1].path = joinPath(args[0], args[1].path)
-                        args[1].prefix(this.path);
-                        return args[1];
+                        if(args[1] instanceof Layer) {
+                            output = args[1];
+                            output.path = joinPath(args[0], args[1].path)
+                            break;
+                        }
 
                     default:
                         throw new TypeError("Middlware must be a function or Layer!");
                 }
+                break;
+
+            case "object":
+                    if(args[0] instanceof Layer) {
+                        output = args[0];
+                        break;
+                    }
+                    throw new TypeError("Middleware object must be an instance of Layer.");
                     
             default:
                 throw new TypeError("Path must be a string!");
         }
+        
+        output.prefix(this.totalPath());
+        return output;
     }
 
     /** Use Middleware Method
      * 
      */
-    use(middleware:Middleware|Router){
-        switch(typeof middleware){
-            case "function":
-                this._methods.add("MIDDLEWARE", new Layer("*", middleware));
-                break;
+    use(middleware:Middleware|Router):this{
+        this._methods.add("MIDDLEWARE", this._filter(arguments));
+        return this;
+    }
 
-            case "object":
-                if(middleware instanceof Router) {
-                    this._methods.add("MIDDLEWARE", middleware);
-                    break;
-                }
-
-            default:
-                throw new TypeError("Invalid middleware!");
+    prefix(value:string){
+        super.prefix(value);
+        for(const {layer} of this._methods){
+            layer.prefix(this.totalPath());
         }
     }
 
@@ -117,9 +120,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    get(handler:Middleware):Router
-    get(path:string, handler:Middleware):Router
-    get():Router{
+    get(handler:Middleware):this
+    get(path:string, handler:Middleware):this
+    get():this{
         this._methods.add("GET", this._filter(arguments));
         return this;
     }
@@ -130,9 +133,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    head(handler:Middleware):Router
-    head(path:string, handler:Middleware):Router
-    head():Router{
+    head(handler:Middleware):this
+    head(path:string, handler:Middleware):this
+    head():this{
         this._methods.add("HEAD", this._filter(arguments));
         return this;
     }
@@ -143,9 +146,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    post(handler:Middleware):Router
-    post(path:string, handler:Middleware):Router
-    post():Router{
+    post(handler:Middleware):this
+    post(path:string, handler:Middleware):this
+    post():this{
         this._methods.add("POST", this._filter(arguments));
         return this;
     }
@@ -156,9 +159,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    put(handler:Middleware):Router
-    put(path:string, handler:Middleware):Router
-    put():Router{
+    put(handler:Middleware):this
+    put(path:string, handler:Middleware):this
+    put():this{
         this._methods.add("PUT", this._filter(arguments));
         return this;
     }
@@ -169,9 +172,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    delete(handler:Middleware):Router
-    delete(path:string, handler:Middleware):Router
-    delete():Router{
+    delete(handler:Middleware):this
+    delete(path:string, handler:Middleware):this
+    delete():this{
         this._methods.add("DELETE", this._filter(arguments));
         return this;
     }
@@ -182,9 +185,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    options(handler:Middleware):Router
-    options(path:string, handler:Middleware):Router
-    options():Router{
+    options(handler:Middleware):this
+    options(path:string, handler:Middleware):this
+    options():this{
         this._methods.add("OPTIONS", this._filter(arguments));
         return this;
     }
@@ -195,9 +198,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    patch(handler:Middleware):Router
-    patch(path:string, handler:Middleware):Router
-    patch():Router{
+    patch(handler:Middleware):this
+    patch(path:string, handler:Middleware):this
+    patch():this{
         this._methods.add("PATCH", this._filter(arguments));
         return this;
     }
@@ -208,9 +211,9 @@ export default class Router extends Layer{
      * @param {EndPoint} handler
      * @returns {Router}
      */
-    all(handler:Middleware):Router
-    all(path:string, handler:Middleware):Router
-    all():Router{
+    all(handler:Middleware):this
+    all(path:string, handler:Middleware):this
+    all():this{
         this._methods.add("ALL", this._filter(arguments));
         return this;
     }

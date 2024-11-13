@@ -114,6 +114,10 @@ export default class Layer {
         this._regex = regexp;
     }
 
+    totalPath():string {
+        return joinPath(this._prefix, this._path);
+    }
+
     prefix(value:string) {
         this._prefix = value;
         value = joinPath(value, this._path);
