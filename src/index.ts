@@ -96,39 +96,4 @@ export default class Engine extends Routing {
         return await this.route(context, error);
     }
 
-    use(handler:Middleware|Layer): void
-    use(path:string, endpoint:Middleware|Layer):void
-    use(){
-        switch(arguments.length){
-            case 0:
-                throw new Error("No arguments were passed to Engine.use!");
-
-            case 1:
-                switch(typeof arguments[0]){
-                    case "function":
-                        super.use(arguments[0]);
-                        break;
-
-                    case "object":
-                        this._methods.add("ALL", arguments[0]);
-                        break;
-
-                    default:
-                        throw new Error("Handler must be a function or a Layer!");
-                }
-                break;
-
-            default:
-                switch(typeof arguments[1]){
-                    case "function":
-                    case "object":
-                        super.all(arguments[0], arguments[1]);
-                        break;
-
-                    default:
-                        throw new Error("Handler must be a function or a Layer!");
-                }
-        }
-    }
-
 }
