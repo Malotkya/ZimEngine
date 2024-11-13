@@ -1,4 +1,4 @@
-import { nodeImport } from "./Util";
+import { nodeImport } from "./Node";
 import MimeTypes from "./MimeTypes";
 import Context from "./Context";
 import OutgoingResponse from "./Context/OutgoingResponse";

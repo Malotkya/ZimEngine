@@ -6,7 +6,8 @@ import {HtmlDocument, HTMLInit} from "./Html";
 import Content, {toUpdate} from "./Html/Content";
 import { HeadInit, HeadUpdate, mergeUpdateToInit, mergeUpdateToUpdate } from "./Html/Head";
 import {AttributeList} from "./Html/Attributes";
-import { nodeImport, inCloudfareWorker } from "../Util";
+import { inCloudfareWorker } from "../Util";
+import { nodeImport } from "../Node";
 import MimeTypes from "../MimeTypes";
 import Context from "../Context";
 

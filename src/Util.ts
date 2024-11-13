@@ -54,13 +54,6 @@ export function inNodeEnvironment():boolean {
     return (typeof process !== 'undefined') && (process.release.name === 'node')
 }
 
-export function nodeImport(module:string):any {
-    if(!inNodeEnvironment())
-        throw new Error("Not in the Node Environment to import: "+module);
-
-    return require(module);
-}
-
 /** Join Paths
  * 
  * @param paths 
