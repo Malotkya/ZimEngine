@@ -138,6 +138,11 @@ module.exports = (args) => {
             'node:string_decoder': 'node:string_decoder',
             'node:test': 'node:test',
             'node:util': 'node:util'
-        }
+        },
+        ignoreWarnings: [
+            {
+                module: /\/Node/
+            }
+        ]
     };
 };
