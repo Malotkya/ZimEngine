@@ -21,11 +21,17 @@ import BodyParser from "./BodyParser";
 export {Router, Context, createElement, HttpError, View, Authorization};
 export type {Content, Middleware, RenderEnvironment, RenderUpdate};
 
+/** Engine Class
+ * 
+ */
 export default class Engine extends Routing {
     private _view:View|undefined;
     private _auth:Authorization|undefined;
     private _env:Env;
 
+    /**
+     * 
+     */
     constructor(){
         super();
         this._env = {};
@@ -63,6 +69,11 @@ export default class Engine extends Routing {
         this._auth = value;
     }
 
+    /** Environemnt Setter
+     * 
+     * @param {string} key 
+     * @param {any} value
+     */
     env(key:string, value:any) {
         if(inCloudfareWorker())
             throw new Error("Cannot setup envrionment in cloudflare worker!");
@@ -70,8 +81,13 @@ export default class Engine extends Routing {
         this._env[key] = value;
     }
 
+    /** Cloudflare Fetch Response Environment
+     * 
+     * @param {Request} req 
+     * @param {Env} env 
+     * @returns {Promise<Response>}
+     */
     async fetch(req:Request, env:Env):Promise<Response> {
-
         if(env.ASSETS){
             const assetResponse = await env.ASSETS.fetch(req.clone());
             if(assetResponse.status < 400)
@@ -81,10 +97,20 @@ export default class Engine extends Routing {
         return (await this.start(req, undefined, env))!;
     }
 
+    /** Get Node Server Environment
+     * 
+     */
     get server() {
         return async(req:NodeRequeset, res:NodeResponse)=>await this.start(req, res);
     }
 
+    /** Start of Handler Environment
+     * 
+     * @param {NodeRequeset|Request} req 
+     * @param {NodeResponse|undefined} res 
+     * @param {Env} env 
+     * @returns {Response|undefined}
+     */
     private async start(req:Request|NodeRequeset, res:NodeResponse|undefined, env?:Env):Promise<Response|undefined> {
         let error:any;
         let body = await BodyParser(req);
