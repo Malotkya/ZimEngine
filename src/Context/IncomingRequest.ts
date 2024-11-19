@@ -1,8 +1,19 @@
+/** /Context/IncomingRequest
+ * 
+ * @author Alex Malotky
+ */
 import { IncomingMessage } from "node:http"
 import { isCloudflareRequest } from "../Util";
 
-export type {IncomingMessage as NodeRequeset};
+// Node:Request Type
+type NodeRequeset = IncomingMessage;
+export type {NodeRequeset};
 
+/** Headers Class
+ * 
+ * Additional Wrapper around Map<string, string>
+ * for the key to not be case sensitive.
+ */
 class Headers extends Map<string, string> {
     set(key:string, value:string){
         return super.set(key.toLocaleLowerCase(), value);
@@ -13,12 +24,16 @@ class Headers extends Map<string, string> {
     }
 }
 
+/** Incoming Request
+ * 
+ * Wrapper around the Node:Request or Cloudflare:Request
+ */
 export default class IncomingRequest {
     private _headers:Headers;
     private _url:string;
     private _method:string;
 
-    constructor(message: IncomingMessage|Request) {
+    constructor(message: NodeRequeset|Request) {
         this._headers = new Headers();
         this._url = message.url!;
         this._method = message.method!.toUpperCase();
@@ -37,14 +52,23 @@ export default class IncomingRequest {
         }
     }
 
+    /** Method Getter
+     * 
+     */
     get method():string {
         return this._method;
     }
 
+    /** URL String Getter
+     * 
+     */
     get url():string {
         return this._url;
     }
 
+    /** Headers Getter
+     * 
+     */
     get headers() {
         return this._headers;
     }

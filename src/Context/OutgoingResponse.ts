@@ -1,21 +1,29 @@
-/** Engine/Context/ProtoResponse
+/** /Context/OutgoingResponse
  * 
+ * @author Alex Malotky
  */
 import { ServerResponse } from "node:http";
 import {Transform, TransformCallback} from "node:stream";
 import { sleep } from "../Util";
 
-export type {ServerResponse as NodeResponse}
+//Node:Resposne Type
+type NodeResponse = ServerResponse;
+export type {NodeResponse}
 
+/** Outgoing Response
+ * 
+ * Wrapper around the Node:Response or 
+ * returns the Cloudflare:Response
+ */
 export default class OutgoingResponse extends Transform{
-    //Strict private members
+    //Strict Private
     #server:ServerResponse|undefined;
     #status:number;
     #headers:Map<string, string>;
     #body: Array<Uint8Array>;
     #redirect: URL|undefined;
 
-    //Not Strict
+    //Not Strict Private
     private working:boolean|undefined;
     private static encoder = new TextEncoder();
 
@@ -49,13 +57,13 @@ export default class OutgoingResponse extends Transform{
         return data;
     }
     
-    /** Text Encoder
+    /** Encode to Uint8Array
      * 
      * @param {any} data 
      * @param {string} encode 
      * @returns {Uint8Array}
      */
-    private static _text(data:any, encode:string):Uint8Array {
+    private static _encode(data:any, encode:string):Uint8Array {
         return OutgoingResponse.encoder.encode(OutgoingResponse._stringify(data, encode));
     }
 
@@ -85,7 +93,7 @@ export default class OutgoingResponse extends Transform{
         if( data instanceof Uint8Array )
             this.#body.push(data);
         else
-            this.#body.push(OutgoingResponse._text(data, encode));
+            this.#body.push(OutgoingResponse._encode(data, encode));
         callback();
     }
 
@@ -150,10 +158,10 @@ export default class OutgoingResponse extends Transform{
                 this.#server.end();
             }
             
-            return undefined;
+            return;
         }
 
-        if( this.#redirect && (this.#status > 300 && this.#status < 400) ){
+        if( this.#redirect ){
             return Response.redirect(this.#redirect, this.#status);
         }
 

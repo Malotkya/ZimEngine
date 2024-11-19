@@ -1,4 +1,4 @@
-/** /Engine/Context
+/** /Context
  * 
  * @author Alex Malotky
  */
@@ -10,6 +10,7 @@ import { BodyData } from "../BodyParser";
 import MimeTypes from "../MimeTypes";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
 
+//Node:Request & Node:Response types.
 export type {NodeRequeset, NodeResponse};
 
 const HTML_MIME_TYPE = MimeTypes("html");
@@ -42,9 +43,9 @@ export default class Context{
         this._request = new IncomingRequest(request);
         this._response = new OutgoingResponse(response);
         this._env = env;
-        this._url = inCloudfareWorker()
-            ? new URL( this._request.url)
-            : new URL( request.url || "/", `http://${this._request.headers.get("host")}`);
+        this._url = inCloudfareWorker() //Different URL construtor based on environement.
+            ? new URL(this._request.url)
+            : new URL(request.url || "/", `http://${this._request.headers.get("host")}`);
         this._view = view;
         this._auth = auth;
 
@@ -205,7 +206,7 @@ export default class Context{
      * @param {string} value 
      * @returns {this}
      */
-    html(value:string): Context{
+    html(value:string):this{
         if (!this._response.headers.get("Content-Type")) {
             this._response.headers.set('Content-Type', HTML_MIME_TYPE);
         }
@@ -227,8 +228,9 @@ export default class Context{
     /** Reunder Update Content
      * 
      * @param {ContentUpdate} value 
+     * @returns {this}
      */
-    render(value:RenderUpdate){
+    render(value:RenderUpdate):this{
         if(this._view === undefined)
             throw new Error("No view to render with!");
         this._response.headers.set(HEADER_KEY, HEADER_VALUE);
@@ -238,9 +240,11 @@ export default class Context{
         } else {
             this.html(this._view.render(value));
         }
+
+        return this;
     }
 
-    /** Flush Update Content
+    /** Flush & Get Response
      * 
      */
     flush():Promise<Response|undefined> {
@@ -258,6 +262,10 @@ export default class Context{
         return await this._auth.get()(this._request);
     }
 
+    /** Set Authorization
+     * 
+     * @returns {Promise<void>}
+     */
     async setAuth(user:User|null):Promise<void> {
         if(this._auth === undefined || this._auth.set() === undefined)
             return;
@@ -275,7 +283,7 @@ export default class Context{
             url = this._request.headers.get("Referrer") || "/";
         }
         
-        if(this._request.headers.get(HEADER_KEY) === HEADER_VALUE){
+        if(this.expectsRender()){
             if(url instanceof URL){
                 url = url.pathname;
             }
