@@ -1,4 +1,4 @@
-/** /Engine/Routing
+/** /Routing
  * 
  * @author Alex Malotky
  */
@@ -6,9 +6,21 @@ import Context from "../Context";
 import Router from "./Router";
 import HttpError from "../HttpError";
 
-type Handler = (context:Context)=>Promise<void>|void;
+/** Handler Type
+ * 
+ */
+export type Handler = (context:Context)=>Promise<void>|void;
+
+/** Error Handler Type
+ * 
+ */
 type ErrorHandler = (error:any, context:Context)=>Promise<void>|void;
 
+/** Routing Class
+ * 
+ * Top Level Wrapper around Router class that 
+ * handles errors.
+ */
 export default class Routing extends Router{
     private notFoundHandler:Handler;
     private errorHandler:ErrorHandler;
@@ -20,11 +32,15 @@ export default class Routing extends Router{
         super("");
         this.notFoundHandler = (ctx:Context) => {throw new HttpError(404, `${ctx.url.pathname} was not found!`)};
         this.errorHandler = (e:any, ctx:Context) => {
-            ctx.status(e.statusCode || e.code || e.status || 500).write(e.message || String(e)).end();
+            const number = Number(e.statusCode || e.code || e.status);
+            ctx.status(isNaN(number)? 500: number).write(e.message || String(e)).end();
         }
     }
 
-    /** Routing Wrappper
+    /** Routing Handler Wrappper
+     * 
+     * Made to easier seperate from routing/not found error handler
+     * and normal error handler.
      * 
      * @param {Context} context 
      * @param {any} error
@@ -43,7 +59,7 @@ export default class Routing extends Router{
         return await context.flush();
     }
 
-    /** Handle Routing
+    /** Handle Routing Override
      * 
      * @param {Context} context 
      * @returns {Promise<void>}
@@ -65,7 +81,7 @@ export default class Routing extends Router{
 
             await this.notFoundHandler(context);
         } catch (route_err:any){
-            if(route_err === 404 || route_err.code === 404 || route_err.status === 404){
+            if(route_err == 404 || route_err.code == 404 || route_err.status == 404){
                 await this.notFoundHandler(context);
             } else {
                 throw route_err;

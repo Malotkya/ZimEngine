@@ -1,20 +1,33 @@
-/** /Engine/Routing/Route.ts
+/** /Routing/Route.ts
  * 
  * @author Alex Malotky
  */
 import Context from "../Context";
 import Layer, { Middleware } from "./Layer";
 
+//Route Error Thrower
 const ROUTE_ERROR = ()=>{throw new Error("_handler called from Route!")}
 
+/** Route Layer
+ * 
+ * Array<Layer> Wrapper
+ */
 export default class Route extends Layer {
     #layers: Array<Layer>;
 
+    /** Constructor
+     * 
+     * @param {string} path 
+     */
     public constructor(path:string = "/") {
         super(path, {end: false}, ROUTE_ERROR);
         this.#layers = [];
     }
 
+    /** Handle Routing Override
+     * 
+     * @param {Context} context 
+     */
     async handle(context: Context):Promise<void> {
         if(this.match(context)){
             for(const layer of this.#layers) {
@@ -25,6 +38,11 @@ export default class Route extends Layer {
         }
     }
 
+    /** Use Middleware
+     * 
+     * @param {string} path = "/"
+     * @param {Middleware|Layer} middleware 
+     */
     use(middleware:Middleware|Layer):Route
     use(path:string, handler:Middleware):Route
     use(){
@@ -54,6 +72,10 @@ export default class Route extends Layer {
         return this;
     }
 
+    /** Set Prefix Override
+     * 
+     * @param {string} value 
+     */
     prefix(value:string){
         super.prefix(value);
         for(const l of this.#layers) {

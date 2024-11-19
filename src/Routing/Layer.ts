@@ -1,4 +1,4 @@
-/** /Engine/Routing/Layer.ts
+/** /Routing/Layer.ts
  * 
  * @author Alex Malotky
  */
@@ -6,8 +6,12 @@ import Context from "../Context";
 import { pathToRegexp, Key, PathToRegexpOptions } from "path-to-regexp";
 import { joinPath } from "../Util";
 
+//Middleware Type
 export type Middleware = (context:Context)=>Promise<void>|void;
 
+/** Single Routing Layer
+ * 
+ */
 export default class Layer {
     private _shortcut:boolean;
     private _handler:Middleware;
@@ -73,6 +77,10 @@ export default class Layer {
         this._keys = keys;
     }
 
+    /** Handle Routing
+     * 
+     * @param {Context} context 
+     */
     async handle(context:Context):Promise<void>{
         try {
             if(this.match(context)) {
@@ -83,6 +91,11 @@ export default class Layer {
         }
     }
 
+    /** Match Routing
+     * 
+     * @param {Context} context 
+     * @returns {boolean}
+     */
     protected match(context:Context):boolean {
         if(this._shortcut){
             return true;
@@ -102,10 +115,16 @@ export default class Layer {
         return true;
     }
 
+    /** Path Getter
+     * 
+     */
     get path():string {
         return this._path;
     }
 
+    /** Path Setter
+     * 
+     */
     set path(value:string) {
         this._path = value;
         this._shortcut = false;
@@ -115,10 +134,18 @@ export default class Layer {
         this._regex = regexp;
     }
 
+    /** Get Total Path
+     * 
+     * @returns {string}
+     */
     totalPath():string {
         return joinPath(this._prefix, this._path);
     }
 
+    /** Set Prefix
+     * 
+     * @param {string} value 
+     */
     prefix(value:string) {
         this._prefix = value;
         value = joinPath(value, this._path);
@@ -127,6 +154,10 @@ export default class Layer {
         this._regex = regexp;
     }
 
+    /** Update Options
+     * 
+     * @param {PathToRegexpOptions} value 
+     */
     update(value:PathToRegexpOptions){
         this._opts = value;
         const {regexp, keys} = pathToRegexp(this._path, value);
