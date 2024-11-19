@@ -1,3 +1,8 @@
+/** /View/Html/Function
+ * 
+ * @author Alex Malotky
+ */
+
 /** Convert Function to String
  * 
  * Will convert a function to a string so that it can be executed on the front end.

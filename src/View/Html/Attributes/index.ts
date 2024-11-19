@@ -1,5 +1,6 @@
-/** /Engine/View/HTML/Attributes
+/** /View/HTML/Attributes
  * 
+ * @author Alex Malotky
  */
 import AriaGlobalAttributes, {toString as toAriaString} from "./Aria";
 import {toString as functionToString} from "../Function";

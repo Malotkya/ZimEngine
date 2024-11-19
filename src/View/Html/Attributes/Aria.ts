@@ -1,6 +1,9 @@
-/** Aria Accessibility Attributes
+/** /View/HTML/Attributes/Aria
+ *  Aria Accessibility Attributes
  * 
  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes
+ * 
+ * @author Alex Malotky
  */
 import {AttributeList, SpaceSeperatedList} from ".";
 

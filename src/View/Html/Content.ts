@@ -1,6 +1,13 @@
+/** /View/Html/Content
+ * 
+ * @author Alex Malotky
+ */
 import { toString as funToString } from "./Function";
 import Element,{ isElement, compileElement } from "./Element";
 
+/** Content Type
+ * 
+ */
 type Content = string|number|boolean|null|undefined|Function|Element|Array<Content>;
 export default Content;
 
@@ -38,6 +45,11 @@ export function compressContent(content:Content):string {
     }
 }
 
+/** Convert Content To Update
+ * 
+ * @param {Dictionary<Content>} value 
+ * @returns {Dictionary<string>|undefined}
+ */
 export function toUpdate(value:Dictionary<Content>|undefined):Dictionary<string>|undefined {
     if(value === undefined)
         return undefined;

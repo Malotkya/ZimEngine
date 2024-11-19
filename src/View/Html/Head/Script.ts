@@ -1,4 +1,4 @@
-/** /Engine/View/Html/Head/Script
+/** /View/Html/Head/Script
  * 
  * @author Alex Malotky
  */
