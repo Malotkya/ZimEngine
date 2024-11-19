@@ -1,24 +1,34 @@
+/** /View/RenderEnvironment
+ * 
+ * Front End Environment
+ * 
+ * @author Alex Malotky
+ */
 import {FetchUpdate} from "..";
 import { getRouteInfo, hashObject } from "./Util";
 import { HeadUpdate } from "../Html/Head";
 import HeadEnvironment from "./Head";
 import { HEADER_KEY, HEADER_VALUE } from "../../Util";
 
-
+//Fetch Options Type
 interface FetchOptions extends RequestInit{
     headers?:Dictionary<string>
 }
 
-interface Event {
+//Event List Item Type
+interface EventItem {
     type:string,
     listener:EventListener
 }
 
+/** Front End Render Environment
+ * 
+ */
 export default class RenderEnvironment {
     private _head:HeadEnvironment;
     private _headHash:number;
     private _bodyHash:number;
-    private _events:Array<Event>;
+    private _events:Array<EventItem>;
 
     private _routing:boolean;
     private _delay:{url:string|URL, body?:FormData}|undefined;
@@ -36,12 +46,12 @@ export default class RenderEnvironment {
 
     /** Main Route Handler
      * 
-     * Returns if there is an anchor to scroll too.
+     * Returns value if there is an anchor to scroll too.
      * 
      * @param {FormData} body 
-     * @returns {Promise<string>}
+     * @returns {Promise<string|undefined>}
      */
-    async handler(url:string|URL = window.location.href, body?:FormData):Promise<string>{
+    async handler(url:string|URL = window.location.href, body?:FormData):Promise<string|undefined>{
         this._routing = true;
         const {anchor, path} = getRouteInfo(url);
 
@@ -77,8 +87,9 @@ export default class RenderEnvironment {
         if(!this._routing) {
             this.clear();
             this.handler(url, body).then(anchor=>{
-                this.scroll(anchor);
-            })
+                if(anchor)
+                    this.scroll(anchor);
+            });
         } else {
             this._delay = {url, body};
         }
@@ -141,7 +152,7 @@ export default class RenderEnvironment {
         }
     }
 
-    /// Private Update Methods ///
+    ////////////// Private Update Methods //////////////
 
     /** Update Head
      * 
@@ -205,7 +216,7 @@ export default class RenderEnvironment {
         }
     }
 
-    /// Static FunctionS ///
+    ////////////// Static FunctionS //////////////
 
     /** Assign Render Content to Target
      * 
@@ -253,6 +264,10 @@ export default class RenderEnvironment {
         }
     }
 
+    /** Display Error
+     * 
+     * @param {any} value 
+     */
     static error(value:any) {
         const dialog = document.createElement("dialog");
         dialog.style.position = "absolute";

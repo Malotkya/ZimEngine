@@ -1,10 +1,24 @@
+/** /View/RenderEnvironment/Tracker
+ * 
+ * Front End Element Tracker
+ * 
+ * @author Alex Malotky
+ */
 import { findOrCreateElement } from "./Util";
 import { AttributeList } from "../Html/Attributes";
 
+/** Header Sub Element Tracker
+ * 
+ */
 export default class Tracker {
     protected _current:Dictionary<Element>;
     private _name:string;
 
+    /** Tracker Constructor
+     * 
+     * @param {HTMLElement} head 
+     * @param {string} name 
+     */
     constructor(head:HTMLElement, name:string){
         this._current = {};
         this._name = name;
@@ -21,6 +35,10 @@ export default class Tracker {
         }
     }
 
+    /** Update Tracked Elements
+     * 
+     * @param {Dictionary<AttributeList>} updates 
+     */
     update(updates:Dictionary<AttributeList>){
         const lstUpdate = Object.getOwnPropertyNames(updates);
 
@@ -47,6 +65,11 @@ export default class Tracker {
         }
     }
 
+    /** Update Element
+     * 
+     * @param {Element} element 
+     * @param {AttributeList} update 
+     */
     static updateElement(element:Element, update:AttributeList = {}){
         if(update.value) {
             element.innerHTML = update.value as string;

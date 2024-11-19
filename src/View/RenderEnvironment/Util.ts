@@ -1,3 +1,11 @@
+/** /View/RenderEnvironment/Util
+ * 
+ * Front End Utility
+ * 
+ * @author Alex Malotky
+ */
+
+
 /** Find Or Create Element
  * 
  * @param {string} name 
@@ -133,7 +141,12 @@ export function hashObject(value:any):number {
             string = value;
             break;
 
-        default:
+        case "function":
+            string = value.name;
+            break;
+
+        case "bigint":
+        case "symbol":
             string = value.toString()
     }
 
@@ -149,9 +162,10 @@ export function hashObject(value:any):number {
     return hash;
 }
 
-/** Get Value From
+/** Get Value From Element
  * 
- * @param {string} query 
+ * @param {HTMLElement} element
+ * @param {string} name 
  * @returns {string}
  */
 export function getValueFrom(element:HTMLElement, name:string):string {

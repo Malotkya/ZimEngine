@@ -1,7 +1,14 @@
+/** /View/Web
+ * 
+ * Front End Web File
+ * 
+ * @author Alex Malotky
+ */
 import { FetchUpdate } from ".";
 import RenderEnvironment from "./RenderEnvironment";
 import { getRouteInfo } from "./RenderEnvironment/Util";
 
+//Render Environment
 const env = new RenderEnvironment();
 
 /** Close Dialog
@@ -26,12 +33,20 @@ function closeDailog(element:HTMLElement|null){
     }
 }
 
-window.addEventListener("popstate", function state_change(event){
+/** Pop State Change Event Listener
+ * 
+ */
+window.addEventListener("popstate", function state_change(){
     env.handler().then(anchor=>{
-        env.scroll(anchor);
+        if(anchor)
+            env.scroll(anchor);
     }).catch(console.error);
 });
 
+/** Click Event Listener
+ * 
+ * @param {Event} event
+ */
 document.body.addEventListener("click", function click_event(event){
     const target:HTMLElement = event.target as HTMLElement;
     const link:HTMLAnchorElement|null = target.closest("a");
@@ -56,6 +71,10 @@ document.body.addEventListener("click", function click_event(event){
     }
 });
 
+/** Submit Event Listener
+ * 
+ * @param {Event} event
+ */
 document.body.addEventListener("submit", async function submit_event(event){
     event.preventDefault();
     const form = event.target as HTMLFormElement;
@@ -91,7 +110,10 @@ document.body.addEventListener("submit", async function submit_event(event){
     }
 });
 
-window.addEventListener("DOMContentLoaded", ()=>{
+/** Load Event Listener
+ * 
+ */
+window.addEventListener("DOMContentLoaded", function run_scripts(){
     document.querySelectorAll("script[env]")?.forEach(script=>{
         if(script.getAttribute("type")?.includes("blocked"))
             env.run(script.innerHTML);
