@@ -1,4 +1,4 @@
-/** /Engine/View
+/** /View
  * 
  * @author Alex Malotky
  */
@@ -13,7 +13,7 @@ import Context from "../Context";
 
 const { version } = require("../../package.json");
 
-/** Get File
+/** Get Web File
  * 
  * Different Implementation depending on environment.
  * 
@@ -32,8 +32,10 @@ function getFile():string {
     ).toString();
 }
 
+//Render Function Type
 export type RenderFunction = (update:Dictionary<Content>)=>Content;
 
+//Render Update Type
 export interface RenderUpdate {
     head?: HeadUpdate,
     body?: Dictionary<Content>,
@@ -41,6 +43,7 @@ export interface RenderUpdate {
     update?: Dictionary<Content>,
 }
 
+//Fetch Update Type
 export interface FetchUpdate {
     head:HeadUpdate,
     body?:Dictionary<string>,
@@ -61,6 +64,10 @@ export default class View{
     private static readonly injectedFileType = MimeTypes("js");
     private static readonly injectedFileContent = getFile();
 
+    /** Inject Web File
+     * 
+     * @param {Context} ctx 
+     */
     static injectFile(ctx:Context){
         ctx.response.headers.set("Content-Type", View.injectedFileType);
         ctx.write(View.injectedFileContent);
@@ -69,11 +76,11 @@ export default class View{
 
     /** Constructor
      * 
-     * @param {Array<ElementTag>} headTags 
-     * @param {RenderFunction} stationaryContent 
-     * @param {AttributeList} attributes 
+     * @param {HTMLInit} attributes 
+     * @param {HeadInit} headInit 
+     * @param {RenderFunction} renderContent 
      */
-    constructor(attributes:HTMLInit = {}, headInit:HeadInit = {}, renderContent:RenderFunction = ()=>undefined){
+    constructor(attributes:HTMLInit = {}, headInit:HeadInit = {}, renderContent:RenderFunction){
 
         if(typeof attributes !== "object")
             throw new TypeError("Invalid Attributes!");
