@@ -2,19 +2,26 @@
  * 
  * @author Alex Malotky
  */
+import { Validator } from "..";
 
 const DATE_TIME_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})[Tt](\d{1,2}):(\d{1,2})$/
 
-/** DateTime Type
- * 
- */
+// DateTime Type
 type DateTime = string;
 export default DateTime;
 
-/** DateTime Format Type
+// DateTime Format Name
+export type  DateTimeType = "DateTime";
+export const DateTimeName = "DateTime";
+
+/** DateTime Validator
  * 
  */
-export type DateTimeType = "DateTime";
+export class DateTimeValidator extends Validator<DateTime> {
+    constructor(value:unknown){
+        super(DateTimeName, formatDateTime(value));
+    }
+}
 
 /** Format DateTime
  * 
@@ -33,7 +40,7 @@ export function formatDateTime(value:unknown):DateTime {
     return value;
 }
 
-/** Validate DateTime
+/** Is DateTime
  * 
  * @param {unknwon} value 
  * @returns {boolean}

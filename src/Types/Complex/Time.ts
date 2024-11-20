@@ -2,19 +2,26 @@
  * 
  * @author Alex Malotky
  */
+import { Validator } from "..";
 
 const TIME_REGEX = /^(\d{1,2}):(\d{1,2})$/;
 
-/** Time Type
- * 
- */
+// Time Type
 type Time = string;
 export default Time;
 
-/** Time Format Type
+//Time Format Name
+export  type TimeType = "Time";
+export const TimeName = "Time";
+
+/** Time Validator
  * 
  */
-export type TimeType = "Time";
+export class TimeValidator extends Validator<Time> {
+    constructor(value:unknown){
+        super(TimeName, formatTime(value))
+    }
+}
 
 /** Format Time
  * 

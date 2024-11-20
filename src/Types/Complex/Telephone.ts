@@ -2,20 +2,24 @@
  * 
  * @author Alex Malotky
  */
+import { Validator } from "..";
 
 //Source: https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
 const TELEPHONE_REGEX = /^(\+?\d{1,2}\s?)?[(.]?(\d{3})\)?[\s.-](\d{3})[\s.-](\d{4})$/;
 
-/** Telephone Type
- * 
- */
+// Telephone Type
 type Telephone = string;
 export default Telephone;
 
-/** Url Format Type
- * 
- */
-export type TelType = "Telephone";
+// Telephone Format Name
+export  type TelType = "Telephone";
+export const TelName = "Telephone";
+
+export class TelValidator extends Validator<Telephone> {
+    constructor(value:unknown) {
+        super(TelName, formatTelephone(value));
+    }
+}
 
 /** Format Telephone
  * 

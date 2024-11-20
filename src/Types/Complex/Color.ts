@@ -2,24 +2,30 @@
  * 
  * @author Alex Malotky
  */
+import { Validator } from "..";
 
 const COLOR_REGEX = /^#[0-9a-f]{6}$/;
 
-/** Color Type
- * 
- */
+//Color Type
 type Color = string;
 export default Color;
 
-/** Color Forat Type
+//Color Format Name
+export  type ColorType = "Color";
+export const ColorName = "Color";
+
+/** Color Validator
  * 
  */
-export type ColorType = "Color";
+export class ColorValidator extends Validator<Color> {
+    constructor(value:unknown){
+        super(ColorName, formatColor(value));
+    }
+}
 
 /** Format Color
  * 
- * @param {unknown} value 
- * @returns {Color}
+ * @param value 
  */
 export function formatColor(value:unknown):Color {
     if(typeof value !== "string")
@@ -32,7 +38,7 @@ export function formatColor(value:unknown):Color {
     return format;
 }
 
-/** Validate Color
+/** Is Color
  * 
  * @param {unknown} value 
  * @returns {boolean}

@@ -3,19 +3,24 @@
  * @author Alex Malotky
  */
 
+import { Validator } from "..";
+
 //Help from: https://stackoverflow.com/questions/7109143/what-characters-are-valid-in-a-url
 const URL_REGEX = /^(https?):\/\/([a-z0-9.][a-z0-9-.]+[a-z0-9.])(:\d{1,5})?(\?[a-z-._~:/#\[\}@!$&'\(\)*+,:%=]+)?/;
 
-/** Url Type
- * 
- */
+// Url Type
 type Url = string;
 export default Url;
 
-/** Url Format Type
- * 
- */
-export type UrlType = "Url";
+//Url Format Name
+export  type UrlType = "Url";
+export const UrlName = "Url";
+
+export class UrlValidator extends Validator<Url> {
+    constructor(value:unknown){
+        super(UrlName, formatUrl(value))
+    }
+}
 
 /** Format Url
  * 

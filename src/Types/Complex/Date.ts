@@ -2,19 +2,26 @@
  * 
  * @author Alex Malotky
  */
+import { Validator } from "..";
 
 const DATE_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
 
-/** Date Type
- * 
- */
+// Date Type
 type Date = string;
 export default Date;
 
-/** Date Format Type
+// Date Format Name
+export  type DateType = "Date";
+export const DateName = "Date";
+
+/** Date Validator
  * 
  */
-export type DateType = "Date";
+export class DateValidator extends Validator<Date> {
+    constructor(value:unknown){
+        super(DateName, formatDate(value));
+    }
+}
 
 /** Format Date
  * 
@@ -33,7 +40,7 @@ export function formatDate(value:unknown):Date {
     return value;
 }
 
-/** Validate Date
+/** Is Date
  * 
  * @param {unknwon} value 
  * @returns {boolean}
