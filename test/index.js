@@ -98,9 +98,12 @@ BodyTest.post((ctx)=>{
     }
 
     ctx.render({
+        head: {
+            styles: "ul{ list-style: none }"
+        },
         body: {
-            main: _("section",
-                list
+            main: _("ul",
+                list.map(i=>_("li", i))
             )
         }
     })
@@ -110,7 +113,58 @@ BodyTest.get((ctx)=>{
     ctx.render({
         body: {
             main: _("form", {method: "POST"},
-                _("input", {name: "test"}),
+                _("label", {for: "checkbox"}, "Checkbox:"),
+                _("input", {name: "checkbox", type: "checkbox", id: "checkbox"}),
+                _("br"),
+
+                _("label", {for: "color"}, "Color:"),
+                _("input", {name: "color", type: "color", id: "color"}),
+                _("br"),
+
+                _("label", {for: "date"}, "Date:"),
+                _("input", {name: "date", type: "date", id: "date"}),
+                _("br"),
+
+                _("label", {for: "time"}, "Time:"),
+                _("input", {name: "time", type: "time", id: "time"}),
+                _("br"),
+
+                _("label", {for: "datetime-local"}, "Date Time:"),
+                _("input", {name: "datetime-local", type: "datetime-local", id: "datetime-local"}),
+                _("br"),
+
+                _("label", {for: "month"}, "Month:"),
+                _("input", {name: "month", type: "month", id: "month"}),
+                _("br"),
+
+                _("label", {for: "number"}, "Number:"),
+                _("input", {name: "number", type: "number", id: "number"}),
+                _("br"),
+
+                _("label", {for: "range"}, "Range:"),
+                _("input", {name: "range", type: "range", id: "range"}),
+                _("br"),
+
+                _("label", {for: "search"}, "Search:"),
+                _("input", {name: "search", type: "search", id: "search"}),
+                _("br"),
+
+                _("label", {for: "tel"}, "Telephone:"),
+                _("input", {name: "tel", type: "tel", id: "tel"}),
+                _("br"),
+
+                _("label", {for: "email"}, "Email:"),
+                _("input", {name: "email", type: "email", id: "email"}),
+                _("br"),
+
+                _("label", {for: "url"}, "URL:"),
+                _("input", {name: "url", type: "url", id: "url"}),
+                _("br"),
+
+                _("label", {for: "file"}, "File:"),
+                _("input", {name: "file", type: "file", id: "file"}),
+                _("br"),
+
                 _("button", "Submit")
             )
         }
