@@ -2,14 +2,28 @@
  * 
  * @author Alex Malotky
  */
-import Primitive, {PrimitiveType} from "./Primitive";
-import Complex, {ComplexType} from "./Complex";
-import Empty, {EmptyType} from "./Empty";
+import Type, { Validator, BASE_TYPE_MAP, BaseType, getValidator } from ".";
 
-type List<T = Primitive|Complex|Empty> = Array<T>;
+//List Type
+type List<T extends BaseType> = Array<BASE_TYPE_MAP[T]>;
 export default List;
 
-export type ListType = Array<PrimitiveType|ComplexType|EmptyType>;
+//List Format Name
+export  type ListType = [BaseType];
+export const ListName = (name:BaseType) => `List<${name}>`;
+
+/** List Validator
+ * 
+ */
+export class ListValidator<I extends BaseType> extends Validator<List<I>> {
+    constructor(name:I, value:unknown){
+        const validator = getValidator(name);
+        super(
+            ListName(name),
+            formatList(value).map(value=>new validator(value).value) as List<I>
+        );
+    }
+}
 
 /** Format List
  * 
@@ -17,7 +31,7 @@ export type ListType = Array<PrimitiveType|ComplexType|EmptyType>;
  * @param {RegExp|string} split = "JSON"
  * @returns {List<unknown>}
  */
-export function formatList(value:unknown, split:RegExp|string = "JSON"):List<unknown> {
+export function formatList(value:unknown, split:RegExp|string = "JSON"):Array<unknown> {
     switch (typeof value){
         case "string":
             if(split === "JSON") {
