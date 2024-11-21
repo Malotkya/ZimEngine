@@ -9,6 +9,9 @@
         "moduleResolution": "node16",
         "outDir": "lib",
         "declaration": true,
-        "types" : ["./global.d.ts", "@types/node"]
-    }
+        "types" : ["./global.d.ts", "@types/node"],
+    },
+    "include": [
+        "src"
+    ]
 }
