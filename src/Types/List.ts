@@ -2,48 +2,56 @@
  * 
  * @author Alex Malotky
  */
-import Type, { Validator, BASE_TYPE_MAP, BaseType, getValidator } from ".";
+import {TypeClass} from ".";
 
 //List Type
-type List<T extends BaseType> = Array<BASE_TYPE_MAP[T]>;
+type List<T extends TypeClass<any>> = Array<T>;
 export default List;
 
 //List Format Name
-export  type ListType = [BaseType];
-export const ListName = (name:BaseType) => `List<${name}>`;
+export const ListName = "List";
 
-/** List Validator
+/** List Type Class
  * 
  */
-export class ListValidator<I extends BaseType> extends Validator<List<I>> {
-    constructor(name:I, value:unknown){
-        const validator = getValidator(name);
-        super(
-            ListName(name),
-            formatList(value).map(value=>new validator(value).value) as List<I>
-        );
+export class ListType<T extends TypeClass<any>> extends TypeClass<List<T>> {
+    constructor(type:T){
+        super(ListName, formatListGenerator(type));
     }
 }
 
-/** Format List
+/** Format List Generator
  * 
- * @param {unknown} value 
- * @param {RegExp|string} split = "JSON"
- * @returns {List<unknown>}
+ * @param {Type<any>}type 
+ * @returns {Function}
  */
-export function formatList(value:unknown, split:RegExp|string = "JSON"):Array<unknown> {
-    switch (typeof value){
+function formatListGenerator<T extends TypeClass<any>>(type:T):(v:unknown)=>List<T> {
+    
+    /** Format List
+     * 
+     * @param {unknown} input
+     * @returns {List<Type>}
+     */
+    return function formatList(input:unknown):List<T> {
+        return objectify(input).map(value=>type.format(value));
+    }
+}
+
+/** List Objectifier
+ * 
+ * @param {unkown} value 
+ * @returns {Array<unknown>}
+ */
+function objectify(value:unknown):unknown[] {
+    switch(typeof value){
         case "string":
-            if(split === "JSON") {
-                value = JSON.parse(value);
-            } else {
-                value = value.split(split);
-            }
+            return objectify(JSON.parse(value));
 
         case "object":
             if(Array.isArray(value))
                 return value;
-    }
 
-    throw new TypeError("List must be stored either in an array object or a string!");
+        default:
+            throw new TypeError(`Invalid type list: '${value}'`);
+    }
 }

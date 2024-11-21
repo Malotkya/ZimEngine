@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { Validator } from "..";
+import { TypeClass } from ".";
 
 const COLOR_REGEX = /^#[0-9a-f]{6}$/;
 
@@ -11,15 +11,14 @@ type Color = string;
 export default Color;
 
 //Color Format Name
-export  type ColorType = "Color";
 export const ColorName = "Color";
 
-/** Color Validator
+/** Color Type Class
  * 
  */
-export class ColorValidator extends Validator<Color> {
-    constructor(value:unknown){
-        super(ColorName, formatColor(value));
+export class ColorType extends TypeClass<Color> {
+    constructor(){
+        super(ColorName, formatColor);
     }
 }
 

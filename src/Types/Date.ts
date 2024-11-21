@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { Validator } from "..";
+import { TypeClass } from ".";
 
 const DATE_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
 
@@ -11,15 +11,14 @@ type Date = string;
 export default Date;
 
 // Date Format Name
-export  type DateType = "Date";
 export const DateName = "Date";
 
-/** Date Validator
+/** Date Type Class
  * 
  */
-export class DateValidator extends Validator<Date> {
-    constructor(value:unknown){
-        super(DateName, formatDate(value));
+export class DateType extends TypeClass<Date> {
+    constructor(){
+        super(DateName, formatDate);
     }
 }
 

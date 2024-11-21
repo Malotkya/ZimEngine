@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { Validator } from "..";
+import { TypeClass } from ".";
 
 /** Email Type
  * 
@@ -11,15 +11,14 @@ type File = Blob;
 export default File;
 
 //Email Format Type
-export  type FileType = "File";
 export const FileName = "File"
 
-/** File Validator
+/** File Type Class
  * 
  */
-export class FileValidator extends Validator<File> {
-    constructor(value:unknown) {
-        super(FileName, formatFile(value) )
+export class FileType extends TypeClass<File> {
+    constructor() {
+        super(FileName, formatFile)
     }
 }
 

@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { Validator } from "..";
+import { TypeClass } from ".";
 
 const DATE_TIME_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})[Tt](\d{1,2}):(\d{1,2})$/
 
@@ -11,15 +11,14 @@ type DateTime = string;
 export default DateTime;
 
 // DateTime Format Name
-export type  DateTimeType = "DateTime";
 export const DateTimeName = "DateTime";
 
-/** DateTime Validator
+/** DateTime Type Class
  * 
  */
-export class DateTimeValidator extends Validator<DateTime> {
-    constructor(value:unknown){
-        super(DateTimeName, formatDateTime(value));
+export class DateTimeType extends TypeClass<DateTime> {
+    constructor(){
+        super(DateTimeName, formatDateTime);
     }
 }
 
