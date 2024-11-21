@@ -9,27 +9,7 @@ import { isCloudflareRequest } from "./Util";
 const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
 const DEFAULT_SIZE_LIMIT = 500000000; //500MB
 
-export type BodyData = Map<string, string>;
-type RawBodyData = Map<string, string|Blob>;
-
-/** Clean Body Data
- * 
- * @param {RawBodyData} data 
- * @returns {Promise<BodyData>}
- */
-export async function cleanBodyData(data: RawBodyData|Error):Promise<BodyData|Error> {
-    if(data instanceof Error)
-        return data;
-
-    for(let [key, value] of data){
-        if(value instanceof Blob){
-            data.set(key, await value.text());
-        }
-    }
-
-    //@ts-ignore
-    return data;
-}
+export type BodyData = Dictionary<string|Blob>;
 
 /** Parse Headers from String
  * 
@@ -62,17 +42,17 @@ function parseHeaders(value:string):Dictionary<string> {
  * @param {Request} request 
  * @returns {Promise<RawBodyData>}
  */
-function processCloudflareRequest(request:Request):Promise<RawBodyData|Error> {
+function processCloudflareRequest(request:Request):Promise<BodyData> {
     return new Promise((res, rej)=>{
         const content = request.headers.get("Content-Type")?.toLocaleLowerCase();
         if (content === undefined || !content.includes("form-data")) {
-            return res(new Map());
+            return res({});
         }
 
         request.formData().then((data)=>{
-            const map = new Map<string, string|Blob>();
+            const map:BodyData ={};
             data.forEach((value, key)=>{
-                map.set(key, value);
+                map[key] = value;
             });
 
             res(map)
@@ -85,7 +65,7 @@ function processCloudflareRequest(request:Request):Promise<RawBodyData|Error> {
  * @param {IncomingMessage} request 
  * @returns {Promise<RawBodyData>}
  */
-function processNodeRequest(request:IncomingMessage):Promise<RawBodyData|Error> {
+function processNodeRequest(request:IncomingMessage):Promise<BodyData> {
     let multipart:boolean = false;
     let boundry:RegExp    = new RegExp("&");
 
@@ -98,7 +78,7 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData|Error> 
         multipart = true;
     }
     let buffer = "";
-    let output = new Map();
+    let output:BodyData = {};
 
     /** Process Multipart Data 
      * 
@@ -139,7 +119,7 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData|Error> 
      */
     const processData = (data:string) => {
         const [name, value] = multipart? processMultipartData(data): data.split("=");
-        output.set(name, value);
+        output[name] = value;
     }
 
     /** Process Buffer
@@ -163,19 +143,7 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData|Error> 
         }
     }
 
-    return new Promise((resolve)=>{
-
-        /** Reject Replacement that instead resolves the error.
-         * 
-         * @param {any} e 
-         */
-        const reject = (e:any) => {
-            if( !(e instanceof Error) ) {
-                e = new Error(String(e));
-            }
-
-            resolve(e);
-        }
+    return new Promise((resolve, reject)=>{
 
         request.on("data", chunk=>{
             try {
@@ -201,10 +169,8 @@ function processNodeRequest(request:IncomingMessage):Promise<RawBodyData|Error> 
     });
 }
 
-export default async function BodyParser(request:IncomingMessage|Request):Promise<BodyData|Error>{
-    return cleanBodyData(
-        isCloudflareRequest(request)
-            ? (await processCloudflareRequest(request))
-            : (await processNodeRequest(request))
-    )
+export default async function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
+    return isCloudflareRequest(request)
+        ? (await processCloudflareRequest(request))
+        : (await processNodeRequest(request))
 }
