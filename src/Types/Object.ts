@@ -3,6 +3,7 @@
  * @author Alex Malotky
  */
 import Type, {TypeClass} from ".";
+import { emptyHandler } from "./Empty";
 
 //Object Type
 type Object = Dictionary<Type>;
@@ -17,17 +18,17 @@ type ObjectProperties<K extends string|number|symbol> = Record<K, TypeClass<any>
  * 
  */
 export class ObjectType<T extends Object> extends TypeClass<T> {
-    constructor(format:ObjectProperties<keyof T>) {
-        super(ObjectName, formatObjectGenerator(format))
+    constructor(format:ObjectProperties<keyof T>, value?:Object) {
+        super(ObjectName, formatObjectGenerator(format, value))
     }
 }
 
 /** Format Object Generator
  * 
- * @param {Object}type 
+ * @param {Object} props 
  * @returns {Function}
  */
-function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyof O>>(props:P):(v:unknown)=>O {
+function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyof O>>(props:P, ifEmpty:any):(v:unknown)=>O {
     
     /** Format Object
      * 
@@ -35,7 +36,7 @@ function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyo
      * @returns {any}
      */
     return function formatObject(input:unknown):O {
-        const buffer = objectify(input);
+        const buffer = objectify(emptyHandler(input, ObjectName, ifEmpty));
         //@ts-ignore
         const output:O = {};
 

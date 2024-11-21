@@ -1,8 +1,8 @@
-/** /Types/Complex/Telephone
+/** /Types/Telephone
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, defaultFormatGenerator } from ".";
 
 //Source: https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
 const TELEPHONE_REGEX = /^(\+?\d{1,2}\s?)?[(.]?(\d{3})\)?[\s.-](\d{3})[\s.-](\d{4})$/;
@@ -18,8 +18,8 @@ export const TelephoneName = "Telephone";
  * 
  */
 export class TelephoneType extends TypeClass<Telephone> {
-    constructor() {
-        super(TelephoneName, formatTelephone);
+    constructor(value?:Telephone) {
+        super(TelephoneName, defaultFormatGenerator(formatTelephone, TelephoneName, value));
     }
 }
 

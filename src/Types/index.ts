@@ -1,3 +1,7 @@
+/** /Types
+ * 
+ * @author Alex Malotky
+ */
 import Boolean, { BooleanName } from "./Boolean";
 import Color, { ColorName } from "./Color";
 import Date, { DateName } from "./Date";
@@ -11,12 +15,10 @@ import Time, { TimeName } from "./Time";
 import Url, { UrlName } from "./Url";
 import Object from "./Object";
 import List from "./List";
-import Empty from "./Empty";
+import Empty, {emptyHandler} from "./Empty";
 
 type Type = Boolean|Color|Date|DateTime|Email|Empty|File|Number|Object|String|Telephone|Time|Url|List<any>;
 export default Type;
-
-type format<T> = (value:unknown)=>T;
 
 /** Type Abstract Class
  * 
@@ -38,6 +40,20 @@ export abstract class TypeClass<T> {
     get format():format<T> {
         return this._format;
     }
+}
+
+/** Format Type
+ * 
+ */
+export type format<T> = (value:unknown)=>T;
+
+/** Format With Default Value Generator
+ * 
+ */
+export function defaultFormatGenerator<T>(fun:format<T>, name:string, defaultValue?:T):format<T> {
+    return function defaultFormater(value:unknown):T{
+        return fun(emptyHandler(value, name, defaultValue));
+    };
 }
 
 /** Basic Names Helper Array

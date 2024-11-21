@@ -27,7 +27,7 @@ export class EmptyType extends TypeClass<Empty> {
 function getEmpty(value:unknown):Empty {
     if(isEmpty(value) === false)
         throw new TypeError(`${value} is not empty!`);
-
+        
     return null;
 }
 
@@ -39,3 +39,16 @@ function getEmpty(value:unknown):Empty {
 export function isEmpty(value:unknown):value is Empty {
     return value === null || value === undefined;
 }
+
+export function emptyHandler(value:unknown, name:string, ifEmpty?:any):unknown {
+    if(isEmpty(value)){
+        if(isEmpty(ifEmpty))
+            throw new EmptyError(`Expected ${name} Value!`)
+
+        return ifEmpty;
+    }
+
+    return value;
+}
+
+export class EmptyError extends Error {};

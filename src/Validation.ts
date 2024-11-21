@@ -1,15 +1,15 @@
-import Type, {TypeClass, BasicNames, TypeNames, BASIC_NAMES} from "./Types";
+import {TypeClass, BasicNames, TypeNames, BASIC_NAMES} from "./Types";
 import { BooleanType } from "./Types/Boolean";
-import { ColorType } from "./Types/Color";
-import { DateType } from "./Types/Date";
-import { DateTimeType } from "./Types/DateTime";
-import { EmaiType } from "./Types/Email";
-import { FileType } from "./Types/File";
+import Color, { ColorType } from "./Types/Color";
+import Date, { DateType } from "./Types/Date";
+import DateTime, { DateTimeType } from "./Types/DateTime";
+import Email, { EmaiType } from "./Types/Email";
+import File, { FileType } from "./Types/File";
 import { NumberType } from "./Types/Number";
 import { StringType } from "./Types/String";
-import { TelephoneType } from "./Types/Telephone";
-import { TimeType } from "./Types/Time";
-import { UrlType } from "./Types/Url";
+import Telephone, { TelephoneType } from "./Types/Telephone";
+import Time, { TimeType } from "./Types/Time";
+import Url, { UrlType } from "./Types/Url";
 import { ObjectType } from "./Types/Object";
 import { ListType } from "./Types/List";
 import { EmptyType } from "./Types/Empty";
@@ -34,19 +34,19 @@ const Basic_Type_Map = {
 type BasicTypes = typeof Basic_Type_Map;
 
 export default {
-    boolean:   ()=>new BooleanType(),
-    number:    ()=>new NumberType(),
-    string:    ()=>new StringType(),
-    Color:     ()=>new ColorType(),
-    Date:      ()=>new DateType(),
-    DateTime:  ()=>new DateTimeType(),
-    Email:     ()=>new EmaiType(),
+    boolean:   (defaultValue?:boolean) =>new BooleanType(defaultValue),
+    number:    (defaultValue?:number)  =>new NumberType(defaultValue),
+    string:    (defaultValue?:string)  =>new StringType(defaultValue),
+    Color:     (defaultValue?:Color)   =>new ColorType(defaultValue),
+    Date:      (defaultValue?:Date)    =>new DateType(defaultValue),
+    DateTime:  (defaultValue?:DateTime)=>new DateTimeType(defaultValue),
+    Email:     (defaultValue?:Email)   =>new EmaiType(defaultValue),
+    Telephone: (defaultValue?:Telephone)=>new TelephoneType(defaultValue),
+    Time:      (defaultValue?:Time)=>new TimeType(defaultValue),
+    Url:       (defaultValue?:Url)=>new UrlType(defaultValue),
     File:      ()=>new FileType(),
-    Telephone: ()=>new TelephoneType(),
-    Time:      ()=>new TimeType(),
-    Url:       ()=>new UrlType(),
-    List:   (props:TypeClass<any>[])=>new ListType(props[0]),
-    Object: (props:Dictionary<TypeClass<any>>)=>new ObjectType(props),
+    List:      (props:TypeClass<any>[], defaultValue?:boolean)=>new ListType(props[0]),
+    Object:    (props:Dictionary<TypeClass<any>>, defaultValue?:boolean)=>new ObjectType(props),
     //Optional: (type:TypeClass<any>)
 }
 

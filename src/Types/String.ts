@@ -1,8 +1,9 @@
-/** /Types/Primitive/String
+/** /Types/String
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, format } from ".";
+import { emptyHandler } from "./Empty";
 
 type String = string;
 export default String;
@@ -14,7 +15,14 @@ export const StringName = "string";
  * 
  */
 export class StringType extends TypeClass<String> {
-    constructor(){
-        super(StringName, String)
+    constructor(value?:String){
+        super(StringName, formatStringGenerator(value))
+    }
+}
+
+function formatStringGenerator(ifEmpty?:String):format<String> {
+
+    return function formatString(value:unknown):String {
+        return String(emptyHandler(value, StringName, ifEmpty))
     }
 }

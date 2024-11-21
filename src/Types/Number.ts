@@ -1,8 +1,9 @@
-/** /Types/Primitive/Number
+/** /Types/Number
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, format } from ".";
+import { emptyHandler } from "./Empty";
 
 type Number = number;
 export default Number;
@@ -14,16 +15,19 @@ export const NumberName = "number";
  * 
  */
 export class NumberType extends TypeClass<Number> {
-    constructor(){
-        super(NumberName, getNumber);
+    constructor(value?:Number){
+        super(NumberName, formatNumberGenerator(value));
     }
 }
 
-function getNumber(value:unknown){
-    const number = Number(value);
-
-    if(isNaN(number))
-        throw new TypeError(`Invalid number '${value}'!`);
-
-    return number
+function formatNumberGenerator(ifEmpty?:Number):format<Number> {
+    return function formatNumber(value:unknown){
+        const number = Number(emptyHandler(value, NumberName, ifEmpty));
+    
+        if(isNaN(number))
+            throw new TypeError(`Invalid number '${value}'!`);
+    
+        return number
+    }
 }
+

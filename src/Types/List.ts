@@ -2,7 +2,8 @@
  * 
  * @author Alex Malotky
  */
-import {TypeClass} from ".";
+import {TypeClass, format} from ".";
+import { emptyHandler } from "./Empty";
 
 //List Type
 type List<T extends TypeClass<any>> = Array<T>;
@@ -15,8 +16,8 @@ export const ListName = "List";
  * 
  */
 export class ListType<T extends TypeClass<any>> extends TypeClass<List<T>> {
-    constructor(type:T){
-        super(ListName, formatListGenerator(type));
+    constructor(type:T, value?:T[]){
+        super(ListName, formatListGenerator(type, value));
     }
 }
 
@@ -25,7 +26,7 @@ export class ListType<T extends TypeClass<any>> extends TypeClass<List<T>> {
  * @param {Type<any>}type 
  * @returns {Function}
  */
-function formatListGenerator<T extends TypeClass<any>>(type:T):(v:unknown)=>List<T> {
+function formatListGenerator<T extends TypeClass<any>>(type:T, ifEmpty?:T[]):format<List<T>> {
     
     /** Format List
      * 
@@ -33,6 +34,7 @@ function formatListGenerator<T extends TypeClass<any>>(type:T):(v:unknown)=>List
      * @returns {List<Type>}
      */
     return function formatList(input:unknown):List<T> {
+        input = emptyHandler(input, ListName, ifEmpty);
         return objectify(input).map(value=>type.format(value));
     }
 }

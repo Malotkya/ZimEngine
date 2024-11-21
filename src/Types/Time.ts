@@ -1,8 +1,8 @@
-/** /Types/Complex/Time
+/** /Types/Time
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, defaultFormatGenerator } from ".";
 
 const TIME_REGEX = /^(\d{1,2}):(\d{1,2})$/;
 
@@ -17,8 +17,8 @@ export const TimeName = "Time";
  * 
  */
 export class TimeType extends TypeClass<Time> {
-    constructor(){
-        super(TimeName, formatTime)
+    constructor(value?:Time){
+        super(TimeName, defaultFormatGenerator(formatTime, TimeName, value))
     }
 }
 

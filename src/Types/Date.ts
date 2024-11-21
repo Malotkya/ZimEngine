@@ -1,8 +1,8 @@
-/** /Types/Complex/Date
+/** /Types/Date
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, defaultFormatGenerator } from ".";
 
 const DATE_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
 
@@ -17,8 +17,8 @@ export const DateName = "Date";
  * 
  */
 export class DateType extends TypeClass<Date> {
-    constructor(){
-        super(DateName, formatDate);
+    constructor(value?:Date){
+        super(DateName, defaultFormatGenerator(formatDate, DateName, value));
     }
 }
 

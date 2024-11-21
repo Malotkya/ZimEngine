@@ -1,9 +1,9 @@
-/** /Types/Complex/Url
+/** /Types/Url
  * 
  * @author Alex Malotky
  */
 
-import { TypeClass } from ".";
+import { TypeClass, defaultFormatGenerator } from ".";
 
 //Help from: https://stackoverflow.com/questions/7109143/what-characters-are-valid-in-a-url
 const URL_REGEX = /^(https?):\/\/([a-z0-9.][a-z0-9-.]+[a-z0-9.])(:\d{1,5})?(\?[a-z-._~:/#\[\}@!$&'\(\)*+,:%=]+)?/;
@@ -19,8 +19,8 @@ export const UrlName = "Url";
  * 
  */
 export class UrlType extends TypeClass<Url> {
-    constructor(){
-        super(UrlName, formatUrl)
+    constructor(value?:Url){
+        super(UrlName, defaultFormatGenerator(formatUrl, UrlName, value))
     }
 }
 

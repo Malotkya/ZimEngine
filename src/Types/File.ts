@@ -1,4 +1,4 @@
-/** /Types/Complex/File
+/** /Types/File
  * 
  * @author Alex Malotky
  */

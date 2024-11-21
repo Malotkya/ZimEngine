@@ -1,8 +1,9 @@
-/** /Types/Primitive/Boolean
+/** /Types/Boolean
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, format } from ".";
+import { emptyHandler } from "./Empty";
 
 type Boolean = boolean;
 export default Boolean;
@@ -14,25 +15,39 @@ export const BooleanName = "boolean";
  * 
  */
 export class BooleanType extends TypeClass<Boolean> {
-    constructor(){
-        super(BooleanName, getBoolean);
+    constructor(value?:Boolean){
+        super(BooleanName, formatBooleanGenerator(value));
     }
 }
 
-function getBoolean(value:unknown):boolean {
-    switch (typeof value){
-        case "string":
-            return value.toLocaleLowerCase() === "true"
+function formatBooleanGenerator(ifEmpty?:boolean):format<Boolean> {
 
-        case "bigint":
-            value = Number(value);
-        case "number":
-            return value === 1;
+    return function formatBoolean(value:unknown):Boolean {
+        value = emptyHandler(value, BooleanName, ifEmpty);
 
-        case "boolean":
-            return value;
+        switch (typeof value){
+            case "string":
+                return value.toLocaleLowerCase() === "true"
+    
+            case "bigint":
+                value = Number(value);
+            case "number":
+                return value === 1;
+    
+            case "boolean":
+                return value;
 
-        default:
-            return false;
+            case "undefined":
+                return false;
+    
+            case "object":
+                if(value === null) {
+                    return false;
+                }
+            
+            default:
+                throw new TypeError(`Invalid type '${typeof value}' for Boolean!`);
+        }
     }
 }
+

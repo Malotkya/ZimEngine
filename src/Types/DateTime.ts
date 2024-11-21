@@ -1,8 +1,8 @@
-/** /Types/Complex/DateTime
+/** /Types/DateTime
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, defaultFormatGenerator } from ".";
 
 const DATE_TIME_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})[Tt](\d{1,2}):(\d{1,2})$/
 
@@ -17,8 +17,8 @@ export const DateTimeName = "DateTime";
  * 
  */
 export class DateTimeType extends TypeClass<DateTime> {
-    constructor(){
-        super(DateTimeName, formatDateTime);
+    constructor(value?:DateTime){
+        super(DateTimeName, defaultFormatGenerator(formatDateTime, DateTimeName, value));
     }
 }
 
