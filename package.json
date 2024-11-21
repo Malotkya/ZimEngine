@@ -4,9 +4,9 @@
     "description": "Combining front and backend rendering",
     "main": "lib/index.js",
     "scripts": {
-        "build:dev": "tsc --build --sourceMap && webpack-cli --env dev",
-        "build:prod": "rimraf lib && tsc --build && webpack-cli --env prod",
-        "test": "ts-jest",
+        "build:dev": "tsc --build tsconfig.build.json --sourceMap && webpack-cli --env dev",
+        "build:prod": "rimraf lib && tsc --build tsconfig.build.json && webpack-cli --env prod",
+        "test": "npm run build:dev && jest",
         "test:serve": "npm run build:dev && node ./test",
         "deploy": "npm run build:prod && ts-jest && npm publish"
     },
