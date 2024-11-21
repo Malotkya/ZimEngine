@@ -80,7 +80,7 @@ export default class View{
      * @param {HeadInit} headInit 
      * @param {RenderFunction} renderContent 
      */
-    constructor(attributes:HTMLInit = {}, headInit:HeadInit = {}, renderContent:RenderFunction){
+    constructor(attributes:HTMLInit = {}, headInit:HeadInit = {}, renderContent:RenderFunction = ()=>null){
 
         if(typeof attributes !== "object")
             throw new TypeError("Invalid Attributes!");
