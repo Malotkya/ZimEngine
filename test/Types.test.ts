@@ -1,5 +1,5 @@
 import {test, expect} from '@jest/globals';
-import {Validation} from "../src";
+import {Validation} from "../lib";
 
 test("Boolean", ()=>{
     let bool = Validation.boolean(true);

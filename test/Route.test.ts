@@ -1,7 +1,7 @@
 import {test} from '@jest/globals';
-import App, {Router} from "../src";
-import Route from "../src/Routing/Route";
-import Layer from "../src/Routing/Layer";
+import App, {Router} from "../lib";
+import Route from "../lib/Routing/Route";
+import Layer from "../lib/Routing/Layer";
 import request from 'supertest';
 
 const app = new App();

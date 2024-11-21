@@ -1,5 +1,5 @@
 import {test, expect} from '@jest/globals';
-import App, {View} from "../src";
+import App, {View} from "../lib";
 
 const {version} = require("../package.json");
 

@@ -1,6 +1,6 @@
 import {test, expect} from '@jest/globals';
-import Element, { createElement as _, compileElement } from '../src/View/Html/Element';
-import { HtmlDocument } from '../src/View/Html';
+import Element, { createElement as _, compileElement } from '../lib/View/Html/Element';
+import { HtmlDocument } from '../lib/View/Html';
 
 test("HTTP: Single Normal Element", ()=>{
     const element = _("a", {href:"/link"}, "Basic Link");
