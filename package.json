@@ -1,26 +1,28 @@
 {
     "name": "zim-engine",
-    "version": "0.7.11",
+    "version": "0.8.0",
     "description": "Combining front and backend rendering",
     "main": "lib/index.js",
     "scripts": {
         "build:dev": "tsc --sourceMap && webpack-cli --env dev",
         "build:prod": "rimraf lib && tsc && webpack-cli --env prod",
-        "test": "npm run build:dev && jest",
+        "test": "npm run build:dev && jest-ts",
         "test:serve": "npm run build:dev && node ./test",
-        "deploy": "npm run build:prod && jest && npm publish"
+        "deploy": "npm run build:prod && jest-ts && npm publish"
     },
     "author": "Alex Malotky",
     "license": "ISC",
     "devDependencies": {
+        "@jest/globals": "^29.7.0",
         "@types/node": "^20.11.30",
-        "jest": "^29.7.0",
         "rimraf": "^6.0.1",
         "supertest": "^6.3.4",
+        "ts-jest": "^29.2.5",
         "ts-loader": "^9.5.1",
         "typescript": "^5.4.3"
     },
     "dependencies": {
+        "@types/supertest": "^6.0.2",
         "path-to-regexp": "^8.2.0"
     },
     "optionalDependencies": {
