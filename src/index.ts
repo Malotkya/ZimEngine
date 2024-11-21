@@ -10,6 +10,7 @@ import { Middleware } from "./Routing/Layer";
 import Authorization from "./Authorization";
 import RenderEnvironment from "./View/RenderEnvironment";
 import { inCloudfareWorker } from "./Util";
+import Validation from "./Validation";
 
 
 //Exports
@@ -18,7 +19,7 @@ import { createElement } from "./View/Html/Element";
 import Content from "./View/Html/Content";
 import HttpError from "./HttpError";
 import BodyParser from "./BodyParser";
-export {Router, Context, createElement, HttpError, View, Authorization};
+export {Router, Context, createElement, HttpError, View, Authorization, Validation};
 export type {Content, Middleware, RenderEnvironment, RenderUpdate};
 
 /** Engine Class
@@ -112,14 +113,13 @@ export default class Engine extends Routing {
      * @returns {Response|undefined}
      */
     private async start(req:Request|NodeRequeset, res:NodeResponse|undefined, env?:Env):Promise<Response|undefined> {
-        let error:any;
+        /*let error:any;
         let body = await BodyParser(req);
         if( body instanceof Error ) {
             error = body;
             body = new Map();
-        }
-        const context = new Context(req, res, body, env || this._env, this._view, this._auth);
-        return await this.route(context, error);
+        }*/
+        return await this.route(new Context(req, res, env || this._env, this._view, this._auth));
     }
 
 }
