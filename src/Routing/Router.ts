@@ -120,10 +120,11 @@ export default class Router extends Layer{
 
     /** Use Middleware Method
      * 
-     * @param {Middleware|Router} middleware
+     * @param {Middleware|Layer} middleware
      * @returns {this}
      */
-    use(middleware:Middleware|Router):this
+    use(middleware:Middleware|Layer):this
+    use(path:string, handler:Middleware|Layer):this
     use():this{
         this._methods.add("MIDDLEWARE", this._filter(arguments));
         return this;
@@ -135,8 +136,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    get(handler:Middleware):this
-    get(path:string, handler:Middleware):this
+    get(handler:Middleware|Layer):this
+    get(path:string, handler:Middleware|Layer):this
     get():this{
         this._methods.add("GET", this._filter(arguments));
         return this;
@@ -148,8 +149,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    head(handler:Middleware):this
-    head(path:string, handler:Middleware):this
+    head(handler:Middleware|Layer):this
+    head(path:string, handler:Middleware|Layer):this
     head():this{
         this._methods.add("HEAD", this._filter(arguments));
         return this;
@@ -161,8 +162,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    post(handler:Middleware):this
-    post(path:string, handler:Middleware):this
+    post(handler:Middleware|Layer):this
+    post(path:string, handler:Middleware|Layer):this
     post():this{
         this._methods.add("POST", this._filter(arguments));
         return this;
@@ -174,8 +175,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    put(handler:Middleware):this
-    put(path:string, handler:Middleware):this
+    put(handler:Middleware|Layer):this
+    put(path:string, handler:Middleware|Layer):this
     put():this{
         this._methods.add("PUT", this._filter(arguments));
         return this;
@@ -187,8 +188,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    delete(handler:Middleware):this
-    delete(path:string, handler:Middleware):this
+    delete(handler:Middleware|Layer):this
+    delete(path:string, handler:Middleware|Layer):this
     delete():this{
         this._methods.add("DELETE", this._filter(arguments));
         return this;
@@ -200,8 +201,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    options(handler:Middleware):this
-    options(path:string, handler:Middleware):this
+    options(handler:Middleware|Layer):this
+    options(path:string, handler:Middleware|Layer):this
     options():this{
         this._methods.add("OPTIONS", this._filter(arguments));
         return this;
@@ -213,8 +214,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    patch(handler:Middleware):this
-    patch(path:string, handler:Middleware):this
+    patch(handler:Middleware|Layer):this
+    patch(path:string, handler:Middleware|Layer):this
     patch():this{
         this._methods.add("PATCH", this._filter(arguments));
         return this;
@@ -226,8 +227,8 @@ export default class Router extends Layer{
      * @param {Middleware|Layer} handler
      * @returns {this}
      */
-    all(handler:Middleware):this
-    all(path:string, handler:Middleware):this
+    all(handler:Middleware|Layer):this
+    all(path:string, handler:Middleware|Layer):this
     all():this{
         this._methods.add("ALL", this._filter(arguments));
         return this;
