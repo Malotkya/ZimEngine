@@ -4,6 +4,7 @@
  */
 import { IncomingMessage } from "node:http"
 import { isCloudflareRequest } from "../Util";
+import BodyParser, {BodyData} from "../BodyParser";
 
 // Node:Request Type
 type NodeRequeset = IncomingMessage;
@@ -32,6 +33,8 @@ export default class IncomingRequest {
     private _headers:Headers;
     private _url:string;
     private _method:string;
+    private _body:BodyData|undefined;
+    private _raw: NodeRequeset|Request
 
     constructor(message: NodeRequeset|Request) {
         this._headers = new Headers();
@@ -50,6 +53,8 @@ export default class IncomingRequest {
                 this._headers.set(key, value);
             }
         }
+
+        this._raw = message;
     }
 
     /** Method Getter
@@ -71,5 +76,12 @@ export default class IncomingRequest {
      */
     get headers() {
         return this._headers;
+    }
+
+    async formData():Promise<BodyData>{
+        if(this._body === undefined)
+            this._body = await BodyParser(this._raw);
+
+        return this._body;
     }
 }
