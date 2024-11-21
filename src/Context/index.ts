@@ -6,9 +6,10 @@ import View, {RenderUpdate} from "../View";
 import OutgoingResponse, {NodeResponse} from "./OutgoingResponse";
 import IncomingRequest, {NodeRequeset} from "./IncomingRequest";
 import Authorization from "../Authorization";
-import { BodyData } from "../BodyParser";
 import MimeTypes from "../MimeTypes";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
+import { ObjectType } from "../Types/Object";
+import { TypeOf } from "../Validation";
 
 //Node:Request & Node:Response types.
 export type {NodeRequeset, NodeResponse};
@@ -28,7 +29,6 @@ export default class Context{
     private _env:Env;
     private _view:View|undefined;
     private _auth:Authorization|undefined;
-    private _form:BodyData;
     private _query:string;
 
     private _search:Map<string, string>;
@@ -39,7 +39,7 @@ export default class Context{
      * @param request 
      * @param response 
      */
-    constructor(request: NodeRequeset|Request, response:NodeResponse|undefined, data:BodyData, env:Env, view?:View, auth?:Authorization){
+    constructor(request: NodeRequeset|Request, response:NodeResponse|undefined, env:Env, view?:View, auth?:Authorization){
         this._request = new IncomingRequest(request);
         this._response = new OutgoingResponse(response);
         this._env = env;
@@ -52,7 +52,6 @@ export default class Context{
         //Defaults
         this._search = new Map();
         this._params = new Map();
-        this._form = data;
         this._query = "/";
 
         //Search Values
@@ -72,13 +71,6 @@ export default class Context{
      */
     get response():OutgoingResponse {
         return this._response;
-    }
-
-    /** Form Data Getter
-     * 
-     */
-    get formData():BodyData {
-        return this._form;
     }
 
     /** Environment Getter
@@ -242,6 +234,20 @@ export default class Context{
         }
 
         return this;
+    }
+
+    /** Form Data Getter
+     * 
+     */
+    async formData<P extends ObjectType<any>, T extends TypeOf<P>>(expected?:P):Promise<P>
+    async formData():Promise<any>
+    async formData(expected?:ObjectType<any>):Promise<any>{
+        const data = await this._request.formData();
+
+        if(expected)
+            return expected.format(data);
+
+        return data;
     }
 
     /** Flush & Get Response
