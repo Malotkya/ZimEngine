@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { TypeClass, defaultFormatGenerator } from ".";
+import { TypeClass, defaultFormatGenerator } from "./Util";
 
 const COLOR_REGEX = /^#[0-9a-f]{6}$/;
 

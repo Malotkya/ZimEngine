@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass } from "./Util";
 
 /** Email Type
  * 

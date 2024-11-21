@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 
-import { TypeClass, defaultFormatGenerator } from ".";
+import { TypeClass, defaultFormatGenerator } from "./Util";
 
 //Help from: https://stackoverflow.com/questions/7109143/what-characters-are-valid-in-a-url
 const URL_REGEX = /^(https?):\/\/([a-z0-9.][a-z0-9-.]+[a-z0-9.])(:\d{1,5})?(\?[a-z-._~:/#\[\}@!$&'\(\)*+,:%=]+)?/;

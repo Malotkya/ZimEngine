@@ -2,8 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { TypeClass, format } from ".";
-import { emptyHandler } from "./Empty";
+import { emptyHandler, TypeClass, format } from "./Util";
 
 type Number = number;
 export default Number;

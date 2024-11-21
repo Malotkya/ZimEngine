@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from ".";
+import { TypeClass, isEmpty as test } from "./Util";
 
 //Empty Type
 type Empty = null|undefined;
@@ -31,24 +31,6 @@ function getEmpty(value:unknown):Empty {
     return null;
 }
 
-/** is Empty
- * 
- * @param {value} value 
- * @returns {boolean}
- */
 export function isEmpty(value:unknown):value is Empty {
-    return value === null || value === undefined;
+    return test(value);
 }
-
-export function emptyHandler(value:unknown, name:string, ifEmpty?:any):unknown {
-    if(isEmpty(value)){
-        if(isEmpty(ifEmpty))
-            throw new EmptyError(`Expected ${name} Value!`)
-
-        return ifEmpty;
-    }
-
-    return value;
-}
-
-export class EmptyError extends Error {};

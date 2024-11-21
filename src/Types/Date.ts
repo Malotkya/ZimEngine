@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { TypeClass, defaultFormatGenerator } from ".";
+import { TypeClass, defaultFormatGenerator } from "./Util";
 
 const DATE_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
 
