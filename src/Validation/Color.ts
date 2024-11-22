@@ -14,6 +14,14 @@ export const ColorName = "Color";
  */
 export default class ColorValidator extends TypeValidator<Color> {
     constructor(value?:Color){
+        if(value){
+            try {
+                value = formatColor(value)
+            } catch (e){
+                throw new TypeError(`${value} is not a valid Color!`);
+            }
+        }
+
         super(ColorName, defaultFormatGenerator(formatColor, ColorName, value));
     }
 }
