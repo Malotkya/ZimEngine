@@ -18,36 +18,6 @@ import ListValidator from "./List";
 import ObjectValidator, {ObjectProperties} from "./Object";
 import OptionalValidator from "./Optional";
 
-/** List Helper Function
- * 
- * @param {TypeValidator} type 
- * @param {Type} defaultValue 
- * @returns {ListValidator}
- */
-function List<T extends Type, V extends TypeValidator<T>>(type:V[], defaultValue?:List<T>):ListValidator<T, V>{
-    return new ListValidator(type[0], defaultValue)
-}
-
-/** Object Helper Function
- * 
- * @param {ObjectProperties} properties 
- * @param {Object} defaultValue 
- * @returns {ObjectValidator}
- */
-function Object<O extends Object, P extends ObjectProperties<keyof O>>(properties:P, defaultValue?:O):ObjectValidator<O, P> {
-    return new ObjectValidator(properties, defaultValue);
-}
-
-/** List Helper Function
- * 
- * @param {TypeValidator} type 
- * @param {Optional} defaultValue 
- * @returns {OptionalValidator}
- */
-function Optional<T extends Type, V extends TypeValidator<T>>(type:V, defaultValue:Optional<T>):OptionalValidator<T, V> {
-    return new OptionalValidator(type, defaultValue)
-}
-
 export default {
     //Basic Helper Functions
     boolean:   (defaultValue?:boolean) =>new BooleanValidator(defaultValue),
@@ -61,9 +31,16 @@ export default {
     Time:      (defaultValue?:Time)=>new TimeValidator(defaultValue),
     Url:       (defaultValue?:Url)=>new UrlValidator(defaultValue),
     File:      ()=>new FileValidator(),
-    
     // Complex Helper Functions
-    Object, List, Optional
+    List: function <T extends Type, V extends TypeValidator<T>>(type:V[], defaultValue?:List<T>):ListValidator<T, V>{
+        return new ListValidator(type[0], defaultValue)
+    },
+    Object: function <O extends Object, P extends ObjectProperties<keyof O>>(properties:P, defaultValue?:O):ObjectValidator<O, P> {
+        return new ObjectValidator(properties, defaultValue);
+    },
+    Optional: function <T extends Type, V extends TypeValidator<T>>(type:V, defaultValue:Optional<T>):OptionalValidator<T, V> {
+        return new OptionalValidator(type, defaultValue)
+    }
 }
 
 export type TypeOf<T extends TypeValidator<any>> = T["_type"];
