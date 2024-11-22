@@ -13,6 +13,9 @@ export const OptionalName = "Optional";
  */
 export default class OptionalValidator<T extends Type, V extends TypeValidator<T>> extends TypeValidator<Optional<T>> {
     constructor(type:V, value?:Optional<T>) {
+        if(value){
+            value = type.run(value);
+        }
         super(OptionalName, formatOptionalGenerator(type, value));
     }
 }
