@@ -13,6 +13,12 @@ export const ListName = "List";
  */
 export default class ListValidator<T extends Type, V extends TypeValidator<T>> extends TypeValidator<List<T>> {
     constructor(type:V, value?:T[]){
+        if(value){
+            if(!Array.isArray(value))
+                throw new TypeError("Default value is not a List!");
+
+            value = value.map((v)=>type.run(v));
+        }
         super(ListName, formatListGenerator(type, value));
     }
 }

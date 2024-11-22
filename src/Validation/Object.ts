@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import {Object, TypeValidator, format} from "./Type";
+import Type, {Object, TypeValidator, format} from "./Type";
 import { emptyHandler } from "./Type/Empty";
 
 
@@ -16,6 +16,12 @@ export type ObjectProperties<K extends string|number|symbol> = Record<K, TypeVal
  */
 export default class ObjectValidator<T extends Object, P extends ObjectProperties<keyof T>> extends TypeValidator<T> {
     constructor(format:P, value?:T) {
+        if(value){
+            if(typeof value !== "object")
+                throw new TypeError("Default value is not an object!");
+
+            value = buildObject(format, value);
+        }
         super(ObjectName, formatObjectGenerator(format, value))
     }
 }
@@ -25,7 +31,7 @@ export default class ObjectValidator<T extends Object, P extends ObjectPropertie
  * @param {Object} props 
  * @returns {Function}
  */
-function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyof O>>(props:P, ifEmpty:any):format<O> {
+function formatObjectGenerator<O extends Object>(props:ObjectProperties<keyof O>, ifEmpty:any):format<O> {
     
     /** Format Object
      * 
@@ -33,20 +39,29 @@ function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyo
      * @returns {any}
      */
     return function formatObject(input:unknown):O {
-        const buffer = objectify(emptyHandler(input, ObjectName, ifEmpty));
-        //@ts-ignore
-        const output:O = {};
-
-        for(const name in buffer){
-            if(props[name] === undefined)
-                throw new Error(`Unexpected value occured at ${name}!`);
-
-            //@ts-ignore
-            output[name] = props[name].run(buffer[name]);
-        }
-
-        return output;
+        return buildObject(props, objectify(emptyHandler(input, ObjectName, ifEmpty)))
     }
+}
+
+/** Build Object
+ * 
+ * @param {ObjectProperties} props 
+ * @param {Object} value 
+ * @returns {Object}
+ */
+function buildObject<O extends Object>(props:ObjectProperties<keyof O>, value:Dictionary<unknown>):O {
+    const output:Dictionary<Type> = {};
+
+    for(const name in value){
+        if(props[name] === undefined)
+            throw new Error(`Unexpected value occured at ${name}!`);
+
+        
+        output[name] = props[name].run(value[name]);
+    }
+
+    //@ts-ignore
+    return output;
 }
 
 /** Object Objectifier
