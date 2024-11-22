@@ -51,13 +51,19 @@ function formatObjectGenerator<O extends Object>(props:ObjectProperties<keyof O>
  */
 function buildObject<O extends Object>(props:ObjectProperties<keyof O>, value:Dictionary<unknown>):O {
     const output:Dictionary<Type> = {};
+    const expected = Object.getOwnPropertyNames(props);
 
     for(const name in value){
-        if(props[name] === undefined)
+        const index = expected.indexOf(name);
+        if(index === -1)
             throw new Error(`Unexpected value occured at ${name}!`);
-
         
+        expected.splice(index, 1);    
         output[name] = props[name].run(value[name]);
+    }
+
+    for(const name of expected){
+        output[name] = props[name].run(null);
     }
 
     //@ts-ignore
