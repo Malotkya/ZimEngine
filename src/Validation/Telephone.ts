@@ -14,6 +14,14 @@ export const TelephoneName = "Telephone";
  */
 export default class TelephoneValidator extends TypeValidator<Telephone> {
     constructor(value?:Telephone) {
+        if(value){
+            try {
+                value = formatTelephone(value)
+            } catch (e){
+                throw new TypeError(`${value} is not a valid Telephone Number!`);
+            }
+        }
+
         super(TelephoneName, defaultFormatGenerator(formatTelephone, TelephoneName, value));
     }
 }

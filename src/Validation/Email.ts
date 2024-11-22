@@ -14,6 +14,13 @@ export const EmailName = "Email"
  */
 export default class EmailValidator extends TypeValidator<Email> {
     constructor(value?:Email) {
+        if(value){
+            try {
+                value = formatEmail(value)
+            } catch (e){
+                throw new TypeError(`${value} is not a valid Email Address!`);
+            }
+        }
         super(EmailName, defaultFormatGenerator(formatEmail, EmailName, value))
     }
 }
