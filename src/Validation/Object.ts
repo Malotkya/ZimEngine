@@ -1,24 +1,21 @@
-/** /Types/Object
+/** /Validation/Object
  * 
  * @author Alex Malotky
  */
-import Type, {TypeClass} from ".";
-import { emptyHandler } from "./Empty";
+import {Object, TypeValidator, format} from "./Type";
+import { emptyHandler } from "./Type/Empty";
 
-//Object Type
-type Object = Dictionary<Type>;
-export default Object;
 
 //Object Format Name
 export const ObjectName = "Object";
 
-type ObjectProperties<K extends string|number|symbol> = Record<K, TypeClass<any>>;
+type ObjectProperties<K extends string|number|symbol> = Record<K, TypeValidator<any>>;
 
-/** Object Type Class
+/** Object Validator
  * 
  */
-export class ObjectType<T extends Object> extends TypeClass<T> {
-    constructor(format:ObjectProperties<keyof T>, value?:Object) {
+export class ObjectValidator<T extends Object, P extends ObjectProperties<keyof T>> extends TypeValidator<T> {
+    constructor(format:P, value?:T) {
         super(ObjectName, formatObjectGenerator(format, value))
     }
 }
@@ -28,7 +25,7 @@ export class ObjectType<T extends Object> extends TypeClass<T> {
  * @param {Object} props 
  * @returns {Function}
  */
-function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyof O>>(props:P, ifEmpty:any):(v:unknown)=>O {
+function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyof O>>(props:P, ifEmpty:any):format<O> {
     
     /** Format Object
      * 
