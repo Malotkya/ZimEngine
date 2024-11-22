@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 //Source: https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
-const TELEPHONE_REGEX = /^(\+?\d{1,2}\s?)?[(.]?(\d{3})\)?[\s.-](\d{3})[\s.-](\d{4})$/;
+const TELEPHONE_REGEX = /^(\+?\d{1,2})?\s?[(.]?(\d{3})\)?\s?[.-]?(\d{3})[\s.-]?(\d{4})$/;
 
 // Telephone Type
 type Telephone = string;
