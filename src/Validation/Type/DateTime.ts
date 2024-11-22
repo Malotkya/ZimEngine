@@ -2,7 +2,8 @@
  * 
  * @author Alex Malotky
  */
-const DATE_TIME_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})[Tt](\d{1,2}):(\d{1,2})$/;
+import Date, { formatDate } from "./Date";
+import Time, { formatTime } from "./Time";
 
 // DateTime Type
 type DateTime = string;
@@ -19,10 +20,21 @@ export function formatDateTime(value:unknown):DateTime {
     if(typeof value !== "string")
         throw new TypeError("DateTime must be stored in a string!");
 
-    if(value.match(DATE_TIME_REGEX) === null)
-        throw new TypeError("DateTime is not formated correctly!");
+    const string = value.toLocaleUpperCase();
 
-    return value;
+    let date:Date, time:Time;
+    try {
+        const index = string.indexOf("T");
+    if(index === -1)
+        throw new Error("Unable to find Date/Time seperator!");
+
+        date = formatDate(string.substring(0, index));
+        time = formatTime(string.substring(index+1));
+    } catch (e){
+        throw new TypeError("DateTime is not formated correctly!");
+    }
+
+    return date+"T"+time;
 }
 
 /** Is DateTime
