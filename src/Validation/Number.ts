@@ -11,7 +11,7 @@ export const NumberName = "number";
 /** Number Validator
  * 
  */
-export class NumberValidator extends TypeValidator<number> {
+export default class NumberValidator extends TypeValidator<number> {
     constructor(value?:number){
         super(NumberName, formatNumberGenerator(value));
     }
