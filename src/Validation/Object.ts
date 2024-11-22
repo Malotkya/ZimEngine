@@ -42,7 +42,7 @@ function formatObjectGenerator<O extends Object, P extends ObjectProperties<keyo
                 throw new Error(`Unexpected value occured at ${name}!`);
 
             //@ts-ignore
-            output[name] = props[name].format(buffer[name]);
+            output[name] = props[name].run(buffer[name]);
         }
 
         return output;
