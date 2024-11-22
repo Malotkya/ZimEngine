@@ -15,7 +15,7 @@ export default File;
  * @param {string} dataURI 
  * @returns {Blob}
  */
-function stringToBlob(dataURI:string):Blob{
+function dataURIToBlob(dataURI:string):Blob{
     // convert base64/URLEncoded data component to raw binary data held in a string
     var byteString:string;
     if (dataURI.split(',')[0].indexOf('base64') >= 0)
@@ -35,6 +35,21 @@ function stringToBlob(dataURI:string):Blob{
     return new Blob([ia], {type:mimeString});
 }
 
+/** Text String To Blob
+ * 
+ * @param {string} value 
+ * @returns {Blob}
+ */
+function textToBlob(value:string):Blob {
+    const byteArray = new Uint8Array(value.length);
+
+    for (let i=0; i<value.length; i++) {
+        byteArray[i] = value.charCodeAt(i);
+    }
+
+    return new Blob([byteArray], { type: "text/plain" });
+}
+
 /** Format Email
  * 
  * Used to format / sanitize email input.
@@ -46,7 +61,12 @@ export function formatFile(value:unknown):File {
     if(isEmpty(value)){
         throw new EmptyError(`Expected File Value!`)
     }else if(typeof value === "string") {
-        return stringToBlob(value);
+        try {
+            return dataURIToBlob(value);
+        } catch (e){
+            return textToBlob(value);
+        }
+        
     } else if( !(value instanceof Blob) ) {
         throw new TypeError("File must be stored in a Blob or string!");
     }
