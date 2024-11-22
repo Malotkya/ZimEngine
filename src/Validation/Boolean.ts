@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import { TypeValidator, format } from "./Type";
-import { emptyHandler } from "./Type/Empty";
+import { EmptyError } from "./Type/Empty";
 
 //Boolean Format Name
 export const BooleanName = "boolean";
@@ -30,11 +30,17 @@ function formatBooleanGenerator(ifEmpty?:boolean):format<boolean> {
      * @return {boolean}
      */
     return function formatBoolean(value:unknown):boolean {
-        value = emptyHandler(value, BooleanName, ifEmpty);
+
+        function undefinedHandler():boolean{
+            if(ifEmpty === undefined)
+                throw new EmptyError(`Expected ${BooleanName} Value!`);
+
+            return ifEmpty;
+        }
 
         switch (typeof value){
             case "string":
-                return value.toLocaleLowerCase() === "true"
+                return value.toLocaleLowerCase() === "true" || value === "1";
     
             case "bigint":
                 value = Number(value);
@@ -45,11 +51,11 @@ function formatBooleanGenerator(ifEmpty?:boolean):format<boolean> {
                 return value;
 
             case "undefined":
-                return false;
+                return undefinedHandler()
     
             case "object":
                 if(value === null) {
-                    return false;
+                    return ifEmpty || false;
                 }
             
             default:
