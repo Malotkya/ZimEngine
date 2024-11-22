@@ -9,12 +9,12 @@ import { emptyHandler } from "./Type/Empty";
 //Object Format Name
 export const ObjectName = "Object";
 
-type ObjectProperties<K extends string|number|symbol> = Record<K, TypeValidator<any>>;
+export type ObjectProperties<K extends string|number|symbol> = Record<K, TypeValidator<any>>;
 
 /** Object Validator
  * 
  */
-export class ObjectValidator<T extends Object, P extends ObjectProperties<keyof T>> extends TypeValidator<T> {
+export default class ObjectValidator<T extends Object, P extends ObjectProperties<keyof T>> extends TypeValidator<T> {
     constructor(format:P, value?:T) {
         super(ObjectName, formatObjectGenerator(format, value))
     }

@@ -11,7 +11,7 @@ export const ListName = "List";
 /** List Validator
  * 
  */
-export class ListValidator<T extends Type, V extends TypeValidator<T>> extends TypeValidator<List<T>> {
+export default class ListValidator<T extends Type, V extends TypeValidator<T>> extends TypeValidator<List<T>> {
     constructor(type:V, value?:T[]){
         super(ListName, formatListGenerator(type, value));
     }
