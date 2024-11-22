@@ -8,7 +8,8 @@ import IncomingRequest, {NodeRequeset} from "./IncomingRequest";
 import Authorization from "../Authorization";
 import MimeTypes from "../MimeTypes";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
-import { ObjectType } from "../Types/Object";
+import ObjectValidator, {ObjectProperties} from "../Validation/Object";
+import {Object as ObjectType} from "../Validation/Type"
 import { TypeOf } from "../Validation";
 
 //Node:Request & Node:Response types.
@@ -239,13 +240,13 @@ export default class Context{
     /** Form Data Getter
      * 
      */
-    async formData<P extends ObjectType<any>, T extends TypeOf<P>>(expected?:P):Promise<P>
+    async formData<O extends ObjectType, P extends ObjectProperties<keyof O>>(expected?:ObjectValidator<O, P>):Promise<TypeOf<ObjectValidator<O, P>>>
     async formData():Promise<any>
-    async formData(expected?:ObjectType<any>):Promise<any>{
+    async formData(expected?:any):Promise<any>{
         const data = await this._request.formData();
 
         if(expected)
-            return expected.format(data);
+            return expected.run(data);
 
         return data;
     }
