@@ -14,6 +14,7 @@ import FileValidator from "./File";
 import TelephoneValidator from "./Telephone";
 import TimeValidator from "./Time";
 import UrlValidator from "./Url";
+import EmptyValidator from "./Empty";
 import ListValidator from "./List";
 import ObjectValidator, {ObjectProperties} from "./Object";
 import OptionalValidator from "./Optional";
@@ -30,6 +31,7 @@ export default {
     Telephone: (defaultValue?:Telephone)=>new TelephoneValidator(defaultValue),
     Time:      (defaultValue?:Time)=>new TimeValidator(defaultValue),
     Url:       (defaultValue?:Url)=>new UrlValidator(defaultValue),
+    Empty:     ()=>new EmptyValidator(),
     File:      ()=>new FileValidator(),
     // Complex Helper Functions
     List: function <T extends Type, V extends TypeValidator<T>>(type:V[], defaultValue?:List<T>):ListValidator<T, V>{
