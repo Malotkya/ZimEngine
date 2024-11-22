@@ -23,10 +23,17 @@ export function formatDate(value:unknown):Date {
     if( match === null)
         throw new TypeError("Date is not formated correctly!");
 
-    const y = Number(match[1]);
-    const m = Number(match[2]);
-    const d = Number(match[3]);
+    return combineDate(Number(match[1]), Number(match[2]), Number(match[3]))
+}
 
+/** Combine Date
+ * 
+ * @param {number} y 
+ * @param {number} m 
+ * @param {number} d 
+ * @returns {Date}
+ */
+export function combineDate(y:number, m:number, d:number):Date {
     if(!validateDateParts(y, m, d))
         throw new Error("Date is invalid!");
 
