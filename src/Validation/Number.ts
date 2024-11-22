@@ -13,6 +13,9 @@ export const NumberName = "number";
  */
 export default class NumberValidator extends TypeValidator<number> {
     constructor(value?:number){
+        if(value)
+            value = convertToNumber(value);
+
         super(NumberName, formatNumberGenerator(value));
     }
 }
@@ -30,12 +33,20 @@ function formatNumberGenerator(ifEmpty?:number):format<number> {
      * @returns {number}
      */
     return function formatNumber(value:unknown):number{
-        const number = Number(emptyHandler(value, NumberName, ifEmpty));
-    
-        if(isNaN(number))
-            throw new TypeError(`Invalid number '${value}'!`);
-    
-        return number
+        return convertToNumber(emptyHandler(value, NumberName, ifEmpty))
     }
 }
 
+/** Convert To Number;
+ * 
+ * @param {unknown} value 
+ * @returns {number}
+ */
+function convertToNumber(value:unknown):number {
+    const number = Number(value);
+    
+    if(isNaN(number))
+        throw new TypeError(`Invalid number '${value}'!`);
+
+    return number
+}

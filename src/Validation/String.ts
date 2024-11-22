@@ -13,7 +13,9 @@ export const StringName = "string";
  */
 export default class StringValidator extends TypeValidator<string> {
     constructor(value?:string){
-        super(StringName, formatStringGenerator(value))
+        if(value)
+            value = convertToString(value);
+        super(StringName, formatStringGenerator(value));
     }
 }
 /** Format String Generator
@@ -29,17 +31,24 @@ function formatStringGenerator(ifEmpty?:string):format<string> {
      * @return {string}
      */
     return function formatString(value:unknown):string {
-        value = emptyHandler(value, StringName, ifEmpty);
+        return convertToString(emptyHandler(value, StringName, ifEmpty));
+    }
+}
 
-        switch(typeof value){
-            case "object":
-                return JSON.stringify(value);
+/** Convert To String
+ * 
+ * @param {unknown} value 
+ * @returns {string}
+ */
+function convertToString(value:unknown):string {
+    switch(typeof value){
+        case "object":
+            return JSON.stringify(value);
 
-            case "string":
-                return value;
+        case "string":
+            return value;
 
-            default:
-                return String(value);
-        }
+        default:
+            return String(value);
     }
 }
