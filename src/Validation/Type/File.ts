@@ -2,6 +2,7 @@
  * 
  * @author Alex Malotky
  */
+import { isEmpty, EmptyError } from "./Empty";
 
 // File Type
 type File = Blob;
@@ -42,7 +43,9 @@ function stringToBlob(dataURI:string):Blob{
  * @returns {Email}
  */
 export function formatFile(value:unknown):File {
-    if(typeof value === "string") {
+    if(isEmpty(value)){
+        throw new EmptyError(`Expected File Value!`)
+    }else if(typeof value === "string") {
         return stringToBlob(value);
     } else if( !(value instanceof Blob) ) {
         throw new TypeError("File must be stored in a Blob or string!");
