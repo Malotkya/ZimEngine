@@ -12,14 +12,14 @@ export const ListName = "List";
  * 
  */
 export default class ListValidator<T extends Type, V extends TypeValidator<T>> extends TypeValidator<List<T>> {
-    constructor(type:V, value?:T[]){
+    constructor(type:V, seperator?:string|RegExp, value?:T[]){
         if(value){
             if(!Array.isArray(value))
                 throw new TypeError("Default value is not a List!");
 
             value = value.map((v)=>type.run(v));
         }
-        super(ListName, formatListGenerator(type, value));
+        super(ListName, formatListGenerator(type, seperator, value));
     }
 }
 
@@ -28,7 +28,7 @@ export default class ListValidator<T extends Type, V extends TypeValidator<T>> e
  * @param {Type<any>}type 
  * @returns {Function}
  */
-function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V, ifEmpty?:T[]):format<List<T>> {
+function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V, seperator?:string|RegExp, ifEmpty?:T[]):format<List<T>> {
     
     /** Format List
      * 
@@ -37,7 +37,7 @@ function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V,
      */
     return function formatList(input:unknown):List<T> {
         input = emptyHandler(input, ListName, ifEmpty);
-        return objectify(input).map(value=>type.run(value));
+        return objectify(input, seperator).map(value=>type.run(value));
     }
 }
 
@@ -46,10 +46,13 @@ function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V,
  * @param {unkown} value 
  * @returns {Array<unknown>}
  */
-function objectify(value:unknown):unknown[] {
+function objectify(value:unknown, seperator:string|RegExp = "~JSON~"):unknown[] {
     switch(typeof value){
         case "string":
-            return objectify(JSON.parse(value));
+            if(seperator === "~JSON~")
+                return objectify(JSON.parse(value));
+            else
+                return value.split(seperator);
 
         case "object":
             if(Array.isArray(value))

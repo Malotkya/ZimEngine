@@ -32,13 +32,13 @@ test("List Primitive Value", ()=>{
 });
 
 test("List Default Value", ()=>{
-    const test = Validation.List(Validation.Date(), ["1970/1/1"]);
+    const test = Validation.List(Validation.Date(), undefined, ["1970/1/1"]);
     expect(test.run(null)).toEqual(["1970-01-01"]);
 });
 
 test("List Stored Value", ()=>{
     const start = ["test@real.com"];
-    const test = Validation.List(Validation.Email(), start);
+    const test = Validation.List(Validation.Email(), undefined, start);
     expect(test.run(null)).toEqual(start);
     expect(test.run(["one@new.com", "two@new.com"])).not.toEqual(start);
     expect (test.run('["test@real.com"]')).toEqual(start);
