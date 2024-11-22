@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator} from "./Type";
+import Type, {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator, List, Object, Optional} from "./Type";
 import BooleanValidator from "./Boolean";
 import NumberValidator from "./Number";
 import StringValidator from "./String";
@@ -14,11 +14,42 @@ import FileValidator from "./File";
 import TelephoneValidator from "./Telephone";
 import TimeValidator from "./Time";
 import UrlValidator from "./Url";
-//import { ListType } from "./Types/List";
-//import { ObjectType } from "./Types/Object";
-import EmptyValidator from "./Empty";
+import ListValidator from "./List";
+import ObjectValidator, {ObjectProperties} from "./Object";
+import OptionalValidator from "./Optional";
+
+/** List Helper Function
+ * 
+ * @param {TypeValidator} type 
+ * @param {Type} defaultValue 
+ * @returns {ListValidator}
+ */
+function List<T extends Type, V extends TypeValidator<T>>(type:V[], defaultValue?:List<T>):ListValidator<T, V>{
+    return new ListValidator(type[0], defaultValue)
+}
+
+/** Object Helper Function
+ * 
+ * @param {ObjectProperties} properties 
+ * @param {Object} defaultValue 
+ * @returns {ObjectValidator}
+ */
+function Object<O extends Object, P extends ObjectProperties<keyof O>>(properties:P, defaultValue?:O):ObjectValidator<O, P> {
+    return new ObjectValidator(properties, defaultValue);
+}
+
+/** List Helper Function
+ * 
+ * @param {TypeValidator} type 
+ * @param {Optional} defaultValue 
+ * @returns {OptionalValidator}
+ */
+function Optional<T extends Type, V extends TypeValidator<T>>(type:V, defaultValue:Optional<T>):OptionalValidator<T, V> {
+    return new OptionalValidator(type, defaultValue)
+}
 
 export default {
+    //Basic Helper Functions
     boolean:   (defaultValue?:boolean) =>new BooleanValidator(defaultValue),
     number:    (defaultValue?:number)  =>new NumberValidator(defaultValue),
     string:    (defaultValue?:string)  =>new StringValidator(defaultValue),
@@ -30,9 +61,9 @@ export default {
     Time:      (defaultValue?:Time)=>new TimeValidator(defaultValue),
     Url:       (defaultValue?:Url)=>new UrlValidator(defaultValue),
     File:      ()=>new FileValidator(),
-    //List:      (props:TypeClass<any>[], defaultValue?:boolean)=>new ListType(props[0]),
-    //Object:    (props:Dictionary<TypeClass<any>>, defaultValue?:boolean)=>new ObjectType(props),
-    //Optional: (type:TypeClass<any>)
+    
+    // Complex Helper Functions
+    Object, List, Optional
 }
 
 export type TypeOf<T extends TypeValidator<any>> = T["_type"];
@@ -55,10 +86,6 @@ export type TypeOf<T extends TypeValidator<any>> = T["_type"];
     "Url": UrlValidator
 }
 type BasicTypes = typeof Basic_Type_Map;
-
-
-
-
 
 //Basic Names Helper Array
 export const BASIC_NAMES = [
