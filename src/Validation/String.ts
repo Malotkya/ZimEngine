@@ -29,6 +29,17 @@ function formatStringGenerator(ifEmpty?:string):format<string> {
      * @return {string}
      */
     return function formatString(value:unknown):string {
-        return String(emptyHandler(value, StringName, ifEmpty))
+        value = emptyHandler(value, StringName, ifEmpty);
+
+        switch(typeof value){
+            case "object":
+                return JSON.stringify(value);
+
+            case "string":
+                return value;
+
+            default:
+                return String(value);
+        }
     }
 }
