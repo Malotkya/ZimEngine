@@ -1,8 +1,10 @@
 import {test, expect} from '@jest/globals';
 import {Validation} from "../lib";
 import { EmptyError } from '../lib/Validation/Type/Empty';
+import fs from "fs";
+import path from "path";
 
-function expectError(test:Function, error?:Function) {
+export function expectError(test:Function, error?:Function) {
     let value:any;
     try {
         test()
@@ -261,3 +263,35 @@ test("Empty Error", ()=>{
     expectError(()=>test.run(1234), TypeError);
     expectError(()=>test.run(false), TypeError);
 });
+
+///////////////////////////// File Validator /////////////////////////////
+const textFile = path.join(__dirname, "static", "file.txt");
+const imgFile  = path.join(__dirname, "static", "Smile.png");
+
+test("Text File Test", ()=>{
+    const test = Validation.File();
+    const buffer = fs.readFileSync(textFile);
+    const file = new Blob([buffer]);
+
+    expect(test.run(file)).toEqual(file);
+});
+
+test("Image File Test", ()=>{
+    const test = Validation.File();
+    const buffer = fs.readFileSync(imgFile);
+    const file = new Blob([buffer]);
+
+    expect(test.run(file)).toEqual(file);
+});
+
+test("File Error Test", ()=>{
+    const test = Validation.File();
+    expectError(()=>test.run(null), EmptyError);
+});
+
+test("String File Test", ()=>{
+    const test = Validation.File();
+    const blank = new Blob([new Uint8Array()], { type: "text/plain" });
+
+    expect(test.run("")).toEqual(blank);
+})
