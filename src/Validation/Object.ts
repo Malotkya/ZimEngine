@@ -39,7 +39,7 @@ function formatObjectGenerator<O extends Object>(props:ObjectProperties<keyof O>
      * @returns {any}
      */
     return function formatObject(input:unknown):O {
-        return buildObject(props, objectify(emptyHandler(input, ObjectName, ifEmpty)))
+        return emptyHandler(input, (value:unknown)=>objectify(value), ObjectName, ifEmpty);
     }
 }
 

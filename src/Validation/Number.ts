@@ -33,7 +33,7 @@ function formatNumberGenerator(ifEmpty?:number):format<number> {
      * @returns {number}
      */
     return function formatNumber(value:unknown):number{
-        return convertToNumber(emptyHandler(value, NumberName, ifEmpty))
+        return emptyHandler(value, convertToNumber, NumberName, ifEmpty);
     }
 }
 

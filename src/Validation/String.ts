@@ -31,7 +31,7 @@ function formatStringGenerator(ifEmpty?:string):format<string> {
      * @return {string}
      */
     return function formatString(value:unknown):string {
-        return convertToString(emptyHandler(value, StringName, ifEmpty));
+        return emptyHandler(value, convertToString, StringName, ifEmpty);
     }
 }
 

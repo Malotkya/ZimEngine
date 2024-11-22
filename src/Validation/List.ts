@@ -29,17 +29,18 @@ export default class ListValidator<T extends Type, V extends TypeValidator<T>> e
  * @returns {Function}
  */
 function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V, seperator?:string|RegExp, ifEmpty?:T[]):format<List<T>> {
-    
+
     /** Format List
      * 
      * @param {unknown} input
      * @returns {List<Type>}
      */
     return function formatList(input:unknown):List<T> {
-        input = emptyHandler(input, ListName, ifEmpty);
-        return objectify(input, seperator).map(value=>type.run(value));
+        return emptyHandler(input, (value:unknown)=>objectify(input, seperator).map(value=>type.run(value)), ListName, ifEmpty);
     }
 }
+
+
 
 /** List Objectifier
  * 
