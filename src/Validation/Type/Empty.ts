@@ -24,7 +24,7 @@ export function formatEmpty(value:unknown):Empty {
  * @param {boolean} string
  * @returns {boolean}
  */
-export function isEmpty(value:unknown, string:boolean = false):boolean {
+export function isEmpty(value:unknown, string:boolean = false):value is Empty {
     if(string && typeof value === "string"){
         return value === "";
     }
