@@ -21,26 +21,26 @@ import OptionalValidator from "./Optional";
 
 export default {
     //Basic Helper Functions
-    boolean:   (defaultValue?:boolean) =>new BooleanValidator(defaultValue),
-    number:    (defaultValue?:number)  =>new NumberValidator(defaultValue),
-    string:    (defaultValue?:string)  =>new StringValidator(defaultValue),
-    Color:     (defaultValue?:Color)   =>new ColorValidator(defaultValue),
-    Date:      (defaultValue?:Date)    =>new DateValidator(defaultValue),
-    DateTime:  (defaultValue?:DateTime)=>new DateTimeValidator(defaultValue),
-    Email:     (defaultValue?:Email)   =>new EmailValidator(defaultValue),
+    boolean:   (defaultValue?:boolean)  =>new BooleanValidator(defaultValue),
+    number:    (defaultValue?:number)   =>new NumberValidator(defaultValue),
+    string:    (defaultValue?:string)   =>new StringValidator(defaultValue),
+    Color:     (defaultValue?:Color)    =>new ColorValidator(defaultValue),
+    Date:      (defaultValue?:Date)     =>new DateValidator(defaultValue),
+    DateTime:  (defaultValue?:DateTime) =>new DateTimeValidator(defaultValue),
+    Email:     (defaultValue?:Email)    =>new EmailValidator(defaultValue),
     Telephone: (defaultValue?:Telephone)=>new TelephoneValidator(defaultValue),
-    Time:      (defaultValue?:Time)=>new TimeValidator(defaultValue),
-    Url:       (defaultValue?:Url)=>new UrlValidator(defaultValue),
+    Time:      (defaultValue?:Time)     =>new TimeValidator(defaultValue),
+    Url:       (defaultValue?:Url)      =>new UrlValidator(defaultValue),
     Empty:     ()=>new EmptyValidator(),
     File:      ()=>new FileValidator(),
     // Complex Helper Functions
-    List: function <T extends Type, V extends TypeValidator<T>>(type:V[], defaultValue?:List<T>):ListValidator<T, V>{
-        return new ListValidator(type[0], defaultValue)
+    List: function <T extends Type>(type:TypeValidator<T>, defaultValue?:List<T>):ListValidator<T, TypeValidator<T>>{
+        return new ListValidator(type, defaultValue)
     },
-    Object: function <O extends Object, P extends ObjectProperties<keyof O>>(properties:P, defaultValue?:O):ObjectValidator<O, P> {
+    Object: function <O extends Object>(properties:ObjectProperties<keyof O>, defaultValue?:O):ObjectValidator<O, ObjectProperties<keyof O>> {
         return new ObjectValidator(properties, defaultValue);
     },
-    Optional: function <T extends Type, V extends TypeValidator<T>>(type:V, defaultValue:Optional<T>):OptionalValidator<T, V> {
+    Optional: function <T extends Type>(type:TypeValidator<T>, defaultValue?:T|null):OptionalValidator<T, TypeValidator<T>> {
         return new OptionalValidator(type, defaultValue)
     }
 }
