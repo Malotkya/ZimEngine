@@ -196,3 +196,68 @@ test("DateTime Empty Error", ()=>{
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
+
+///////////////////////////// Email Validator /////////////////////////////
+
+test("Email Default Value", ()=>{
+    expectError(()=>Validation.Email("Not an Email"), TypeError)
+    const test = Validation.Email("Test@RealyReal.com");
+    expect(test.run(undefined)).toBe("test@realyreal.com");
+});
+
+test("Email Empty Error", ()=>{
+    const test = Validation.Email();
+    expectError(()=>test.run(undefined), EmptyError);
+    expectError(()=>test.run(null), EmptyError);
+});
+
+///////////////////////////// Telephone Validator /////////////////////////////
+
+test("Telephone Default Value", ()=>{
+    expectError(()=>Validation.Telephone("1-234-567-8910"), TypeError)
+    const test = Validation.Telephone("123.456.7890");
+    expect(test.run(undefined)).toBe("(123) 456-7890");
+});
+
+test("Telephone Empty Error", ()=>{
+    const test = Validation.Telephone();
+    expectError(()=>test.run(undefined), EmptyError);
+    expectError(()=>test.run(null), EmptyError);
+});
+
+test("Telephone Transform", ()=>{
+    const test = Validation.Telephone();
+    expect(test.run("1234567890")).toBe("(123) 456-7890");
+    expect(test.run("5 1234567890")).toBe("+5 (123) 456-7890");
+    expect(test.run("123.4567890")).toBe("(123) 456-7890");
+    expect(test.run("10 123.4567890")).toBe("+10 (123) 456-7890");
+});
+
+///////////////////////////// Url Validator /////////////////////////////
+
+test("Url Default Value", ()=>{
+    expectError(()=>Validation.Url("www.google.com"), TypeError)
+    const test = Validation.Url("HTTP://WWW.GOOGLE.COM");
+    expect(test.run(undefined)).toBe("http://www.google.com");
+});
+
+test("Url Empty Error", ()=>{
+    const test = Validation.Url();
+    expectError(()=>test.run(undefined), EmptyError);
+    expectError(()=>test.run(null), EmptyError);
+});
+
+///////////////////////////// Empty Validator /////////////////////////////
+
+test("Empty Value", ()=>{
+    const test = Validation.Empty();
+    expect(test.run(null)).toBe(null);
+    expect(test.run(undefined)).toBe(null);
+});
+
+test("Empty Error", ()=>{
+    const test = Validation.Url();
+    expectError(()=>test.run("string"), TypeError);
+    expectError(()=>test.run(1234), TypeError);
+    expectError(()=>test.run(false), TypeError);
+});
