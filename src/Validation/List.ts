@@ -1,22 +1,18 @@
-/** /Types/List
+/** /Validation/List
  * 
  * @author Alex Malotky
  */
-import {TypeClass, format} from ".";
-import { emptyHandler } from "./Empty";
-
-//List Type
-type List<T extends TypeClass<any>> = Array<T>;
-export default List;
+import Type, {List, format, TypeValidator} from "./Type";
+import { emptyHandler } from "./Type/Empty";
 
 //List Format Name
 export const ListName = "List";
 
-/** List Type Class
+/** List Validator
  * 
  */
-export class ListType<T extends TypeClass<any>> extends TypeClass<List<T>> {
-    constructor(type:T, value?:T[]){
+export class ListValidator<T extends Type, V extends TypeValidator<T>> extends TypeValidator<List<T>> {
+    constructor(type:V, value?:T[]){
         super(ListName, formatListGenerator(type, value));
     }
 }
@@ -26,7 +22,7 @@ export class ListType<T extends TypeClass<any>> extends TypeClass<List<T>> {
  * @param {Type<any>}type 
  * @returns {Function}
  */
-function formatListGenerator<T extends TypeClass<any>>(type:T, ifEmpty?:T[]):format<List<T>> {
+function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V, ifEmpty?:T[]):format<List<T>> {
     
     /** Format List
      * 
@@ -35,7 +31,7 @@ function formatListGenerator<T extends TypeClass<any>>(type:T, ifEmpty?:T[]):for
      */
     return function formatList(input:unknown):List<T> {
         input = emptyHandler(input, ListName, ifEmpty);
-        return objectify(input).map(value=>type.format(value));
+        return objectify(input).map(value=>type.run(value));
     }
 }
 

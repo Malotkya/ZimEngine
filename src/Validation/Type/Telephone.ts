@@ -1,27 +1,13 @@
-/** /Types/Telephone
+/** /Validation/Types/Telephone
  * 
  * @author Alex Malotky
  */
-import { TypeClass, defaultFormatGenerator } from "./Util";
-
 //Source: https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
 const TELEPHONE_REGEX = /^(\+?\d{1,2}\s?)?[(.]?(\d{3})\)?[\s.-](\d{3})[\s.-](\d{4})$/;
 
 // Telephone Type
 type Telephone = string;
 export default Telephone;
-
-// Telephone Format Name
-export const TelephoneName = "Telephone";
-
-/** Telephone Type Class
- * 
- */
-export class TelephoneType extends TypeClass<Telephone> {
-    constructor(value?:Telephone) {
-        super(TelephoneName, defaultFormatGenerator(formatTelephone, TelephoneName, value));
-    }
-}
 
 /** Format Telephone
  * 

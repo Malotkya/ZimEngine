@@ -1,32 +1,18 @@
-/** /Types/Color
+/** /Validation/Types/Color
  * 
  * @author Alex Malotky
  */
-import { TypeClass, defaultFormatGenerator } from "./Util";
-
 const COLOR_REGEX = /^#[0-9a-f]{6}$/;
 
 //Color Type
 type Color = string;
 export default Color;
 
-//Color Format Name
-export const ColorName = "Color";
-
-/** Color Type Class
- * 
- */
-export class ColorType extends TypeClass<Color> {
-    constructor(value?:Color){
-        super(ColorName, defaultFormatGenerator(formatColor, ColorName, value));
-    }
-}
-
  /** Format Color
-     * 
-     * @param value 
-     */
- export function formatColor(value:unknown):Color {
+ * 
+ * @param value 
+ */
+export function formatColor(value:unknown):Color {
     if(typeof value !== "string") 
         throw new TypeError("Color must be stored in a string!");
 

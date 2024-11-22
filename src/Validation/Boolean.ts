@@ -1,27 +1,35 @@
-/** /Types/Boolean
+/** /Validation/Boolean
  * 
  * @author Alex Malotky
  */
-import { emptyHandler, TypeClass, format } from "./Util";
-
-type Boolean = boolean;
-export default Boolean;
+import { TypeValidator, format } from "./Type";
+import { emptyHandler } from "./Type/Empty";
 
 //Boolean Format Name
 export const BooleanName = "boolean";
 
-/** Boolean Type Class
+/** Boolean Validator
  * 
  */
-export class BooleanType extends TypeClass<Boolean> {
-    constructor(value?:Boolean){
+export default class BooleanValidator extends TypeValidator<boolean> {
+    constructor(value?:boolean){
         super(BooleanName, formatBooleanGenerator(value));
     }
 }
 
-function formatBooleanGenerator(ifEmpty?:boolean):format<Boolean> {
+/** FOrmat Boolean Genderator
+ * 
+ * @param {boolean} ifEmpty 
+ * @returns {Function}
+ */
+function formatBooleanGenerator(ifEmpty?:boolean):format<boolean> {
 
-    return function formatBoolean(value:unknown):Boolean {
+    /** Format Boolean
+     * 
+     * @param {unkown} value
+     * @return {boolean}
+     */
+    return function formatBoolean(value:unknown):boolean {
         value = emptyHandler(value, BooleanName, ifEmpty);
 
         switch (typeof value){

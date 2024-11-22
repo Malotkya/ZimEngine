@@ -1,26 +1,12 @@
-/** /Types/Time
+/** /Validation/Types/Time
  * 
  * @author Alex Malotky
  */
-import { TypeClass, defaultFormatGenerator } from "./Util";
-
 const TIME_REGEX = /^(\d{1,2}):(\d{1,2})$/;
 
 // Time Type
 type Time = string;
 export default Time;
-
-//Time Format Name
-export const TimeName = "Time";
-
-/** Time Type Class
- * 
- */
-export class TimeType extends TypeClass<Time> {
-    constructor(value?:Time){
-        super(TimeName, defaultFormatGenerator(formatTime, TimeName, value))
-    }
-}
 
 /** Format Time
  * 
@@ -53,4 +39,3 @@ export function isTime(value:unknown):value is Time {
 
     return true;
 }
-

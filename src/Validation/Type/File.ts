@@ -1,26 +1,11 @@
-/** /Types/File
+/** Validation/Types/File
  * 
  * @author Alex Malotky
  */
-import { TypeClass } from "./Util";
 
-/** Email Type
- * 
- */
+// File Type
 type File = Blob;
 export default File;
-
-//Email Format Type
-export const FileName = "File"
-
-/** File Type Class
- * 
- */
-export class FileType extends TypeClass<File> {
-    constructor() {
-        super(FileName, formatFile)
-    }
-}
 
 /** String to Blob
  * 
@@ -29,7 +14,7 @@ export class FileType extends TypeClass<File> {
  * @param {string} dataURI 
  * @returns {Blob}
  */
-export function stringToBlob(dataURI:string):Blob{
+function stringToBlob(dataURI:string):Blob{
     // convert base64/URLEncoded data component to raw binary data held in a string
     var byteString:string;
     if (dataURI.split(',')[0].indexOf('base64') >= 0)

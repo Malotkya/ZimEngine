@@ -1,26 +1,12 @@
-/** /Types/Date
+/** /Validation/Types/Date
  * 
  * @author Alex Malotky
  */
-import { TypeClass, defaultFormatGenerator } from "./Util";
-
 const DATE_REGEX = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
 
 // Date Type
 type Date = string;
 export default Date;
-
-// Date Format Name
-export const DateName = "Date";
-
-/** Date Type Class
- * 
- */
-export class DateType extends TypeClass<Date> {
-    constructor(value?:Date){
-        super(DateName, defaultFormatGenerator(formatDate, DateName, value));
-    }
-}
 
 /** Format Date
  * 
