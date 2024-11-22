@@ -46,10 +46,10 @@ function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V,
  * @param {unkown} value 
  * @returns {Array<unknown>}
  */
-function objectify(value:unknown, seperator:string|RegExp = "~JSON~"):unknown[] {
+function objectify(value:unknown, seperator:string|RegExp|null = null):unknown[] {
     switch(typeof value){
         case "string":
-            if(seperator === "~JSON~")
+            if(seperator === null)
                 return objectify(JSON.parse(value));
             else
                 return value.split(seperator);
