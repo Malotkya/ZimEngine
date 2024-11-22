@@ -14,6 +14,13 @@ export const DateTimeName = "DateTime";
  */
 export default class DateTimeValidator extends TypeValidator<DateTime> {
     constructor(value?:DateTime){
+        if(value){
+            try {
+                value = formatDateTime(value)
+            } catch (e){
+                throw new TypeError(`${value} is not a valid DateTime!`);
+            }
+        }
         super(DateTimeName, defaultFormatGenerator(formatDateTime, DateTimeName, value));
     }
 }
