@@ -14,12 +14,12 @@ import Empty from "./Empty";
 
 //Complex Types
 export type List<T extends Type> = T[];
-export type Object = {[key:string]:Type};
+export type Object<K extends string|number|symbol> = { [key in K]?:Type }
 export type Optional<T extends Type> = T|null;
 export {Color, Date, DateTime, Email, Telephone, Time, Url, Empty};
 
 //Default Types
-type Type = boolean|number|string|Color|Date|DateTime|Email|Empty|File|Telephone|Time|Url|List<any>|Object
+type Type = boolean|number|string|Color|Date|DateTime|Email|Empty|File|Telephone|Time|Url|List<any>|Object<any>
 export default Type;
 
 /** Format Type

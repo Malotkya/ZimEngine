@@ -9,13 +9,13 @@ import { emptyHandler } from "./Type/Empty";
 //Object Format Name
 export const ObjectName = "Object";
 
-export type ObjectProperties<K extends string|number|symbol> = Record<K, TypeValidator<any>>;
+export type ObjectProperties = Record<string, TypeValidator<Type>>;
 
 /** Object Validator
  * 
  */
-export default class ObjectValidator<T extends Object, P extends ObjectProperties<keyof T>> extends TypeValidator<T> {
-    constructor(format:P, value?:T) {
+export default class ObjectValidator<P extends ObjectProperties> extends TypeValidator<Object<keyof P>> {
+    constructor(format:P, value?:Object<keyof P>) {
         if(value){
             if(typeof value !== "object")
                 throw new TypeError("Default value is not an object!");
@@ -31,14 +31,14 @@ export default class ObjectValidator<T extends Object, P extends ObjectPropertie
  * @param {Object} props 
  * @returns {Function}
  */
-function formatObjectGenerator<O extends Object>(props:ObjectProperties<keyof O>, ifEmpty:any):format<O> {
+function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty:any):format<Object<keyof P>> {
     
     /** Format Object
      * 
      * @param {unknown} input
      * @returns {any}
      */
-    return function formatObject(input:unknown):O {
+    return function formatObject(input:unknown):Object<keyof P> {
         return emptyHandler(input, (value:unknown)=>objectify(value), ObjectName, ifEmpty);
     }
 }
@@ -49,8 +49,8 @@ function formatObjectGenerator<O extends Object>(props:ObjectProperties<keyof O>
  * @param {Object} value 
  * @returns {Object}
  */
-function buildObject<O extends Object>(props:ObjectProperties<keyof O>, value:Dictionary<unknown>):O {
-    const output:Dictionary<Type> = {};
+function buildObject<P extends ObjectProperties>(props:P, value:Dictionary<unknown>):Object<keyof P> {
+    const output:Record<string, Type> = {};
     const expected = Object.getOwnPropertyNames(props);
 
     for(const name in value){
@@ -66,7 +66,6 @@ function buildObject<O extends Object>(props:ObjectProperties<keyof O>, value:Di
         output[name] = props[name].run(null);
     }
 
-    //@ts-ignore
     return output;
 }
 

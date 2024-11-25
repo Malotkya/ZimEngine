@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import Type, {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator, List, Object, Optional} from "./Type";
+import Type, {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator, List, Object} from "./Type";
 import BooleanValidator from "./Boolean";
 import NumberValidator from "./Number";
 import StringValidator from "./String";
@@ -37,7 +37,7 @@ export default {
     List: function <T extends Type>(type:TypeValidator<T>, seperator?:string|RegExp, defaultValue?:List<T>):ListValidator<T, TypeValidator<T>>{
         return new ListValidator(type, seperator, defaultValue)
     },
-    Object: function <O extends Object>(properties:ObjectProperties<keyof O>, defaultValue?:O):ObjectValidator<O, ObjectProperties<keyof O>> {
+    Object: function <P extends ObjectProperties>(properties:P, defaultValue?:Object<keyof P>):ObjectValidator<P> {
         return new ObjectValidator(properties, defaultValue);
     },
     Optional: function <T extends Type>(type:TypeValidator<T>, defaultValue?:T|null):OptionalValidator<T, TypeValidator<T>> {
@@ -45,7 +45,8 @@ export default {
     }
 }
 
-export type TypeOf<T extends TypeValidator<any>> = T["_type"];
+//Get Type From Validator
+export type TypeOf<T extends TypeValidator<Type>> = T["_type"];
 
 /** Basic Types Map
  * 
