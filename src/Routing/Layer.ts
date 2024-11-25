@@ -111,7 +111,7 @@ export default class Layer {
             context.params.set(this._keys[index-1].name, decodeURIComponent(match[index]))
         }
 
-        context.query = context.url.pathname.replace(match[0], "");
+        context.path = context.url.pathname.replace(match[0], "");
         return true;
     }
 
