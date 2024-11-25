@@ -97,6 +97,10 @@ export default class View{
         this.#defaultHead = headInit;
     }
 
+    /** Set Up File Injection
+     * 
+     * @returns {Layer}
+     */
     setUpInjection():Layer{
         if(this.#defaultHead.scripts === undefined)
             this.#defaultHead.scripts = [];
