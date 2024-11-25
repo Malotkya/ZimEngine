@@ -41,7 +41,7 @@ function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:Obj
      * @returns {Object}
      */
     return function formatObject(input:unknown):Object<keyof P> {
-        return emptyHandler<Object<keyof P>>(input, (value:unknown)=>buildObject(props, objectify(value)), ObjectName, ifEmpty as any);
+        return emptyHandler<Object<keyof P>>(input, (value:unknown)=>buildObject(props, objectify(value), ifEmpty), ObjectName, ifEmpty as any);
     }
 }
 
@@ -51,7 +51,7 @@ function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:Obj
  * @param {Object} value 
  * @returns {Object}
  */
-function buildObject<P extends ObjectProperties>(props:P, value:Record<string, unknown>):Object<keyof P> {
+function buildObject<P extends ObjectProperties>(props:P, value:Record<string, unknown>, defaultValue:Record<string, Type> = {}):Object<keyof P> {
     const output:Record<string, Type> = {};
     const expected = Object.getOwnPropertyNames(props);
 
@@ -65,7 +65,7 @@ function buildObject<P extends ObjectProperties>(props:P, value:Record<string, u
     }
 
     for(const name of expected){
-        output[name] = props[name].run(null);
+        output[name] = props[name].run(defaultValue[name]);
     }
 
     return output as any;

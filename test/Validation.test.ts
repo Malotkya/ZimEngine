@@ -60,12 +60,21 @@ test("Default Object Value", ()=>{
         email: "Alex@email.Com"
     });
 
-    type value = TypeOf<typeof test>;
-
     expect(test.run(null)).toEqual({
         name: "Alex",
         age: 32,
         email: "alex@email.com",
         portfolio: null
     });
+
+    expect(test.run({
+        age: 45
+    })).toEqual({
+        name: "Alex",
+        age: 45,
+        email: "alex@email.com",
+        portfolio: null
+    })
+
+    type value = TypeOf<typeof test>;
 });
