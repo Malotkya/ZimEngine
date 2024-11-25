@@ -113,12 +113,6 @@ export default class Engine extends Routing {
      * @returns {Response|undefined}
      */
     private async start(req:Request|NodeRequeset, res:NodeResponse|undefined, env?:Env):Promise<Response|undefined> {
-        /*let error:any;
-        let body = await BodyParser(req);
-        if( body instanceof Error ) {
-            error = body;
-            body = new Map();
-        }*/
         return await this.route(new Context(req, res, env || this._env, this._view, this._auth));
     }
 
