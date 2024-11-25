@@ -9,6 +9,7 @@ test("View Init Test", ()=>{
 
 test("Render View", ()=>{
     const v = new View(undefined, {title: "Global Title"}, (args)=>`${args.main}`);
+    
 
     const update = {
         head: {
@@ -18,6 +19,12 @@ test("Render View", ()=>{
             main:"<h1>Hello World</h1>"
         }
     }
+
+    expect(v.render(update))
+        .toBe(`<!DOCTYPE html><html><head><title>Global Title | New Title</title></head><body><h1>Hello World</h1></body></html>`)
+
+    const app = new App();
+    app.view(v);
 
     expect(v.render(update))
         .toBe(`<!DOCTYPE html><html><head><title>Global Title | New Title</title><script src=\"/zim.js?${version}\" defer></script></head><body><h1>Hello World</h1></body></html>`)
