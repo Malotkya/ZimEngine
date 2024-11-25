@@ -2,6 +2,7 @@
  * 
  * @author Alex Malotky
  */
+import { TypeOf } from ".";
 import Type, {Object, TypeValidator, format} from "./Type";
 import { emptyHandler } from "./Type/Empty";
 
@@ -15,7 +16,7 @@ export type ObjectDefaults<K extends string|number|symbol> = { [key in K]?:Type 
 /** Object Validator
  * 
  */
-export default class ObjectValidator<P extends ObjectProperties> extends TypeValidator<Object<keyof P>> {
+export default class ObjectValidator<P extends ObjectProperties> extends TypeValidator<{[K in keyof P]: TypeOf<P[K]>}> {
     constructor(format:P, value?:ObjectDefaults<keyof P>) {
         if(value){
             if(typeof value !== "object")
