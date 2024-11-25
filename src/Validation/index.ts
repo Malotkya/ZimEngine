@@ -16,7 +16,7 @@ import TimeValidator from "./Time";
 import UrlValidator from "./Url";
 import EmptyValidator from "./Empty";
 import ListValidator from "./List";
-import ObjectValidator, {ObjectProperties} from "./Object";
+import ObjectValidator, {ObjectProperties, ObjectDefaults} from "./Object";
 import OptionalValidator from "./Optional";
 
 export default {
@@ -37,7 +37,7 @@ export default {
     List: function <T extends Type>(type:TypeValidator<T>, seperator?:string|RegExp, defaultValue?:List<T>):ListValidator<T, TypeValidator<T>>{
         return new ListValidator(type, seperator, defaultValue)
     },
-    Object: function <P extends ObjectProperties>(properties:P, defaultValue?:Object<keyof P>):ObjectValidator<P> {
+    Object: function <P extends ObjectProperties>(properties:P, defaultValue?:ObjectDefaults<keyof P>):ObjectValidator<P> {
         return new ObjectValidator(properties, defaultValue);
     },
     Optional: function <T extends Type>(type:TypeValidator<T>, defaultValue?:T|null):OptionalValidator<T, TypeValidator<T>> {

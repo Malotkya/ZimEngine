@@ -9,13 +9,14 @@ import { emptyHandler } from "./Type/Empty";
 //Object Format Name
 export const ObjectName = "Object";
 
-export type ObjectProperties = Record<string, TypeValidator<Type>>;
+export type ObjectProperties = Record<string, TypeValidator<any>>;
+export type ObjectDefaults<K extends string|number|symbol> = { [key in K]?:Type }
 
 /** Object Validator
  * 
  */
 export default class ObjectValidator<P extends ObjectProperties> extends TypeValidator<Object<keyof P>> {
-    constructor(format:P, value?:Object<keyof P>) {
+    constructor(format:P, value?:ObjectDefaults<keyof P>) {
         if(value){
             if(typeof value !== "object")
                 throw new TypeError("Default value is not an object!");
@@ -31,15 +32,15 @@ export default class ObjectValidator<P extends ObjectProperties> extends TypeVal
  * @param {Object} props 
  * @returns {Function}
  */
-function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty:any):format<Object<keyof P>> {
+function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:ObjectDefaults<keyof P>):format<Object<keyof P>> {
     
     /** Format Object
      * 
      * @param {unknown} input
-     * @returns {any}
+     * @returns {Object}
      */
     return function formatObject(input:unknown):Object<keyof P> {
-        return emptyHandler(input, (value:unknown)=>objectify(value), ObjectName, ifEmpty);
+        return emptyHandler<Object<keyof P>>(input, (value:unknown)=>buildObject(props, objectify(value)), ObjectName, ifEmpty as any);
     }
 }
 
@@ -49,7 +50,7 @@ function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty:any)
  * @param {Object} value 
  * @returns {Object}
  */
-function buildObject<P extends ObjectProperties>(props:P, value:Dictionary<unknown>):Object<keyof P> {
+function buildObject<P extends ObjectProperties>(props:P, value:Record<string, unknown>):Object<keyof P> {
     const output:Record<string, Type> = {};
     const expected = Object.getOwnPropertyNames(props);
 
@@ -66,15 +67,15 @@ function buildObject<P extends ObjectProperties>(props:P, value:Dictionary<unkno
         output[name] = props[name].run(null);
     }
 
-    return output;
+    return output as any;
 }
 
 /** Object Objectifier
  * 
  * @param {unkown} value 
- * @returns {Dictionary<unknown>}
+ * @returns {Record<string, unknown>}
  */
-function objectify(value:unknown):Dictionary<unknown> {
+function objectify(value:unknown):Record<string, unknown> {
     switch (typeof value){
         case "string":
             return objectify(JSON.parse(value));
