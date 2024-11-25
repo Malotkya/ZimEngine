@@ -33,6 +33,10 @@ export default class ObjectValidator<P extends ObjectProperties> extends TypeVal
     simplify(value: { [K in keyof P]: TypeOf<P[K]>; }): string {
         return JSON.stringify(value);
     }
+
+    get<K extends keyof P>(name:K):TypeValidator<TypeOf<P[K]>> {
+        return this._validators[name];
+    }
 }
 
 /** Format Object Generator
