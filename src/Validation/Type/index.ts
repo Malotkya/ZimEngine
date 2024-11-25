@@ -18,6 +18,8 @@ export type Object<K extends string|number|symbol> = { [key in K]:Type }
 export type Optional<T extends Type> = T|null;
 export {Color, Date, DateTime, Email, Telephone, Time, Url, Empty};
 
+export type Simple = string|boolean|number|null;
+
 //Default Types
 type Type = boolean|number|string|Color|Date|DateTime|Email|Empty|File|Telephone|Time|Url|List<any>|Object<any>
 export default Type;
@@ -48,10 +50,8 @@ export abstract class TypeValidator<T> {
         return this._format;
     }
 
-    stringify(value:T):string{
-        if(typeof value === "string")
-            return value;
-
-        return String(value);
+    simplify(value:T):Simple {
+        //@ts-ignore
+        return value;
     };
 }
