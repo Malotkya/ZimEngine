@@ -47,4 +47,11 @@ export abstract class TypeValidator<T> {
     get run():format<T> {
         return this._format;
     }
+
+    stringify(value:T):string{
+        if(typeof value === "string")
+            return value;
+
+        return String(value);
+    };
 }

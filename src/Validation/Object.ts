@@ -26,6 +26,10 @@ export default class ObjectValidator<P extends ObjectProperties> extends TypeVal
         }
         super(ObjectName, formatObjectGenerator(format, value))
     }
+
+    stringify(value: { [K in keyof P]: TypeOf<P[K]>; }): string {
+        return JSON.stringify(value);
+    }
 }
 
 /** Format Object Generator

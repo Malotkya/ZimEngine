@@ -12,7 +12,9 @@ export const ListName = "List";
  * 
  */
 export default class ListValidator<T extends Type> extends TypeValidator<List<T>> {
-    constructor(type:TypeValidator<T>, seperator?:string|RegExp, value?:T[]){
+    private _seperator:string|undefined;
+
+    constructor(type:TypeValidator<T>, seperator?:string, value?:T[]){
         if(value){
             if(!Array.isArray(value))
                 throw new TypeError("Default value is not a List!");
@@ -20,6 +22,15 @@ export default class ListValidator<T extends Type> extends TypeValidator<List<T>
             value = value.map((v)=>type.run(v));
         }
         super(ListName, formatListGenerator(type, seperator, value));
+        this._seperator = seperator;
+    }
+
+    stringify(value: List<T>): string {
+        if(this._seperator === undefined) {
+            return JSON.stringify(value);
+        }
+            
+        return value.join(this._seperator);
     }
 }
 
