@@ -11,7 +11,7 @@ import { AttributeList } from "../Html/Attributes";
  * 
  */
 export default class Tracker {
-    protected _current:Dictionary<Element>;
+    protected _current:Record<string, Element>;
     private _name:string;
 
     /** Tracker Constructor
@@ -26,7 +26,7 @@ export default class Tracker {
         for(const element of Array.from(head.querySelectorAll(name))){
             const name = element.getAttribute("name");
             if(name){
-                const defaults:Dictionary<string|undefined> = {};
+                const defaults:Record<string, string|undefined> = {};
                 for(let att of element.getAttributeNames()){
                     defaults[att] = element.getAttribute(att) || undefined;
                 }
@@ -37,9 +37,9 @@ export default class Tracker {
 
     /** Update Tracked Elements
      * 
-     * @param {Dictionary<AttributeList>} updates 
+     * @param {Record<string, AttributeList>} updates 
      */
-    update(updates:Dictionary<AttributeList>){
+    update(updates:Record<string, AttributeList>){
         const lstUpdate = Object.getOwnPropertyNames(updates);
 
         //Loop over current tags

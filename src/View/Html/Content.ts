@@ -50,11 +50,11 @@ export function compressContent(content:Content):string {
  * @param {Dictionary<Content>} value 
  * @returns {Dictionary<string>|undefined}
  */
-export function toUpdate(value:Dictionary<Content>|undefined):Dictionary<string>|undefined {
+export function toUpdate(value:Record<string, Content>|undefined):Record<string, string>|undefined {
     if(value === undefined)
         return undefined;
 
-    const output:Dictionary<string> = {};
+    const output:Record<string, string> = {};
     for(const name in value){
         output[name] = compressContent(value[name]);
     }

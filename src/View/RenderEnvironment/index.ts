@@ -12,7 +12,7 @@ import { HEADER_KEY, HEADER_VALUE } from "../../Util";
 
 //Fetch Options Type
 interface FetchOptions extends RequestInit{
-    headers?:Dictionary<string>
+    headers?:Record<string, string>
 }
 
 //Event List Item Type
@@ -171,7 +171,7 @@ export default class RenderEnvironment {
     /** Update Body
      * 
      */
-    private updateBody(update:Dictionary<string>) {
+    private updateBody(update:Record<string, string>) {
         const hash = hashObject(update);
         const scripts: Array<string> = [];
 

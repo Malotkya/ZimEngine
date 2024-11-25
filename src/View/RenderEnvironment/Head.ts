@@ -57,7 +57,7 @@ export default class HeadEnvironment {
             this._title.textContent = this._defaultTitle + " | " + update.title;
         }
 
-        const meta:Dictionary<AttributeList> = {};
+        const meta:Record<string, AttributeList> = {};
         for(let name in update.meta){
             meta[name] = {
                 content: update.meta[name]
@@ -66,7 +66,7 @@ export default class HeadEnvironment {
 
         this._meta.update(meta);
         this._links.update(update.links!);
-        this._styles.update(update.styles! as Dictionary<AttributeList>);
+        this._styles.update(update.styles! as Record<string, AttributeList>);
         await this._scripts.update(update.scripts!);
     }
 }

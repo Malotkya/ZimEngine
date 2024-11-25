@@ -24,10 +24,10 @@ export interface HeadInit {
 
 export interface HeadUpdate {
     title?:TitleUpdate,
-    links?:Dictionary<LinkUpdate>,
-    meta?:Dictionary<MetaUpdate>,
-    styles?:Dictionary<StyleUpdate>|string,
-    scripts?:Dictionary<ScriptUpdate>
+    links?:Record<string, LinkUpdate>,
+    meta?:Record<string, MetaUpdate>,
+    styles?:Record<string, StyleUpdate>|string,
+    scripts?:Record<string,ScriptUpdate>
 }
 
 /** Merge Init with Update
@@ -36,7 +36,7 @@ export interface HeadUpdate {
  * @param {U} update 
  * @returns {I}
  */
-function merge<U, I extends U&{name?:string}>(init:Array<I> = [], update:Dictionary<U> = {}):Array<I> {
+function merge<U, I extends U&{name?:string}>(init:Array<I> = [], update:Record<string, U> = {}):Array<I> {
     const output: Array<I> = [];
     const list = Object.getOwnPropertyNames(update);
 
@@ -68,8 +68,8 @@ function merge<U, I extends U&{name?:string}>(init:Array<I> = [], update:Diction
     return output;
 }
 
-function toUpdate<U extends {name?:string}>(value:Array<U>):Dictionary<U> {
-    const output:Dictionary<U> = {};
+function toUpdate<U extends {name?:string}>(value:Array<U>):Record<string, U> {
+    const output:Record<string, U> = {};
 
     for(let item of value){
         if(item.name){

@@ -8,10 +8,6 @@ declare module '*.scss' {
     export default content;
 }
 
-interface Dictionary<t> {
-    [index:string]:t
-}
-
 interface Env {
     ASSETS?: Fetcher
     [key:string]:any

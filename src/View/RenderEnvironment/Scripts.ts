@@ -25,7 +25,7 @@ export default class Scripts extends Tracker{
      * @param updates 
      * @returns 
      */
-    update(updates:Dictionary<AttributeList>):Promise<void[]>{
+    update(updates:Record<string, AttributeList>):Promise<void[]>{
         super.update(updates);
         const waits: Array<Promise<void>> = [];
 

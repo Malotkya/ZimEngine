@@ -33,22 +33,22 @@ function getFile():string {
 }
 
 //Render Function Type
-export type RenderFunction = (update:Dictionary<Content>)=>Content;
+export type RenderFunction = (update:Record<string, Content>)=>Content;
 
 //Render Update Type
 export interface RenderUpdate {
     head?: HeadUpdate,
-    body?: Dictionary<Content>,
+    body?: Record<string, Content>,
     redirect?:string,
-    update?: Dictionary<Content>,
+    update?: Record<string, Content>,
 }
 
 //Fetch Update Type
 export interface FetchUpdate {
     head:HeadUpdate,
-    body?:Dictionary<string>,
+    body?:Record<string, string>,
     redirect?:string,
-    update?: Dictionary<string>
+    update?: Record<string, string>
 }
 
 /** View Class

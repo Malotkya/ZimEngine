@@ -9,14 +9,14 @@ import { isCloudflareRequest } from "./Util";
 const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
 const DEFAULT_SIZE_LIMIT = 500000000; //500MB
 
-export type BodyData = Dictionary<string|Blob>;
+export type BodyData = Record<string, string|Blob>;
 
 /** Parse Headers from String
  * 
  * @param {string} value 
  */
-function parseHeaders(value:string):Dictionary<string> {
-    const headers:Dictionary<string> = {};
+function parseHeaders(value:string):Record<string, string> {
+    const headers:Record<string, string> = {};
 
     for(const header of value.split(/;|\n/g)){
         if(header.trim() !== "") {

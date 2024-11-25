@@ -7,7 +7,7 @@ import {toString as functionToString} from "../Function";
 
 type Attribute = string|number|boolean|Array<string>|Date|EventListener;
 export default Attribute;
-export type AttributeList = Dictionary<Attribute|undefined>;
+export type AttributeList = Record<string, Attribute|undefined>;
 
 //HTML Values used accross Elements
 export type RefferPolicy = "no-referrer"|"no-referrer-when-downgrade"|"origin"|"origin-when-cross-origin"|"unsafe-url";

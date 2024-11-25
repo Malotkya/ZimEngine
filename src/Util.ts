@@ -22,7 +22,7 @@ export function sleep(n:number=1):Promise<void>{
  * @param {string} name 
  * @returns {boolean}
  */
-export function dictionaryInclude(dictionary:Dictionary<any>, name:string):boolean{
+export function dictionaryInclude(dictionary:Record<string, any>, name:string):boolean{
     for(let test in dictionary){
         if(test === name)
             return true;

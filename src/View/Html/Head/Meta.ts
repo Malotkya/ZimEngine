@@ -41,7 +41,7 @@ export default function Meta(value:MetaInit):HTMLElement {
 /** Update Meta Tags
  * 
  */
-export function mergeMeta(init:Array<MetaInit> = [], update:Dictionary<MetaUpdate> = {}):Array<MetaInit> {
+export function mergeMeta(init:Array<MetaInit> = [], update:Record<string, MetaUpdate> = {}):Array<MetaInit> {
     const output:Array<MetaInit> = JSON.parse(JSON.stringify(init));
     const list = Object.getOwnPropertyNames(update);
 
@@ -70,8 +70,8 @@ export function mergeMeta(init:Array<MetaInit> = [], update:Dictionary<MetaUpdat
 /** Update Meta Tags
  * 
  */
-export function updateMeta(init:Array<MetaInit> = [], update:Dictionary<MetaUpdate> = {}):Dictionary<string> {
-    const output:Dictionary<string> = JSON.parse(JSON.stringify(update));
+export function updateMeta(init:Array<MetaInit> = [], update:Record<string, MetaUpdate> = {}):Record<string, string> {
+    const output:Record<string, string> = JSON.parse(JSON.stringify(update));
 
     for(const item of init){
         if(item.name && item.content && !dictionaryInclude(output, item.name)){
