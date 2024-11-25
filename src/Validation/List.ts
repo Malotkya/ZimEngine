@@ -11,8 +11,8 @@ export const ListName = "List";
 /** List Validator
  * 
  */
-export default class ListValidator<T extends Type, V extends TypeValidator<T>> extends TypeValidator<List<T>> {
-    constructor(type:V, seperator?:string|RegExp, value?:T[]){
+export default class ListValidator<T extends Type> extends TypeValidator<List<T>> {
+    constructor(type:TypeValidator<T>, seperator?:string|RegExp, value?:T[]){
         if(value){
             if(!Array.isArray(value))
                 throw new TypeError("Default value is not a List!");
@@ -28,7 +28,7 @@ export default class ListValidator<T extends Type, V extends TypeValidator<T>> e
  * @param {Type}type 
  * @returns {Function}
  */
-function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V, seperator?:string|RegExp, ifEmpty?:T[]):format<List<T>> {
+function formatListGenerator<T extends Type>(type:TypeValidator<T>, seperator?:string|RegExp, ifEmpty?:T[]):format<List<T>> {
 
     /** Format List
      * 
