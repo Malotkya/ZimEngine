@@ -103,7 +103,7 @@ function processNodeRequest(request:IncomingMessage):Promise<BodyData> {
         if(headers["filename"] !== undefined){
             [
                 headers["name"],
-                new Blob([data], { type: "text/plain" })
+                new Blob([data], { type: headers["Content-Type"] || "text/plain" })
             ]
         }
 
