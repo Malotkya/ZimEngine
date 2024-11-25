@@ -43,8 +43,14 @@ test("List Stored Value", ()=>{
     const test = Validation.List(Validation.Email(), undefined, start);
     expect(test.run(null)).toEqual(start);
     expect(test.run(["one@new.com", "two@new.com"])).not.toEqual(start);
-    expect (test.run('["test@real.com"]')).toEqual(start);
+    
 });
+
+test("List in String", ()=>{
+    const test = Validation.List(Validation.boolean());
+    expect(test.run('["true", "false", 1, 0, "24", 7, true, false]'))
+        .toEqual([true, false, true, false, false, false, true, false]);
+})
 
 ///////////////////////////// Object Validator /////////////////////////////
 
@@ -77,4 +83,54 @@ test("Default Object Value", ()=>{
     })
 
     type value = TypeOf<typeof test>;
+});
+
+test("Deep Object Values", ()=>{
+    const test = Validation.Object({
+        list: Validation.List(Validation.number()),
+        name: Validation.Object({
+            first: Validation.string(),
+            last: Validation.string()
+        }),
+        birthday: Validation.Date("2024-12-25")
+    });
+
+    expect(test.run({
+        list: [3, 6, "7"],
+        name: {
+            first: "First Name",
+            last: "Last Name"
+        }
+    })).toEqual({
+        list: [3, 6, 7],
+        name: {
+            first: "First Name",
+            last: "Last Name"
+        },
+        birthday: "2024-12-25"
+    })
+
+    type value = TypeOf<typeof test>;
+});
+
+test("Object in String", ()=>{
+    const test = Validation.Object({
+        string: Validation.string(),
+        number: Validation.number(),
+        List: Validation.List(Validation.Telephone())
+    });
+
+    expect(test.run(`{
+        "string": 45,
+        "number": false, 
+        "List": [
+            "1234567890"
+        ]
+    }`)).toEqual({
+        string: "45",
+        number: 0,
+        List: [
+            "(123) 456-7890"
+        ]
+    })
 });
