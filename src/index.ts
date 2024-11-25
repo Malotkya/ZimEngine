@@ -18,7 +18,6 @@ import Router from "./Routing/Router";
 import { createElement } from "./View/Html/Element";
 import Content from "./View/Html/Content";
 import HttpError from "./HttpError";
-import BodyParser from "./BodyParser";
 export {Router, Context, createElement, HttpError, View, Authorization, Validation};
 export type {Content, Middleware, RenderEnvironment, RenderUpdate};
 
