@@ -1,7 +1,5 @@
 import {test, expect} from '@jest/globals';
-import {Validation} from "../lib";
-import { EmptyError } from '../lib/Validation/Type/Empty';
-import { expectError } from './Validation.Types.test';
+import Validation, {TypeOf} from "../src/Validation";
 
 
 ///////////////////////////// Optional Validator /////////////////////////////
@@ -10,6 +8,8 @@ test("Optional Primitive Value", ()=>{
     const test = Validation.Optional(Validation.string());
     expect(test.run(undefined)).toBe(null);
     expect(test.run("Hello, World")).toBe("Hello, World");
+
+    type value = TypeOf<typeof test>;
 });
 
 test("Optional Default Value", ()=>{
@@ -29,6 +29,8 @@ test("List Primitive Value", ()=>{
     const test = Validation.List(Validation.number());
     expect(test.run("[]")).toEqual([]);
     expect(test.run([1, 2, 3])).toEqual([1, 2, 3]);
+
+    type value = TypeOf<typeof test>;
 });
 
 test("List Default Value", ()=>{
@@ -46,20 +48,21 @@ test("List Stored Value", ()=>{
 
 ///////////////////////////// Object Validator /////////////////////////////
 
-test("Object Value", ()=>{
+test("Default Object Value", ()=>{
     const test = Validation.Object({
         name: Validation.string(),
         age: Validation.number(),
         email: Validation.Email(),
         portfolio: Validation.Optional(Validation.Url())
-    });
-    const value = {
+    }, {
         name: "Alex",
         age: "32",
-        email: "Alex@email.com"
-    };
+        email: "Alex@email.Com"
+    });
 
-    expect(test.run(value)).toEqual({
+    type value = TypeOf<typeof test>;
+
+    expect(test.run(null)).toEqual({
         name: "Alex",
         age: 32,
         email: "alex@email.com",
