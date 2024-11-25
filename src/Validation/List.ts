@@ -25,7 +25,7 @@ export default class ListValidator<T extends Type, V extends TypeValidator<T>> e
 
 /** Format List Generator
  * 
- * @param {Type<any>}type 
+ * @param {Type}type 
  * @returns {Function}
  */
 function formatListGenerator<T extends Type, V extends TypeValidator<T>>(type:V, seperator?:string|RegExp, ifEmpty?:T[]):format<List<T>> {
