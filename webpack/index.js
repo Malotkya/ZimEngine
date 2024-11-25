@@ -12,6 +12,9 @@ const tsconfig = fs.existsSync(tsconfigFileName)? fs.readFileSync(tsconfigFileNa
 const package  = fs.readFileSync(path.join(process.cwd(), "package.json")).toString();
 const {version} = json5.parse(package);
 
+//Export path Front End File.
+module.exports.BundlePath = path.resolve(__dirname, "..", "lib", "View", "Web.js");
+
 /** Get Typescript Aliases
  * 
  * @returns {Object}

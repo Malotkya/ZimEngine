@@ -41,15 +41,18 @@ export default class Engine extends Routing {
      * 
      * @param {View} value 
      */
-    view(value:View){
+    view(value:View, inject:boolean = true){
         if( !(value instanceof View) )
             throw new Error("Value must be an instance of View!");
 
-        if(this._methods.length === 0 || this._methods.at(0)!.layer.path !== View.injectFilePath) {
-            this._methods.unshift({
-                name: "ALL",
-                layer: new Layer(View.injectFilePath, View.injectFile)
-            });
+        if(inject) {
+            const layer = value.setUpInjection();
+            if(this._methods.length === 0 || this._methods.at(0)!.layer.path !== View.injectFilePath) {
+                this._methods.unshift({
+                    name: "ALL",
+                    layer: layer
+                });
+            }
         }
         
         this._view = value;

@@ -10,6 +10,7 @@ import { inCloudfareWorker } from "../Util";
 import { nodeImport } from "../Node";
 import MimeTypes from "../MimeTypes";
 import Context from "../Context";
+import Layer from "../Routing/Layer";
 
 const { version } = require("../../package.json");
 
@@ -91,13 +92,28 @@ export default class View{
         if(typeof renderContent !== "function")
             throw new TypeError("Render Content must be in the form of a function!");
 
-        if(headInit.scripts === undefined)
-            headInit.scripts = [];
-        headInit.scripts.push({src: View.injectedFileRoute, defer: true});
-
         this.#defaultContent = renderContent;
         this.#attribute = attributes;
         this.#defaultHead = headInit;
+    }
+
+    setUpInjection():Layer{
+        if(this.#defaultHead.scripts === undefined)
+            this.#defaultHead.scripts = [];
+
+        let exsits:boolean = false;
+        for(const scripts of this.#defaultHead.scripts){
+            if(scripts.src === View.injectedFileRoute){
+                exsits = true;
+                break;
+            }
+        }
+
+        if(!exsits) {
+            this.#defaultHead.scripts.push({src: View.injectedFileRoute, defer: true});
+        }
+
+        return new Layer(View.injectFilePath, View.injectFile);
     }
 
     /** Render Content
