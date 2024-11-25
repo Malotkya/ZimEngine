@@ -34,7 +34,7 @@ export default {
     Empty:     ()=>new EmptyValidator(),
     File:      ()=>new FileValidator(),
     // Complex Helper Functions
-    List: function <T extends Type>(type:TypeValidator<T>, seperator?:string|RegExp, defaultValue?:List<T>):ListValidator<T>{
+    List: function <T extends Type>(type:TypeValidator<T>, seperator?:string, defaultValue?:List<T>):ListValidator<T>{
         return new ListValidator(type, seperator, defaultValue)
     },
     Object: function <P extends ObjectProperties>(properties:P, defaultValue?:ObjectDefaults<keyof P>):ObjectValidator<P> {
