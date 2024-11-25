@@ -10,6 +10,7 @@ import MimeTypes from "../MimeTypes";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
 import ObjectValidator, {ObjectProperties} from "../Validation/Object";
 import { TypeOf } from "../Validation";
+import Query from "./Query";
 
 //Node:Request & Node:Response types.
 export type {NodeRequeset, NodeResponse};
@@ -29,7 +30,7 @@ export default class Context{
     private _env:Env;
     private _view:View|undefined;
     private _auth:Authorization|undefined;
-    private _query:string;
+    private _path:string;
 
     private _search:Map<string, string>;
     private _params:Map<string, string>;
@@ -52,7 +53,7 @@ export default class Context{
         //Defaults
         this._search = new Map();
         this._params = new Map();
-        this._query = "/";
+        this._path = this._url.pathname;
 
         //Search Values
         for(const [name, value] of this._url.searchParams.entries())
@@ -108,24 +109,24 @@ export default class Context{
         return this._search;
     }
 
-    /** Query Getter
+    /** Path Getter
      * 
      */
-    get query():string {
-        return this._query;
+    get path():string {
+        return this._path;
     }
 
-    /** Query Setter
+    /** Path Setter
      * 
      */
-    set query(value:string) {
+    set path(value:string) {
         if(value.charAt(0) !== "/") {
             value = "/"+value;
         }
         if(value.charAt(value.length-1) === "/")
             value = value.substring(0, value.length-1);
             
-        this._query = value;
+        this._path = value;
     }
 
     /** Set Status Code
@@ -305,5 +306,14 @@ export default class Context{
             this._response.redirect(url, status);
 
         }
+    }
+
+    /** Start Database Query
+     * 
+     * @param {string} table 
+     * @returns {Query}
+     */
+    query(table:string):Query {
+        return new Query(table, this._env["DB"]);
     }
 }
