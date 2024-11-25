@@ -17,6 +17,8 @@ export type ObjectDefaults<K extends string|number|symbol> = { [key in K]?:Type 
  * 
  */
 export default class ObjectValidator<P extends ObjectProperties> extends TypeValidator<{[K in keyof P]: TypeOf<P[K]>}> {
+    private _validators:P;
+
     constructor(format:P, value?:ObjectDefaults<keyof P>) {
         if(value){
             if(typeof value !== "object")
@@ -24,10 +26,11 @@ export default class ObjectValidator<P extends ObjectProperties> extends TypeVal
 
             value = buildObject(format, value);
         }
-        super(ObjectName, formatObjectGenerator(format, value))
+        super(ObjectName, formatObjectGenerator(format, value));
+        this._validators = format;
     }
 
-    stringify(value: { [K in keyof P]: TypeOf<P[K]>; }): string {
+    simplify(value: { [K in keyof P]: TypeOf<P[K]>; }): string {
         return JSON.stringify(value);
     }
 }

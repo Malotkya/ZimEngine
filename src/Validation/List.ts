@@ -25,7 +25,7 @@ export default class ListValidator<T extends Type> extends TypeValidator<List<T>
         this._seperator = seperator;
     }
 
-    stringify(value: List<T>): string {
+    simplify(value: List<T>): string {
         if(this._seperator === undefined) {
             return JSON.stringify(value);
         }

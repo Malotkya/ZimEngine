@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import Type, {Optional, format, TypeValidator} from "./Type";
+import Type, {Optional, format, TypeValidator, Simple} from "./Type";
 import { isEmpty } from "./Type/Empty";
 
 //Optional Format Name
@@ -12,11 +12,21 @@ export const OptionalName = "Optional";
  * 
  */
 export default class OptionalValidator<T extends Type> extends TypeValidator<Optional<T>> {
+    private _proto:TypeValidator<T>;
+
     constructor(type:TypeValidator<T>, value?:Optional<T>) {
         if(value){
             value = type.run(value);
         }
         super(OptionalName, formatOptionalGenerator(type, value));
+        this._proto = type;
+    }
+
+    simplify(value: Optional<T>): Simple {
+        if(value)
+            return this._proto.simplify(value);
+
+        return null;
     }
 }
 
