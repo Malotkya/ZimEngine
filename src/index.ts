@@ -89,7 +89,7 @@ export default class Engine extends Routing {
      */
     async fetch(req:Request, env:Env):Promise<Response> {
         if(env.ASSETS){
-            const assetResponse = await env.ASSETS.fetch(req.clone());
+            const assetResponse = await env.ASSETS.fetch(req.clone() as any);
             if(assetResponse.status < 400)
                 return assetResponse;
         }
