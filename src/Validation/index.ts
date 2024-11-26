@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import Type, {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator, List, Object, Simple} from "./Type";
+import Type, {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator, List, ObjectType, Simple} from "./Type";
 import BooleanValidator from "./Boolean";
 import NumberValidator from "./Number";
 import StringValidator from "./String";
@@ -99,7 +99,7 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
      * @param {Object} value 
      * @returns {Array}
      */
-    buildInsertValues(value:Object<keyof P>):[string, Simple[]]{
+    buildInsertValues(value:ObjectType<keyof P>):[string, Simple[]]{
         let queryNames:string = "(";
         let queryValues:string = "VALUES(";
         const values:Array<Simple> = [];
@@ -118,7 +118,7 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
      * @param {Object} value 
      * @returns {Array}
      */
-    buildUpdateValues(value:Object<keyof P>):[string, Simple[]] {
+    buildUpdateValues(value:ObjectType<keyof P>):[string, Simple[]] {
         let string:string = "SET ";
         const values:Array<Simple> = [];
 
