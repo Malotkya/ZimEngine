@@ -2,9 +2,9 @@
  * 
  * @author Alex Malotky
  */
-import {D1Database} from "@cloudflare/workers-types";
-import { Object } from "../Validation/Type";
-import DataObject, { TypeOf, DataConstraints, ObjectProperties,  } from "../Validation";
+import { ObjectType as ObjectValue } from "../Validation/Type";
+import DataObject, { TypeOf, DataConstraints, ObjectProperties } from "../Validation";
+import { isDatabaseClass } from "../Util";
 
 /** Database Query Builder
  * 
@@ -15,7 +15,7 @@ export default class QueryBuilder {
 
     constructor(env:Env) {
         for(const name in env){
-            if(env[name] instanceof D1Database){
+            if( isDatabaseClass(env[name]) ){
                 this.#db = env[name];
                 break;
             }
@@ -34,7 +34,7 @@ export default class QueryBuilder {
      * @param {ObjectValidator} validator 
      * @param {Object} value 
      */
-    async insert<P extends ObjectProperties>(object:DataObject<P>, value:Object<keyof P>):Promise<void> {
+    async insert<P extends ObjectProperties>(object:DataObject<P>, value:ObjectValue<keyof P>):Promise<void> {
         const [string, values] = object.buildInsertValues(value);
 
         await this.db.prepare(`INSERT INTO ${object.name}${string}`)
@@ -47,7 +47,7 @@ export default class QueryBuilder {
      * @param {Object} value 
      * @param {ObjectDefaults} constraints
      */
-    async update<P extends ObjectProperties>(object:DataObject<P>, value:Object<keyof P>, constraints?:DataConstraints<keyof P>):Promise<void>{
+    async update<P extends ObjectProperties>(object:DataObject<P>, value:ObjectValue<keyof P>, constraints?:DataConstraints<keyof P>):Promise<void>{
         const [updateString, updateValues] = object.buildUpdateValues(value);
         const [constraintString, constraintValues] = object.buildConstraints(constraints);
 
