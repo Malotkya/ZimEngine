@@ -4,10 +4,11 @@
  */
 import AriaGlobalAttributes, {toString as toAriaString} from "./Aria";
 import {toString as functionToString} from "../Function";
+import { Optional } from "../../../Validation/Type";
 
 type Attribute = string|number|boolean|Array<string>|Date|EventListener;
 export default Attribute;
-export type AttributeList = Record<string, Attribute|undefined>;
+export type AttributeList = Record<string, Optional<Attribute>>;
 
 //HTML Values used accross Elements
 export type RefferPolicy = "no-referrer"|"no-referrer-when-downgrade"|"origin"|"origin-when-cross-origin"|"unsafe-url";
@@ -46,7 +47,7 @@ export function buildAttributesString(attributes:AttributeList):string {
  * @param name 
  * @param value 
  */
-export function toString(name:string, value:Attribute|undefined):string {
+export function toString(name:string, value:Optional<Attribute>):string {
     switch (typeof value){
         case "function":
             value = functionToString(value);
