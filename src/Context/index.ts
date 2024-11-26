@@ -10,7 +10,7 @@ import MimeTypes from "../MimeTypes";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
 import ObjectValidator, {ObjectProperties} from "../Validation/Object";
 import { TypeOf } from "../Validation";
-import Query from "./Query";
+import QueryBuilder from "./Query";
 
 //Node:Request & Node:Response types.
 export type {NodeRequeset, NodeResponse};
@@ -31,6 +31,7 @@ export default class Context{
     private _view:View|undefined;
     private _auth:Authorization|undefined;
     private _path:string;
+    private _queryBuilder:QueryBuilder
 
     private _search:Map<string, string>;
     private _params:Map<string, string>;
@@ -54,6 +55,7 @@ export default class Context{
         this._search = new Map();
         this._params = new Map();
         this._path = this._url.pathname;
+        this._queryBuilder = new QueryBuilder(env);
 
         //Search Values
         for(const [name, value] of this._url.searchParams.entries())
@@ -308,12 +310,11 @@ export default class Context{
         }
     }
 
-    /** Start Database Query
+    /** Database Query Builder
      * 
-     * @param {string} table 
-     * @returns {Query}
+     * @returns {QueryBuilder}
      */
-    query(table:string):Query {
-        return new Query(table, this._env["DB"]);
+    query():QueryBuilder {
+        return this._queryBuilder;
     }
 }
