@@ -1,5 +1,5 @@
 import {test, expect} from '@jest/globals';
-import Validation, {TypeOf} from "../src/Validation";
+import * as Validation from "../src/Validation";
 
 
 ///////////////////////////// Optional Validator /////////////////////////////
@@ -9,7 +9,7 @@ test("Optional Primitive Value", ()=>{
     expect(test.run(undefined)).toBe(null);
     expect(test.run("Hello, World")).toBe("Hello, World");
 
-    type value = TypeOf<typeof test>;
+    type value = Validation.TypeOf<typeof test>;
 });
 
 test("Optional Default Value", ()=>{
@@ -30,7 +30,7 @@ test("List Primitive Value", ()=>{
     expect(test.run("[]")).toEqual([]);
     expect(test.run([1, 2, 3])).toEqual([1, 2, 3]);
 
-    type value = TypeOf<typeof test>;
+    type value = Validation.TypeOf<typeof test>;
 });
 
 test("List Default Value", ()=>{
@@ -82,7 +82,7 @@ test("Default Object Value", ()=>{
         portfolio: null
     })
 
-    type value = TypeOf<typeof test>;
+    type value = Validation.TypeOf<typeof test>;
 });
 
 test("Deep Object Values", ()=>{
@@ -110,7 +110,7 @@ test("Deep Object Values", ()=>{
         birthday: "2024-12-25"
     })
 
-    type value = TypeOf<typeof test>;
+    type value = Validation.TypeOf<typeof test>;
 });
 
 test("Object in String", ()=>{

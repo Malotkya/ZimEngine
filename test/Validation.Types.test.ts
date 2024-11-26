@@ -1,5 +1,5 @@
 import {test, expect} from '@jest/globals';
-import {Validation} from "../lib";
+import * as Validation from "../lib/Validation";
 import { EmptyError } from '../lib/Validation/Type/Empty';
 import fs from "fs";
 import path from "path";
