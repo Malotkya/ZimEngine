@@ -3,21 +3,30 @@
  * @author Alex Malotky
  */
 import {D1Database} from "@cloudflare/workers-types";
-import ObjectValidator, {ObjectProperties, ObjectDefaults} from "../Validation/Object";
 import { Object, Simple } from "../Validation/Type";
-import { TypeOf } from "../Validation";
+import DataObject, { TypeOf, DataConstraints, ObjectProperties,  } from "../Validation";
 
 /** Database Query Builder
  * 
  * Currntly only works with Cloudflare D1Database
  */
 export default class Query {
-    #db:D1Database;
-    private _table:string;
+    #db:D1Database|undefined;
 
-    constructor(table:string, db:D1Database) {
-        this.#db = db;
-        this._table = table;
+    constructor(env:Env) {
+        for(const name in env){
+            if(env[name] instanceof D1Database){
+                this.#db = env[name];
+                break;
+            }
+        }
+    }
+
+    private get db():D1Database {
+        if(this.#db === undefined)
+            throw new Error("No database connection!");
+
+        return this.#db;
     }
 
     /** Insert Value into Database
@@ -25,20 +34,11 @@ export default class Query {
      * @param {ObjectValidator} validator 
      * @param {Object} value 
      */
-    async insert<P extends ObjectProperties>(validator:ObjectValidator<P>, value:Object<keyof P>):Promise<void> {
-        let queryNames:string = this._table + "(";
-        let queryValues:string = "VALUES(";
-        const values:Array<Simple> = [];
+    async insert<P extends ObjectProperties>(object:DataObject<P>, value:Object<keyof P>):Promise<void> {
+        const [string, values] = object.buildInsertValues(value);
 
-        for(const name in value) {
-            queryNames  += name + ", ";
-            queryValues += "?, ";
-            values.push(validator.get(name).simplify(value[name]));
-        }
-
-        await this.#db.prepare(`INSERT INTO ${this._table}${queryNames.slice(-2)}) ${queryValues.slice(-2)})`)
+        await this.db.prepare(`INSERT INTO ${object.name}${string}`)
             .bind(...values).run();
-        
     }
 
     /** Update Value in Database
@@ -47,28 +47,21 @@ export default class Query {
      * @param {Object} value 
      * @param {ObjectDefaults} constraints
      */
-    async update<P extends ObjectProperties>(validator:ObjectValidator<P>, value:Object<keyof P>, constraints?:ObjectDefaults<keyof P>):Promise<void>{
-        let queryNames:string = "SET ";
-        const values:Array<Simple> = [];
+    async update<P extends ObjectProperties>(object:DataObject<P>, value:Object<keyof P>, constraints?:DataConstraints<keyof P>):Promise<void>{
+        const [updateString, updateValues] = object.buildUpdateValues(value);
+        const [constraintString, constraintValues] = object.buildConstraints(constraints);
 
-        for(const name in value) {
-            queryNames  += name + " = ?, ";
-            values.push(validator.get(name).simplify(value[name]));
-        }
+        await this.db.prepare(`UPDATE ${object.name} ${updateString} ${constraintString}`)
+                .bind(...updateValues.concat(constraintValues)).run();
+    }
 
-        let constraintNames:string = "";
-        if(constraints) {
+    /**
+     * 
+     */
+    async delete<P extends ObjectProperties>(object:DataObject<P>, constraints?:DataConstraints<keyof P>):Promise<void> {
+        const [string, values] = object.buildConstraints(constraints);
 
-            constraintNames = "WHERE ";
-            for(const name in constraints) {
-                constraintNames += name + " = ? AND"
-                values.push(validator.get(name).simplify(constraints[name]));
-            }
-
-            constraintNames = constraintNames.slice(-3);
-        }
-
-        await this.#db.prepare(`UPDATE ${this._table} ${queryNames} ${constraintNames}`)
+        await this.db.prepare(`DELETE FROM ${object.name} ${string}`)
                 .bind(...values).run();
     }
 
@@ -77,32 +70,16 @@ export default class Query {
      * @param {ObjectValidator} validator 
      * @param {ObjectDefaults} constraints
      */
-    async get<P extends ObjectProperties>(validator:ObjectValidator<P>, constraints?:ObjectDefaults<keyof P>):Promise<TypeOf<ObjectValidator<P>>|null> {
-        let constraintNames:string = "";
-        const values:Array<Simple> = [];
+    async get<P extends ObjectProperties>(object:DataObject<P>, constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>|null> {
+        const [string, values] = object.buildConstraints(constraints); 
 
-        if(constraints) {
-
-            constraintNames = "WHERE ";
-            for(const name in constraints) {
-                constraintNames += name + " = ? AND"
-                values.push(validator.get(name).simplify(constraints[name]));
-            }
-
-            constraintNames = constraintNames.slice(-3);
-        }
-
-        const result:TypeOf<ObjectValidator<P>>|null = await this.#db.prepare(`SELECT * FROM ${this._table} ${constraintNames}`)
+        const result:TypeOf<DataObject<P>>|null = await this.db.prepare(`SELECT * FROM ${object.name} ${string}`)
                         .bind(...values).first();
         
         if(result === null)
             return null;
 
-        for(const name in result){
-            result[name] = validator.get(name).run(result[name]);
-        }
-
-        return result;
+        return object.run(result);
     }
 
     /** Get ALl Values from Database
@@ -110,36 +87,15 @@ export default class Query {
      * @param {ObjectValidator} validator 
      * @param {ObjectDefaults} constraints
      */
-    async getAll<P extends ObjectProperties>(validator:ObjectValidator<P>, constraints?:ObjectDefaults<keyof P>):Promise<TypeOf<ObjectValidator<P>>[]> {
-        let constraintNames:string = "";
-        const values:Array<Simple> = [];
+    async getAll<P extends ObjectProperties>(object:DataObject<P>, constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>[]> {
+        const [string, values] = object.buildConstraints(constraints); 
 
-        if(constraints) {
-
-            constraintNames = "WHERE ";
-            for(const name in constraints) {
-                constraintNames += name + " = ? AND"
-                values.push(validator.get(name).simplify(constraints[name]));
-            }
-
-            constraintNames = constraintNames.slice(-3);
-        }
-
-        const output:TypeOf<ObjectValidator<P>>[] = []
-        const {results, error} = await this.#db.prepare(`SELECT * FROM ${this._table} ${constraintNames}`)
+        const {results, error} = await this.db.prepare(`SELECT * FROM ${object.name} ${string}`)
                         .bind(...values).all();
 
         if(error)
             throw error;
 
-        for(const result of results){
-            for(const name in result){
-                result[name] = validator.get(name).run(result[name]);
-            }
-
-            output.push(result as any);
-        }
-
-        return output;
+        return results.map((v)=>object.run(v));
     }
 }
