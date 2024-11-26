@@ -3,14 +3,14 @@
  * @author Alex Malotky
  */
 import {D1Database} from "@cloudflare/workers-types";
-import { Object, Simple } from "../Validation/Type";
+import { Object } from "../Validation/Type";
 import DataObject, { TypeOf, DataConstraints, ObjectProperties,  } from "../Validation";
 
 /** Database Query Builder
  * 
  * Currntly only works with Cloudflare D1Database
  */
-export default class Query {
+export default class QueryBuilder {
     #db:D1Database|undefined;
 
     constructor(env:Env) {
