@@ -15,7 +15,7 @@ import Empty from "./Empty";
 //Complex Types
 export type List<T extends Type> = T[];
 export type Object<K extends string|number|symbol> = { [key in K]:Type }
-export type Optional<T extends Type> = T|null;
+export type Optional<T> = T|Empty;
 export {Color, Date, DateTime, Email, Telephone, Time, Url, Empty};
 
 export type Simple = string|boolean|number|null;
