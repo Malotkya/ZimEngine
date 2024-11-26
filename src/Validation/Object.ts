@@ -81,7 +81,7 @@ function buildObject<P extends ObjectProperties>(props:P, value:Record<string, u
  * @param {unkown} value 
  * @returns {Record<string, unknown>}
  */
-function objectify(value:unknown):Record<string, unknown> {
+export function objectify(value:unknown):Record<string, unknown> {
     switch (typeof value){
         case "string":
             return objectify(JSON.parse(value));
