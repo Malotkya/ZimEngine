@@ -9,7 +9,9 @@ import { isCloudflareRequest } from "./Util";
 const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
 const DEFAULT_SIZE_LIMIT = 500000000; //500MB
 
-export type BodyData = Record<string, string|Blob>;
+export interface BodyData{
+    [key:string]: string|Blob|undefined
+};
 
 /** Parse Headers from String
  * 

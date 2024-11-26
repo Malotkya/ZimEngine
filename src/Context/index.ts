@@ -7,6 +7,7 @@ import OutgoingResponse, {NodeResponse} from "./OutgoingResponse";
 import IncomingRequest, {NodeRequeset} from "./IncomingRequest";
 import Authorization from "../Authorization";
 import MimeTypes from "../MimeTypes";
+import { BodyData } from "..//BodyParser";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
 import DataObject, { TypeOf, ObjectProperties } from "../Validation";
 import QueryBuilder from "./QueryBuilder";
@@ -242,7 +243,7 @@ export default class Context{
      * 
      */
     async formData<P extends ObjectProperties>(expected?:DataObject<P>):Promise<TypeOf<DataObject<P>>>
-    async formData():Promise<any>
+    async formData():Promise<BodyData>
     async formData<P extends ObjectProperties>(expected?:DataObject<P>):Promise<any>{
         const data = await this._request.formData();
 
