@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import Type, {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator, List, ObjectType, Simple} from "./Type";
+import Type, {Color, Date, DateTime, Email, Telephone, Time, Url, TypeValidator, List, Object, Simple} from "./Type";
 import BooleanValidator from "./Boolean";
 import NumberValidator from "./Number";
 import StringValidator from "./String";
@@ -25,27 +25,27 @@ import { isEmpty } from "./Type/Empty";
 export function boolean  (defaultValue?:boolean)  { return new BooleanValidator(defaultValue) };
 export function number   (defaultValue?:number)   { return new NumberValidator(defaultValue) };
 export function string   (defaultValue?:string)   {return new StringValidator(defaultValue) };
-export function Color    (defaultValue?:Color)    { return new ColorValidator(defaultValue) };
-export function Date     (defaultValue?:Date)     { return new DateValidator(defaultValue) };
-export function DateTime (defaultValue?:DateTime) { return new DateTimeValidator(defaultValue) };
-export function Email    (defaultValue?:Email)    { return new EmailValidator(defaultValue) };
-export function Telephone(defaultValue?:Telephone){ return new TelephoneValidator(defaultValue) };
-export function Time     (defaultValue?:Time)     { return new TimeValidator(defaultValue) };
-export function Url      (defaultValue?:Url)      { return new UrlValidator(defaultValue) };
-export function Empty    () { return new EmptyValidator() };
-export function File     () { return new FileValidator() };
+export function color    (defaultValue?:Color)    { return new ColorValidator(defaultValue) };
+export function date     (defaultValue?:Date)     { return new DateValidator(defaultValue) };
+export function datetime (defaultValue?:DateTime) { return new DateTimeValidator(defaultValue) };
+export function email    (defaultValue?:Email)    { return new EmailValidator(defaultValue) };
+export function telephone(defaultValue?:Telephone){ return new TelephoneValidator(defaultValue) };
+export function time     (defaultValue?:Time)     { return new TimeValidator(defaultValue) };
+export function url      (defaultValue?:Url)      { return new UrlValidator(defaultValue) };
+export function empty    () { return new EmptyValidator() };
+export function file     () { return new FileValidator() };
 
 //Complex Helper Functions
-export function List<T extends Type>(type:TypeValidator<T>, seperator?:string, defaultValue?:List<T>):ListValidator<T>{
+export function list<T extends Type>(type:TypeValidator<T>, seperator?:string, defaultValue?:List<T>):ListValidator<T>{
     return new ListValidator(type, seperator, defaultValue)
 }
-export function Object<P extends ObjectProperties>(properties:P, defaultValue?:ObjectDefaults<keyof P>):ObjectValidator<P> {
+export function object<P extends ObjectProperties>(properties:P, defaultValue?:ObjectDefaults<keyof P>):ObjectValidator<P> {
     return new ObjectValidator(properties, defaultValue);
 }
-export function Optional<T extends Type>(type:TypeValidator<T>, defaultValue?:T|null):OptionalValidator<T> {
+export function optional<T extends Type>(type:TypeValidator<T>, defaultValue?:T|null):OptionalValidator<T> {
     return new OptionalValidator(type, defaultValue)
 }
-export function Record<T extends Type>(type:TypeValidator<T>, defaultValue?:Record<string, T>) {
+export function record<T extends Type>(type:TypeValidator<T>, defaultValue?:Record<string, T>) {
     return new RecordValidator(type, defaultValue);
 }
 
@@ -99,7 +99,7 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
      * @param {Object} value 
      * @returns {Array}
      */
-    buildInsertValues(value:ObjectType<keyof P>):[string, Simple[]]{
+    buildInsertValues(value:Object<keyof P>):[string, Simple[]]{
         let queryNames:string = "(";
         let queryValues:string = "VALUES(";
         const values:Array<Simple> = [];
@@ -118,7 +118,7 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
      * @param {Object} value 
      * @returns {Array}
      */
-    buildUpdateValues(value:ObjectType<keyof P>):[string, Simple[]] {
+    buildUpdateValues(value:Object<keyof P>):[string, Simple[]] {
         let string:string = "SET ";
         const values:Array<Simple> = [];
 
