@@ -10,7 +10,7 @@ import MimeTypes from "../MimeTypes";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
 import ObjectValidator, {ObjectProperties} from "../Validation/Object";
 import { TypeOf } from "../Validation";
-import QueryBuilder from "./Query";
+import QueryBuilder from "./QueryBuilder";
 
 //Node:Request & Node:Response types.
 export type {NodeRequeset, NodeResponse};
