@@ -49,6 +49,10 @@
         "./Webpack": {
             "require": "./webpack/index.js"
         },
+        "./Validation": {
+            "import": "./lib/Validation/index.js",
+            "types": "./lib/Validation/index.d.ts"
+        },
         ".": {
             "import": "./lib/index.js",
             "types": "./lib/index.d.ts"
