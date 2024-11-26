@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { ObjectType as ObjectValue } from "../Validation/Type";
+import { Object as ObjectValue } from "../Validation/Type";
 import DataObject, { TypeOf, DataConstraints, ObjectProperties } from "../Validation";
 import { isDatabaseClass } from "../Util";
 
