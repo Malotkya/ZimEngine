@@ -106,19 +106,19 @@ test("String Convertion Test", ()=>{
 ///////////////////////////// Color Validator /////////////////////////////
 
 test("Color Default Value", ()=>{
-    expectError(()=>Validation.Color("White"), TypeError)
-    const test = Validation.Color("#FFFFFF");
+    expectError(()=>Validation.color("White"), TypeError)
+    const test = Validation.color("#FFFFFF");
     expect(test.run(undefined)).toBe("#ffffff");
 });
 
 test("Color Empty Error", ()=>{
-    const test = Validation.Color();
+    const test = Validation.color();
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
 
 test("Color Conversion", ()=>{
-    const test = Validation.Color();
+    const test = Validation.color();
     expect(test.run("fff")).toBe("#ffffff");
     expect(test.run("#123")).toBe("#112233");
     expect(test.run("000")).toBe("#000000");
@@ -127,19 +127,19 @@ test("Color Conversion", ()=>{
 ///////////////////////////// Date Validator /////////////////////////////
 
 test("Date Default Value", ()=>{
-    expectError(()=>Validation.Date("January 1, 1970"), TypeError)
-    const test = Validation.Date("2023-12-15");
+    expectError(()=>Validation.date("January 1, 1970"), TypeError)
+    const test = Validation.date("2023-12-15");
     expect(test.run(undefined)).toBe("2023-12-15");
 });
 
 test("Date Empty Error", ()=>{
-    const test = Validation.Date();
+    const test = Validation.date();
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
 
 test("Invalid Dates", ()=>{
-    const test = Validation.Date();
+    const test = Validation.date();
     expectError(()=>test.run("1-1-20202"));
     expectError(()=>test.run("2021-2-29"));
     expectError(()=>test.run("2021-1-50"));
@@ -148,7 +148,7 @@ test("Invalid Dates", ()=>{
 })
 
 test("Date Conversion", ()=>{
-    const test = Validation.Date();
+    const test = Validation.date();
     expect(test.run("1-2-3")).toBe("0001-02-03");
     expect(test.run("45.06.7")).toBe("0045-06-07");
     expect(test.run("890.1.23")).toBe("0890-01-23");
@@ -159,26 +159,26 @@ test("Date Conversion", ()=>{
 ///////////////////////////// Time Validator /////////////////////////////
 
 test("Time Default Value", ()=>{
-    expectError(()=>Validation.Time("17:00:01"), TypeError)
-    const test = Validation.Time("17:00");
+    expectError(()=>Validation.time("17:00:01"), TypeError)
+    const test = Validation.time("17:00");
     expect(test.run(undefined)).toBe("17:00");
 });
 
 test("Time Empty Error", ()=>{
-    const test = Validation.Time();
+    const test = Validation.time();
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
 
 test("Invalid Time", ()=>{
-    const test = Validation.Time();
+    const test = Validation.time();
     expectError(()=>test.run("50:34"));
     expectError(()=>test.run("18:99"));
     expectError(()=>test.run("15:00:PM"));
 });
 
 test("Time Conversion", ()=>{
-    const test = Validation.Time();
+    const test = Validation.time();
     expect(test.run("12:00:PM")).toBe("12:00");
     expect(test.run("12:00:AM")).toBe("00:00");
     expect(test.run("5:00:PM")).toBe("17:00");
@@ -188,13 +188,13 @@ test("Time Conversion", ()=>{
 ///////////////////////////// DateTime Validator /////////////////////////////
 
 test("DateTime Default Value", ()=>{
-    expectError(()=>Validation.DateTime("January 1, 1970 @ 5:00 PM"), TypeError)
-    const test = Validation.DateTime("1970-1-1t5:00:pm");
+    expectError(()=>Validation.datetime("January 1, 1970 @ 5:00 PM"), TypeError)
+    const test = Validation.datetime("1970-1-1t5:00:pm");
     expect(test.run(undefined)).toBe("1970-01-01T17:00");
 });
 
 test("DateTime Empty Error", ()=>{
-    const test = Validation.DateTime();
+    const test = Validation.datetime();
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
@@ -202,13 +202,13 @@ test("DateTime Empty Error", ()=>{
 ///////////////////////////// Email Validator /////////////////////////////
 
 test("Email Default Value", ()=>{
-    expectError(()=>Validation.Email("Not an Email"), TypeError)
-    const test = Validation.Email("Test@RealyReal.com");
+    expectError(()=>Validation.email("Not an Email"), TypeError)
+    const test = Validation.email("Test@RealyReal.com");
     expect(test.run(undefined)).toBe("test@realyreal.com");
 });
 
 test("Email Empty Error", ()=>{
-    const test = Validation.Email();
+    const test = Validation.email();
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
@@ -216,19 +216,19 @@ test("Email Empty Error", ()=>{
 ///////////////////////////// Telephone Validator /////////////////////////////
 
 test("Telephone Default Value", ()=>{
-    expectError(()=>Validation.Telephone("1-234-567-8910"), TypeError)
-    const test = Validation.Telephone("123.456.7890");
+    expectError(()=>Validation.telephone("1-234-567-8910"), TypeError)
+    const test = Validation.telephone("123.456.7890");
     expect(test.run(undefined)).toBe("(123) 456-7890");
 });
 
 test("Telephone Empty Error", ()=>{
-    const test = Validation.Telephone();
+    const test = Validation.telephone();
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
 
 test("Telephone Transform", ()=>{
-    const test = Validation.Telephone();
+    const test = Validation.telephone();
     expect(test.run("1234567890")).toBe("(123) 456-7890");
     expect(test.run("5 1234567890")).toBe("+5 (123) 456-7890");
     expect(test.run("123.4567890")).toBe("(123) 456-7890");
@@ -238,13 +238,13 @@ test("Telephone Transform", ()=>{
 ///////////////////////////// Url Validator /////////////////////////////
 
 test("Url Default Value", ()=>{
-    expectError(()=>Validation.Url("www.google.com"), TypeError)
-    const test = Validation.Url("HTTP://WWW.GOOGLE.COM");
+    expectError(()=>Validation.url("www.google.com"), TypeError)
+    const test = Validation.url("HTTP://WWW.GOOGLE.COM");
     expect(test.run(undefined)).toBe("http://www.google.com");
 });
 
 test("Url Empty Error", ()=>{
-    const test = Validation.Url();
+    const test = Validation.url();
     expectError(()=>test.run(undefined), EmptyError);
     expectError(()=>test.run(null), EmptyError);
 });
@@ -252,13 +252,13 @@ test("Url Empty Error", ()=>{
 ///////////////////////////// Empty Validator /////////////////////////////
 
 test("Empty Value", ()=>{
-    const test = Validation.Empty();
+    const test = Validation.empty();
     expect(test.run(null)).toBe(null);
     expect(test.run(undefined)).toBe(null);
 });
 
 test("Empty Error", ()=>{
-    const test = Validation.Url();
+    const test = Validation.empty();
     expectError(()=>test.run("string"), TypeError);
     expectError(()=>test.run(1234), TypeError);
     expectError(()=>test.run(false), TypeError);
@@ -269,7 +269,7 @@ const textFile = path.join(__dirname, "static", "file.txt");
 const imgFile  = path.join(__dirname, "static", "Smile.png");
 
 test("Text File Test", ()=>{
-    const test = Validation.File();
+    const test = Validation.file();
     const buffer = fs.readFileSync(textFile);
     const file = new Blob([buffer]);
 
@@ -277,7 +277,7 @@ test("Text File Test", ()=>{
 });
 
 test("Image File Test", ()=>{
-    const test = Validation.File();
+    const test = Validation.file();
     const buffer = fs.readFileSync(imgFile);
     const file = new Blob([buffer]);
 
@@ -285,12 +285,12 @@ test("Image File Test", ()=>{
 });
 
 test("File Error Test", ()=>{
-    const test = Validation.File();
+    const test = Validation.file();
     expectError(()=>test.run(null), EmptyError);
 });
 
 test("String File Test", ()=>{
-    const test = Validation.File();
+    const test = Validation.file();
     const blank = new Blob([new Uint8Array()], { type: "text/plain" });
 
     expect(test.run("")).toEqual(blank);
