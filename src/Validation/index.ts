@@ -18,6 +18,7 @@ import EmptyValidator from "./Empty";
 import ListValidator from "./List";
 import ObjectValidator, {ObjectProperties, ObjectDefaults} from "./Object";
 import OptionalValidator from "./Optional";
+import RecordValidator from "./Record";
 import { isEmpty } from "./Type/Empty";
 
 //Basic Helper Functions
@@ -43,6 +44,9 @@ export function Object<P extends ObjectProperties>(properties:P, defaultValue?:O
 }
 export function Optional<T extends Type>(type:TypeValidator<T>, defaultValue?:T|null):OptionalValidator<T> {
     return new OptionalValidator(type, defaultValue)
+}
+export function Record<T extends Type>(type:TypeValidator<T>, defaultValue?:Record<string, T>) {
+    return new RecordValidator(type, defaultValue);
 }
 
 //Get Type From Validator
