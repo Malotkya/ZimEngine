@@ -20,9 +20,9 @@ export default class RecordValidator<T extends Type> extends TypeValidator<Recor
             } catch (e){
                 throw new TypeError("Default value is not a Record!");
             }
-
-            super(RecordName, formatRecordGenerator(type, value));
         }
+
+        super(RecordName, formatRecordGenerator(type, value));
     }
 }
 
