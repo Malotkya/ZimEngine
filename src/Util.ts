@@ -52,7 +52,7 @@ export function inCloudfareWorker():boolean {
  */
 export function isDatabaseClass(value:unknown):value is D1Database {
     if(inCloudfareWorker()){
-        return value instanceof D1Database
+        return typeof (value as D1Database).prepare === "function";
     }
 
     return false;
