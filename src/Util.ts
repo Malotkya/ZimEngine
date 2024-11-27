@@ -47,16 +47,6 @@ export function inCloudfareWorker():boolean {
     return typeof navigator !== "undefined" && navigator.userAgent === 'Cloudflare-Workers'
 }
 
-/** is Database Class
- * 
- */
-export function isDatabaseClass(value:unknown):value is D1Database {
-    if(inCloudfareWorker()){
-        return typeof (value as D1Database).prepare === "function";
-    }
-
-    return false;
-}
 
 /** Detect Node Environment
  * 
