@@ -302,8 +302,8 @@ export default class Context{
         } else {
 
             if(typeof url === "string"){
-                const {protocol, domain, hash, search} = split(this._request.url);
-                url = new URL(protocol+"://"+domain+url+hash+search);
+                const {protocol, domain, port, hash, search} = split(this._request.url);
+                url = new URL(protocol+"://"+domain+port+url+hash+search);
             }
             this._response.redirect(url, status);
 
