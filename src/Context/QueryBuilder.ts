@@ -4,98 +4,100 @@
  */
 import { Object as ObjectValue } from "../Validation/Type";
 import DataObject, { TypeOf, DataConstraints, ObjectProperties } from "../Validation";
-import { isDatabaseClass } from "../Util";
 
 /** Database Query Builder
  * 
  * Currntly only works with Cloudflare D1Database
  */
-export default class QueryBuilder {
-    #db:D1Database|undefined;
+export default class QueryBuilder<P extends ObjectProperties> {
+    private _db:D1Database|undefined;
+    private _obj:DataObject<P>;
 
-    constructor(env:Env) {
-        for(const name in env){
-            if( isDatabaseClass(env[name]) ){
-                this.#db = env[name];
-                break;
-            }
-        }
+    constructor(db:D1Database, object:DataObject<P>) {
+        this._db = db;
+        this._obj = object;
     }
 
     private get db():D1Database {
-        if(this.#db === undefined)
+        if(this._db === undefined)
             throw new Error("No database connection!");
 
-        return this.#db;
+        return this._db;
     }
 
     /** Insert Value into Database
      * 
-     * @param {ObjectValidator} validator 
      * @param {Object} value 
      */
-    async insert<P extends ObjectProperties>(object:DataObject<P>, value:ObjectValue<keyof P>):Promise<void> {
-        const [string, values] = object.buildInsertValues(value);
+    async insert(value:ObjectValue<keyof P>):Promise<void> {
+        const [string, values] = this._obj.buildInsertValues(value);
 
-        await this.db.prepare(`INSERT INTO ${object.name}${string}`)
-            .bind(...values).run();
+        const query = `INSERT INTO ${this._obj.name}${string}`;
+        console.debug(query);
+
+        await this.db.prepare(query).bind(...values).run();
     }
 
     /** Update Value in Database
      * 
-     * @param {ObjectValidator} validator 
      * @param {Object} value 
      * @param {ObjectDefaults} constraints
      */
-    async update<P extends ObjectProperties>(object:DataObject<P>, value:ObjectValue<keyof P>, constraints?:DataConstraints<keyof P>):Promise<void>{
-        const [updateString, updateValues] = object.buildUpdateValues(value);
-        const [constraintString, constraintValues] = object.buildConstraints(constraints);
+    async update(value:ObjectValue<keyof P>, constraints?:DataConstraints<keyof P>):Promise<void>{
+        const [updateString, updateValues] = this._obj.buildUpdateValues(value);
+        const [constraintString, constraintValues] = this._obj.buildConstraints(constraints);
 
-        await this.db.prepare(`UPDATE ${object.name} ${updateString} ${constraintString}`)
-                .bind(...updateValues.concat(constraintValues)).run();
+        const query = `UPDATE ${this._obj.name} ${updateString} ${constraintString}`;
+        console.debug(query);
+
+        await this.db.prepare(query).bind(...updateValues.concat(constraintValues)).run();
     }
 
-    /**
+    /** Delete Value in Database
      * 
      */
-    async delete<P extends ObjectProperties>(object:DataObject<P>, constraints?:DataConstraints<keyof P>):Promise<void> {
-        const [string, values] = object.buildConstraints(constraints);
+    async delete(constraints?:DataConstraints<keyof P>):Promise<void> {
+        const [string, values] = this._obj.buildConstraints(constraints);
 
-        await this.db.prepare(`DELETE FROM ${object.name} ${string}`)
-                .bind(...values).run();
+        const query = `DELETE FROM ${this._obj.name} ${string}`;
+        console.debug(query);
+
+        await this.db.prepare(query).bind(...values).run();
     }
 
     /** Get First Value from Database
      * 
-     * @param {ObjectValidator} validator 
      * @param {ObjectDefaults} constraints
      */
-    async get<P extends ObjectProperties>(object:DataObject<P>, constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>|null> {
-        const [string, values] = object.buildConstraints(constraints); 
+    async get(constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>|null> {
+        const [string, values] = this._obj.buildConstraints(constraints); 
 
-        const result:TypeOf<DataObject<P>>|null = await this.db.prepare(`SELECT * FROM ${object.name} ${string}`)
-                        .bind(...values).first();
+        const query = `SELECT * FROM ${this._obj.name} ${string}`;
+        console.debug(query);
+
+        const result:TypeOf<DataObject<P>>|null = await this.db.prepare(query).bind(...values).first();
         
         if(result === null)
             return null;
 
-        return object.run(result);
+        return this._obj.run(result);
     }
 
     /** Get ALl Values from Database
      * 
-     * @param {ObjectValidator} validator 
      * @param {ObjectDefaults} constraints
      */
-    async getAll<P extends ObjectProperties>(object:DataObject<P>, constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>[]> {
-        const [string, values] = object.buildConstraints(constraints); 
+    async getAll(constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>[]> {
+        const [string, values] = this._obj.buildConstraints(constraints); 
 
-        const {results, error} = await this.db.prepare(`SELECT * FROM ${object.name} ${string}`)
-                        .bind(...values).all();
+        const query = `SELECT * FROM ${this._obj.name} ${string}`;
+        console.debug(query);
+
+        const {results, error} = await this.db.prepare(query).bind(...values).all();
 
         if(error)
             throw error;
 
-        return results.map((v)=>object.run(v));
+        return results.map((v)=>this._obj.run(v));
     }
 }

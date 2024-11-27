@@ -31,7 +31,6 @@ export default class Context{
     private _view:View|undefined;
     private _auth:Authorization|undefined;
     private _path:string;
-    private _queryBuilder:QueryBuilder
 
     private _search:Map<string, string>;
     private _params:Map<string, string>;
@@ -55,7 +54,6 @@ export default class Context{
         this._search = new Map();
         this._params = new Map();
         this._path = this._url.pathname;
-        this._queryBuilder = new QueryBuilder(env);
 
         //Search Values
         for(const [name, value] of this._url.searchParams.entries())
@@ -314,7 +312,7 @@ export default class Context{
      * 
      * @returns {QueryBuilder}
      */
-    query():QueryBuilder {
-        return this._queryBuilder;
+    query<P extends ObjectProperties>(object:DataObject<P>):QueryBuilder<P> {
+        return new QueryBuilder(this._env["db"], object);
     }
 }
