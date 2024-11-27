@@ -5,6 +5,69 @@
 import { Object as ObjectValue } from "../Validation/Type";
 import DataObject, { TypeOf, DataConstraints, ObjectProperties } from "../Validation";
 
+//Query Filter Constraints
+interface QueryConstraints<P extends ObjectProperties> {
+    groupBy?: Array<keyof P>,
+    orderBy?: Record<keyof P, "ASC"|"DESC">,
+    limit?:number,
+    offset?:number
+}
+
+/** Build Group By String
+ * 
+ * @param {Array} value 
+ * @returns {string}
+ */
+function buildGroupByString<P extends ObjectProperties>(value:Array<keyof P>):string {
+    if(value.length === 0)
+        return "";
+
+    return "ORDER BY " + value.filter((v, i, self)=>self.indexOf(v, i)===i).join(", ");
+}
+
+/** Build Order By String
+ * 
+ * @param {Record} value 
+ * @returns {String}
+ */
+function buildOrderByString<P extends ObjectProperties>(value:Record<keyof P, "ASC"|"DESC">):string {
+    if(Object.getOwnPropertyNames(value).length === 0)
+        return "";
+
+    let string = "ORDER BY ";
+    for(const name in value) {
+        string += name + " " + value[name] + ", ";
+    }
+
+    return string.substring(0, string.length-1);
+}
+
+/** Build Query Filter String
+ * 
+ * @param {QueryConstraints} constraints 
+ * @returns {string}
+ */
+function buildFilterString<P extends ObjectProperties>(constraints:QueryConstraints<P> = {}):string {
+    const {groupBy, orderBy, limit, offset} = constraints;
+    let output:string = "";
+
+    if(groupBy)
+        output += buildGroupByString(groupBy) + " ";
+    
+    if(orderBy)
+        output += buildOrderByString(orderBy) + " ";
+
+    if(limit)
+        output += `LIMIT ${limit} `; 
+    
+
+    if(offset)
+        output += `OFFSET ${offset}`;
+    
+
+    return output;
+}
+
 /** Database Query Builder
  * 
  * Currntly only works with Cloudflare D1Database
@@ -33,8 +96,6 @@ export default class QueryBuilder<P extends ObjectProperties> {
         const [string, values] = this._obj.buildInsertValues(value);
 
         const query = `INSERT INTO ${this._obj.name}${string}`;
-        console.debug(query);
-
         await this.db.prepare(query).bind(...values).run();
     }
 
@@ -48,8 +109,6 @@ export default class QueryBuilder<P extends ObjectProperties> {
         const [constraintString, constraintValues] = this._obj.buildConstraints(constraints);
 
         const query = `UPDATE ${this._obj.name} ${updateString} ${constraintString}`;
-        console.debug(query);
-
         await this.db.prepare(query).bind(...updateValues.concat(constraintValues)).run();
     }
 
@@ -60,8 +119,6 @@ export default class QueryBuilder<P extends ObjectProperties> {
         const [string, values] = this._obj.buildConstraints(constraints);
 
         const query = `DELETE FROM ${this._obj.name} ${string}`;
-        console.debug(query);
-
         await this.db.prepare(query).bind(...values).run();
     }
 
@@ -73,8 +130,6 @@ export default class QueryBuilder<P extends ObjectProperties> {
         const [string, values] = this._obj.buildConstraints(constraints); 
 
         const query = `SELECT * FROM ${this._obj.name} ${string}`;
-        console.debug(query);
-
         const result:TypeOf<DataObject<P>>|null = await this.db.prepare(query).bind(...values).first();
         
         if(result === null)
@@ -87,12 +142,11 @@ export default class QueryBuilder<P extends ObjectProperties> {
      * 
      * @param {ObjectDefaults} constraints
      */
-    async getAll(constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>[]> {
+    async getAll(constraints?:DataConstraints<keyof P>, filter?:QueryConstraints<P>):Promise<TypeOf<DataObject<P>>[]> {
         const [string, values] = this._obj.buildConstraints(constraints); 
+        const filterString = buildFilterString(filter);
 
-        const query = `SELECT * FROM ${this._obj.name} ${string}`;
-        console.debug(query);
-
+        const query = `SELECT * FROM ${this._obj.name} ${string} ${filterString}`;
         const {results, error} = await this.db.prepare(query).bind(...values).all();
 
         if(error)
