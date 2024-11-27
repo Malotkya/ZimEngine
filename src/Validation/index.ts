@@ -91,7 +91,8 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
             values.push(this._props[name].simplify(constraints[name]));
         }
 
-        return [string.slice(-3), values];
+        string.slice(-3)
+        return [string, values];
     }
 
     /** Build Insert
@@ -109,8 +110,9 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
             queryValues += "?, ";
             values.push(this._props[name].simplify(value[name]));
         }
-
-        return [`${queryNames.slice(-2)}) ${queryValues.slice(-2)})`, values]
+        queryNames.slice(-2)
+        queryValues.slice(-2)
+        return [`${queryNames}) ${queryValues})`, values]
     }
 
     /** Build Update
