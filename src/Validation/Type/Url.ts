@@ -20,17 +20,22 @@ export function formatUrl(value:unknown):Url {
     if(typeof value !== "string")
         throw new TypeError("Url must be stored in a string!");
 
+    const {protocol, domain, path, hash, search} = split(value);
+    return protocol+"://"+domain+path+hash+search;
+}
+
+export function split(value:string):{protocol:string, domain:string, path:string, hash:string, search:string}{
     const match = value.match(URL_REGEX);
     if(match === null)
         throw new TypeError("Url is not formated correctly!");
 
-    const protocol = match[1].toLocaleLowerCase();
-    const domain   = match[2].toLocaleLowerCase();
-    const path     = match[3] || "";
-    const hash     = match[4] || "";
-    const search   = match[5] || "";
-
-    return protocol+"://"+domain+path+hash+search;
+    return {
+        protocol: match[1].toLocaleLowerCase(),
+        domain: match[2].toLocaleLowerCase(),
+        path: match[3] || "",
+        hash: match[4] || "",
+        search:match[5] || ""
+    }
 }
 
 /** Validate Url
