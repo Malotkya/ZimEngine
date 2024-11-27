@@ -8,7 +8,7 @@ import DataObject, { TypeOf, DataConstraints, ObjectProperties } from "../Valida
 //Query Filter Constraints
 interface QueryConstraints<P extends ObjectProperties> {
     groupBy?: Array<keyof P>,
-    orderBy?: Record<keyof P, "ASC"|"DESC">,
+    orderBy?: {[k in keyof P]?: "ASC"|"DESC"},
     limit?:number,
     offset?:number
 }
@@ -30,7 +30,7 @@ function buildGroupByString<P extends ObjectProperties>(value:Array<keyof P>):st
  * @param {Record} value 
  * @returns {String}
  */
-function buildOrderByString<P extends ObjectProperties>(value:Record<keyof P, "ASC"|"DESC">):string {
+function buildOrderByString<P extends ObjectProperties>(value:{[k in keyof P]?: "ASC"|"DESC"}):string {
     if(Object.getOwnPropertyNames(value).length === 0)
         return "";
 
