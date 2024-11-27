@@ -39,7 +39,7 @@ function buildOrderByString<P extends ObjectProperties>(value:{[k in keyof P]?: 
         string += name + " " + value[name] + ", ";
     }
 
-    return string.substring(0, string.length-1);
+    return string.substring(0, string.length-2);
 }
 
 /** Build Query Filter String
