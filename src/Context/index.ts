@@ -11,6 +11,7 @@ import { BodyData } from "..//BodyParser";
 import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
 import DataObject, { TypeOf, ObjectProperties } from "../Validation";
 import QueryBuilder from "./QueryBuilder";
+import { split } from "../Validation/Type/Url";
 
 //Node:Request & Node:Response types.
 export type {NodeRequeset, NodeResponse};
@@ -301,7 +302,8 @@ export default class Context{
         } else {
 
             if(typeof url === "string"){
-                url = new URL(this._request.url.replace(/(^https?:\/\/.*?:\d{0,4})(.*)$/, "$1"+url));
+                const {protocol, domain, hash, search} = split(this._request.url);
+                url = new URL(protocol+"://"+domain+url+hash+search);
             }
             this._response.redirect(url, status);
 
@@ -313,6 +315,6 @@ export default class Context{
      * @returns {QueryBuilder}
      */
     query<P extends ObjectProperties>(object:DataObject<P>):QueryBuilder<P> {
-        return new QueryBuilder(this._env["db"], object);
+        return new QueryBuilder(this._env["DB"] || this._env["db"], object);
     }
 }
