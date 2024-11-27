@@ -41,7 +41,7 @@ export function isEmpty(value:unknown, string:boolean = false):value is Empty {
  * @returns {unknown}
  */
 export function emptyHandler<T>(value:unknown, format:format<T>, name:string, ifEmpty?:T):T {
-    if(isEmpty(value)){
+    if(isEmpty(value, true)){
         if(ifEmpty === undefined)
             throw new EmptyError(`Expected ${name} Value!`)
 
