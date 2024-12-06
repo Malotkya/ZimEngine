@@ -35,7 +35,7 @@ function formatBooleanGenerator(ifEmpty?:boolean):format<boolean> {
 
         if(value === undefined) {
             if(ifEmpty === undefined)
-                throw new EmptyError(`Expected ${BooleanName} Value!`);
+                throw new EmptyError();
 
             return ifEmpty;
         } else if(value == null){

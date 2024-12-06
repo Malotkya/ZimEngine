@@ -8,8 +8,8 @@ import { emptyHandler } from "./Type/Empty";
 /** Format With Default Value Generator
  * 
  */
-export function defaultFormatGenerator<T>(fun:format<T>, name:string, defaultValue?:T):format<T> {
+export function defaultFormatGenerator<T>(fun:format<T>, defaultValue?:T):format<T> {
     return function defaultFormater(value:unknown):T{
-        return emptyHandler(value, fun, name, defaultValue);
+        return emptyHandler(value, fun, defaultValue);
     };
 }
