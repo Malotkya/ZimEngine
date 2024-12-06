@@ -31,14 +31,13 @@ class Headers extends Map<string, string> {
  */
 export default class IncomingRequest {
     private _headers:Headers;
-    private _url:string;
+    private _url:URL;
     private _method:string;
     private _body:BodyData|undefined;
     private _raw: NodeRequeset|Request
 
     constructor(message: NodeRequeset|Request) {
         this._headers = new Headers();
-        this._url = message.url!;
         this._method = message.method!.toUpperCase();
 
         if( isCloudflareRequest(message) ){
@@ -54,6 +53,10 @@ export default class IncomingRequest {
             }
         }
 
+        this._url = isCloudflareRequest(message) //Different URL construtor based on environement.
+            ? new URL(message.url)
+            : new URL(message.url || "/", `http://${this._headers.get("host")}`);
+
         this._raw = message;
     }
 
@@ -67,7 +70,7 @@ export default class IncomingRequest {
     /** URL String Getter
      * 
      */
-    get url():string {
+    get url():URL {
         return this._url;
     }
 

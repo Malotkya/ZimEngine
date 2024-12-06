@@ -8,10 +8,9 @@ import IncomingRequest, {NodeRequeset} from "./IncomingRequest";
 import Authorization from "../Authorization";
 import MimeTypes from "../MimeTypes";
 import { BodyData } from "..//BodyParser";
-import { HEADER_KEY, HEADER_VALUE, inCloudfareWorker } from "../Util";
+import { HEADER_KEY, HEADER_VALUE } from "../Util";
 import DataObject, { TypeOf, ObjectProperties } from "../Validation";
 import QueryBuilder from "./QueryBuilder";
-import { split } from "../Validation/Type/Url";
 
 //Node:Request & Node:Response types.
 export type {NodeRequeset, NodeResponse};
@@ -27,7 +26,6 @@ const JSON_MIME_TYPE = MimeTypes("json");
 export default class Context{
     private _request:IncomingRequest;
     private _response:OutgoingResponse;
-    private _url:URL;
     private _env:Env;
     private _view:View|undefined;
     private _auth:Authorization|undefined;
@@ -45,19 +43,16 @@ export default class Context{
         this._request = new IncomingRequest(request);
         this._response = new OutgoingResponse(response);
         this._env = env;
-        this._url = inCloudfareWorker() //Different URL construtor based on environement.
-            ? new URL(this._request.url)
-            : new URL(request.url || "/", `http://${this._request.headers.get("host")}`);
         this._view = view;
         this._auth = auth;
 
         //Defaults
         this._search = new Map();
         this._params = new Map();
-        this._path = this._url.pathname;
+        this._path = this._request.url.pathname;
 
         //Search Values
-        for(const [name, value] of this._url.searchParams.entries())
+        for(const [name, value] of this._request.url.searchParams.entries())
             this._search.set(name, value);
     }
 
@@ -86,7 +81,7 @@ export default class Context{
      * 
      */
     get url():URL {
-        return this._url;
+        return this._request.url;
     }
 
     /** Method Getter
@@ -304,8 +299,7 @@ export default class Context{
         } else {
 
             if(typeof url === "string"){
-                const {protocol, domain, port, hash, search} = split(this._request.url);
-                url = new URL(protocol+"://"+domain+port+url+hash+search);
+                url = new URL(url, this._request.url);
             }
             this._response.redirect(url, status);
 
