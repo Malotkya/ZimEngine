@@ -44,22 +44,30 @@ function parseHeaders(value:string):Record<string, string> {
  * @param {Request} request 
  * @returns {Promise<RawBodyData>}
  */
-function processCloudflareRequest(request:Request):Promise<BodyData> {
-    return new Promise((res, rej)=>{
-        const content = request.headers.get("Content-Type")?.toLocaleLowerCase();
-        if (content === undefined || !content.includes("form-data")) {
-            return res({});
+async function processCloudflareRequest(request:Request):Promise<BodyData> {
+    const content = request.headers.get("Content-Type")?.toLocaleLowerCase();
+
+    if(content !== undefined) {
+        let body:FormData|URLSearchParams|undefined;
+
+        if( content.includes("form-data") ) {
+            body = await request.formData();
+        } else if(content.includes("x-www-form-urlencoded")) {
+            body = new URLSearchParams(await request.text());
         }
 
-        request.formData().then((data)=>{
-            const map:BodyData ={};
-            data.forEach((value, key)=>{
-                map[key] = value;
-            });
+        if(body){
+            const data:BodyData ={};
 
-            res(map)
-        }).catch(rej)
-    });
+            body.forEach((value, key)=>{
+                data[key] = value;
+            });
+        
+            return data;
+        }
+    }
+
+    return {};
 }
 
 /** Process Node Request
@@ -171,8 +179,9 @@ function processNodeRequest(request:IncomingMessage):Promise<BodyData> {
     });
 }
 
-export default async function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
-    return isCloudflareRequest(request)
-        ? (await processCloudflareRequest(request))
-        : (await processNodeRequest(request))
+export default function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
+    if(isCloudflareRequest(request))
+        return processCloudflareRequest(request);
+    
+    return processNodeRequest(request);
 }
