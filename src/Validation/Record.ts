@@ -40,7 +40,7 @@ function formatRecordGenerator<T extends Type>(type:TypeValidator<T>, ifEmpty?:R
      * @returns {Record}
      */
     return function formatRecord(input:unknown):Record<string,T> {
-        return emptyHandler(input, (value)=>buildRecord(type, objectify(input)), RecordName, ifEmpty);
+        return emptyHandler(input, (value)=>buildRecord(type, objectify(input)), ifEmpty);
     }
 }
 
@@ -54,7 +54,12 @@ function buildRecord<T extends Type>(type:TypeValidator<T>, value:Record<string,
     const output:Record<string, T> = {};
 
     for(const name in value) {
-        output[name] = type.run(value[name]);
+        try {
+            output[name] = type.run(value[name]);
+        } catch (e:any){
+            throw new Error(`${e.message || String(e)} at ${name}`);
+        }
+        
     }
 
     return output;

@@ -49,7 +49,13 @@ function formatListGenerator<T extends Type>(type:TypeValidator<T>, seperator?:s
      * @returns {List<Type>}
      */
     return function formatList(input:unknown):List<T> {
-        return emptyHandler(input, (value:unknown)=>objectify(input, seperator).map(value=>type.run(value)), ListName, ifEmpty);
+        return emptyHandler(input, (value:unknown)=>objectify(input, seperator).map((value, index)=>{
+            try {
+                return type.run(value)
+            } catch (e:any){
+                throw new Error(`${e.message || String(e)} at ${index}`);
+            }
+        }), ifEmpty);
     }
 }
 

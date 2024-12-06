@@ -65,7 +65,7 @@ function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:Obj
      * @returns {Object}
      */
     return function formatObject(input:unknown):Object<keyof P> {
-        return emptyHandler<Object<keyof P>>(input, (value:unknown)=>buildObject(props, objectify(value), ifEmpty), ObjectName, ifEmpty as any);
+        return emptyHandler<Object<keyof P>>(input, (value:unknown)=>buildObject(props, objectify(value), ifEmpty), ifEmpty as any);
     }
 }
 
@@ -85,11 +85,20 @@ function buildObject<P extends ObjectProperties>(props:P, value:Record<string, u
             throw new Error(`Unexpected value occured at ${name}!`);
         
         expected.splice(index, 1);    
-        output[name] = props[name].run(value[name]);
+        try {
+            output[name] = props[name].run(value[name]);
+        }  catch (e:any){
+            throw new Error(`${e.message || String(e)} at ${name}`);
+        }
     }
 
     for(const name of expected){
-        output[name] = props[name].run(defaultValue[name]);
+        try {
+            output[name] = props[name].run(defaultValue[name]);
+        }  catch (e:any){
+            throw new Error(`${e.message || String(e)} at ${name}`);
+        }
+        
     }
 
     return output as any;
