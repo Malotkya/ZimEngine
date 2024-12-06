@@ -1,7 +1,6 @@
 import {test, expect} from '@jest/globals';
 import * as Validation from "../src/Validation";
 
-
 ///////////////////////////// Optional Validator /////////////////////////////
 
 test("Optional Primitive Value", ()=>{
@@ -15,6 +14,12 @@ test("Optional Primitive Value", ()=>{
 test("Optional Default Value", ()=>{
     const test = Validation.optional(Validation.time(), "5:00:PM");
     expect(test.run(null)).toBe("17:00");
+});
+
+test("Optional Empty String", ()=>{
+    const test = Validation.optional(Validation.string());
+    expect(test.run("")).toBe("");
+    expect(test.run(undefined)).toBe(null);
 });
 
 test("Optional Stored Value", ()=>{
