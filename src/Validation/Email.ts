@@ -21,7 +21,7 @@ export default class EmailValidator extends TypeValidator<Email> {
                 throw new TypeError(`${value} is not a valid Email Address!`);
             }
         }
-        super(EmailName, defaultFormatGenerator(formatEmail, EmailName, value))
+        super(EmailName, defaultFormatGenerator(formatEmail, value))
     }
 }
 

@@ -21,7 +21,7 @@ export default class DateTimeValidator extends TypeValidator<DateTime> {
                 throw new TypeError(`${value} is not a valid DateTime!`);
             }
         }
-        super(DateTimeName, defaultFormatGenerator(formatDateTime, DateTimeName, value));
+        super(DateTimeName, defaultFormatGenerator(formatDateTime, value));
     }
 }
 

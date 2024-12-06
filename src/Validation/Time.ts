@@ -22,7 +22,7 @@ export default class TimeValidator extends TypeValidator<Time> {
             }
         }
         
-        super(TimeName, defaultFormatGenerator(formatTime, TimeName, value))
+        super(TimeName, defaultFormatGenerator(formatTime, value))
     }
 }
 

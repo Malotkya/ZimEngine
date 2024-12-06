@@ -22,6 +22,6 @@ export default class DateValidator extends TypeValidator<Date> {
             }
         }
         
-        super(DateName, defaultFormatGenerator(formatDate, DateName, value));
+        super(DateName, defaultFormatGenerator(formatDate, value));
     }
 }

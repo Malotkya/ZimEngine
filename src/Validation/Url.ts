@@ -22,7 +22,7 @@ export default class UrlValidator extends TypeValidator<Url> {
             }
         }
 
-        super(UrlName, defaultFormatGenerator(formatUrl, UrlName, value))
+        super(UrlName, defaultFormatGenerator(formatUrl, value))
     }
 }
 

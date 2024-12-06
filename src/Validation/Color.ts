@@ -22,7 +22,7 @@ export default class ColorValidator extends TypeValidator<Color> {
             }
         }
 
-        super(ColorName, defaultFormatGenerator(formatColor, ColorName, value));
+        super(ColorName, defaultFormatGenerator(formatColor, value));
     }
 }
 

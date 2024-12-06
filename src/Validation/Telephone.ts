@@ -22,6 +22,6 @@ export default class TelephoneValidator extends TypeValidator<Telephone> {
             }
         }
 
-        super(TelephoneName, defaultFormatGenerator(formatTelephone, TelephoneName, value));
+        super(TelephoneName, defaultFormatGenerator(formatTelephone, value));
     }
 }
