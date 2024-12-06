@@ -240,8 +240,10 @@ export default class Context{
 
     /** Form Data Getter
      * 
+     * @param {DataObject} expected 
+     * @returns {BodyData}
      */
-    async formData<P extends ObjectProperties>(expected?:DataObject<P>):Promise<TypeOf<DataObject<P>>>
+    async formData<P extends ObjectProperties>(expected:DataObject<P>):Promise<TypeOf<DataObject<P>>>
     async formData():Promise<BodyData>
     async formData<P extends ObjectProperties>(expected?:DataObject<P>):Promise<any>{
         const data = await this._request.formData();
