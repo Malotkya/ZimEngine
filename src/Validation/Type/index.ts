@@ -46,12 +46,22 @@ export abstract class TypeValidator<T> {
         return this._name;
     }
 
-    get run():format<T> {
-        return this._format;
+    run(value:unknown):T {
+        try {
+            return this._format(value);
+        } catch (e:any){
+            throw new ValidationError(this._name, e.message || String(e))
+        }
     }
 
     simplify(value:T):Simple {
         //@ts-ignore
         return value;
     };
+}
+
+export class ValidationError extends Error {
+    constructor(name:string, message:string){
+        super(`${name} Validation Error: ${message}`);
+    }
 }
