@@ -60,12 +60,11 @@ export type {ObjectProperties}
  */
 export default class DataObject<P extends ObjectProperties> extends ObjectValidator<P> {
     private _table:string;
-    private _props:P;
+    
 
     constructor(tableName:string, properties:P) {
         super(properties);
         this._table = tableName;
-        this._props = properties;
     }
 
     /** Get Table Name
