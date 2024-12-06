@@ -59,7 +59,7 @@ function textToBlob(value:string):Blob {
  */
 export function formatFile(value:unknown):File {
     if(isEmpty(value)){
-        throw new EmptyError(`Expected File Value!`)
+        throw new EmptyError()
     }else if(typeof value === "string") {
         try {
             return dataURIToBlob(value);
