@@ -44,7 +44,7 @@ function formatOptionalGenerator<T extends Type>(type:TypeValidator<T>, ifEmpty:
      */
     return function formatOptional(value:unknown):Optional<T> {
         if(type.name === "string" && isEmpty(value, true)) {
-            if(typeof value === "string")
+            if(isEmpty(ifEmpty) && typeof value === "string")
                 return value;
             
             return ifEmpty;

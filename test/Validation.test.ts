@@ -20,6 +20,11 @@ test("Optional Empty String", ()=>{
     const test = Validation.optional(Validation.string());
     expect(test.run("")).toBe("");
     expect(test.run(undefined)).toBe(null);
+
+    const testDefault = Validation.optional(Validation.string(), "Hello, World!");
+    expect(testDefault.run("")).toBe("Hello, World!");
+    expect(testDefault.run(" ")).toBe(" ");
+    expect(testDefault.run(undefined)).toBe("Hello, World!");
 });
 
 test("Optional Stored Value", ()=>{
