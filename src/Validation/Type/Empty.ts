@@ -40,10 +40,10 @@ export function isEmpty(value:unknown, string:boolean = false):value is Empty {
  * @param {any} ifEmpty 
  * @returns {unknown}
  */
-export function emptyHandler<T>(value:unknown, format:format<T>, name:string, ifEmpty?:T):T {
+export function emptyHandler<T>(value:unknown, format:format<T>, ifEmpty?:T):T {
     if(isEmpty(value, true)){
         if(ifEmpty === undefined)
-            throw new EmptyError(`Expected ${name} Value!`)
+            throw new EmptyError()
 
         return ifEmpty;
     }
@@ -51,4 +51,8 @@ export function emptyHandler<T>(value:unknown, format:format<T>, name:string, if
     return format(value);
 }
 
-export class EmptyError extends Error {};
+export class EmptyError extends Error {
+    constructor(){
+        super("Unexpected Empty Value!")
+    }
+};
