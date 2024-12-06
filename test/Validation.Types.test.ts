@@ -1,8 +1,9 @@
 import {test, expect} from '@jest/globals';
 import * as Validation from "../lib/Validation";
-import { EmptyError } from '../lib/Validation/Type/Empty';
+import { ValidationError } from '../lib/Validation/Type';
 import fs from "fs";
 import path from "path";
+
 
 export function expectError(test:Function, error?:Function) {
     let value:any;
@@ -25,7 +26,7 @@ test("Boolean Default Value", ()=>{
 
 test("Boolean Empty Error", ()=>{
     const test = Validation.boolean();
-    expectError(()=>test.run(undefined), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
 });
 
 test("Boolean Strings", ()=>{
@@ -50,7 +51,7 @@ test("Boolean Numbers", ()=>{
 test("Boolean Objects", ()=>{
     const test = Validation.boolean();
     expect(test.run(null)).toBe(false);
-    expectError(()=>test.run({}), TypeError);
+    expectError(()=>test.run({}), ValidationError);
 });
 
 ///////////////////////////// Number Validator /////////////////////////////
@@ -63,7 +64,7 @@ test("Number Default Value", ()=>{
 
 test("Number Empty Error", ()=>{
     const test = Validation.number();
-    expectError(()=>test.run(undefined), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
 });
 
 test("Valid Numbers", ()=>{
@@ -77,7 +78,7 @@ test("Invalid Numbers", ()=>{
     const test = Validation.number();
     expectError(()=>test.run("1,000"));
     expectError(()=>test.run({}));
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 ///////////////////////////// String Validator /////////////////////////////
@@ -89,8 +90,8 @@ test("String Default Value", ()=>{
 
 test("String Empty Error", ()=>{
     const test = Validation.string();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 test("String Convertion Test", ()=>{
@@ -113,8 +114,8 @@ test("Color Default Value", ()=>{
 
 test("Color Empty Error", ()=>{
     const test = Validation.color();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 test("Color Conversion", ()=>{
@@ -134,8 +135,8 @@ test("Date Default Value", ()=>{
 
 test("Date Empty Error", ()=>{
     const test = Validation.date();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 test("Invalid Dates", ()=>{
@@ -166,8 +167,8 @@ test("Time Default Value", ()=>{
 
 test("Time Empty Error", ()=>{
     const test = Validation.time();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 test("Invalid Time", ()=>{
@@ -195,8 +196,8 @@ test("DateTime Default Value", ()=>{
 
 test("DateTime Empty Error", ()=>{
     const test = Validation.datetime();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 ///////////////////////////// Email Validator /////////////////////////////
@@ -209,8 +210,8 @@ test("Email Default Value", ()=>{
 
 test("Email Empty Error", ()=>{
     const test = Validation.email();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 ///////////////////////////// Telephone Validator /////////////////////////////
@@ -223,8 +224,8 @@ test("Telephone Default Value", ()=>{
 
 test("Telephone Empty Error", ()=>{
     const test = Validation.telephone();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 test("Telephone Transform", ()=>{
@@ -245,8 +246,8 @@ test("Url Default Value", ()=>{
 
 test("Url Empty Error", ()=>{
     const test = Validation.url();
-    expectError(()=>test.run(undefined), EmptyError);
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(undefined), ValidationError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 ///////////////////////////// Empty Validator /////////////////////////////
@@ -257,11 +258,11 @@ test("Empty Value", ()=>{
     expect(test.run(undefined)).toBe(null);
 });
 
-test("Empty Error", ()=>{
+test("Empty Type Error", ()=>{
     const test = Validation.empty();
-    expectError(()=>test.run("string"), TypeError);
-    expectError(()=>test.run(1234), TypeError);
-    expectError(()=>test.run(false), TypeError);
+    expectError(()=>test.run("string"), ValidationError);
+    expectError(()=>test.run(1234), ValidationError);
+    expectError(()=>test.run(false), ValidationError);
 });
 
 ///////////////////////////// File Validator /////////////////////////////
@@ -286,7 +287,7 @@ test("Image File Test", ()=>{
 
 test("File Error Test", ()=>{
     const test = Validation.file();
-    expectError(()=>test.run(null), EmptyError);
+    expectError(()=>test.run(null), ValidationError);
 });
 
 test("String File Test", ()=>{
