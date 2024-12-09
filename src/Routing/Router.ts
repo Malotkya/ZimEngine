@@ -4,6 +4,7 @@
  */
 import Context from "../Context";
 import Layer, {Middleware} from "./Layer";
+import ErrorRouting, {FormatedErrorHandler, DefaultErrorHandler} from "./Error";
 import { joinPath } from "../Util";
 
 //Router Error Thrower
@@ -31,6 +32,7 @@ class Stack extends Array<{name:string, layer:Layer}>{
  */
 export default class Router extends Layer{
     protected _methods:Stack;
+    protected _errors:ErrorRouting;
 
     /** Constructor
      * 
@@ -39,6 +41,7 @@ export default class Router extends Layer{
     constructor(path:string = "/") {
         super(path, {end: false}, ROUTER_ERROR);
         this._methods = new Stack();
+        this._errors = new ErrorRouting();
     }
 
     /** Handle Routing Override
@@ -47,17 +50,20 @@ export default class Router extends Layer{
      */
     async handle(context:Context):Promise<void> {
         if(this.match(context)){
-
-            for(const {name, layer} of this._methods) {
-                if(name === "MIDDLEWARE"){
-                    await layer.handle(context);
-                    if(context.response.commited())
-                        return;
-                } else if(name === context.method || name === "ALL") {
-                    await layer.handle(context);
-                    if(context.response.commited())
-                        return;
-                } 
+            try {
+                for(const {name, layer} of this._methods) {
+                    if(name === "MIDDLEWARE"){
+                        await layer.handle(context);
+                        if(context.response.commited())
+                            return;
+                    } else if(name === context.method || name === "ALL") {
+                        await layer.handle(context);
+                        if(context.response.commited())
+                            return;
+                    } 
+                }
+            } catch (e:any){
+                this._errors.handle(e, context);
             }
         }
     }
@@ -232,5 +238,16 @@ export default class Router extends Layer{
     all():this{
         this._methods.add("ALL", this._filter(arguments));
         return this;
+    }
+
+    /** Error Handler Setter
+     * 
+     * @param {number|string} status
+     * @param {ErrorHandler} handler 
+     */
+    error(status:number|string, handler:FormatedErrorHandler):void
+    error(handler:DefaultErrorHandler):void
+    error():void{
+        this._errors.set(arguments[0], arguments[1]);
     }
 }

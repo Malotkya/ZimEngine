@@ -11,51 +11,45 @@ import HttpError from "../HttpError";
  */
 export type Handler = (context:Context)=>Promise<void>|void;
 
-/** Error Handler Type
- * 
- */
-type ErrorHandler = (error:any, context:Context)=>Promise<void>|void;
-
 /** Routing Class
  * 
  * Top Level Wrapper around Router class that 
  * handles errors.
  */
 export default class Routing extends Router{
-    private notFoundHandler:Handler;
-    private errorHandler:ErrorHandler;
 
     /** Routing Constructor
      * 
      */
     constructor(){
         super("");
-        this.notFoundHandler = (ctx:Context) => {throw new HttpError(404, `${ctx.url.pathname} was not found!`)};
-        this.errorHandler = (e:any, ctx:Context) => {
-            const number = Number(e.statusCode || e.code || e.status);
-            ctx.status(isNaN(number)? 500: number).write(e.message || String(e)).end();
-        }
+        this._errors.set((err, ctx) => {
+            const status = isNaN(err.status as number)? 500: Number(err.status);
+            const message = String(err.message);
+
+            ctx.status(status);
+            if(ctx.expectsRender()){
+                ctx.render({
+                    body: {
+                        error: message
+                    }
+                });
+            } else {
+                ctx.write(message);
+            }
+
+            ctx.end();
+        })
     }
 
     /** Routing Handler Wrappper
      * 
-     * Made to easier seperate from routing/not found error handler
-     * and normal error handler.
      * 
      * @param {Context} context 
-     * @param {any} error
      * @returns {Promise<Response>}
      */
-    async route(context:Context, error?:any):Promise<Response|undefined>{
-        try {
-            if(error)
-                throw error;
-
-            await this.handle(context);
-        } catch (e){
-            await this.errorHandler(e, context);
-        }
-
+    async route(context:Context):Promise<Response|undefined>{
+        await this.handle(context);
         return await context.flush();
     }
 
@@ -79,35 +73,11 @@ export default class Routing extends Router{
                 }
             }
 
-            await this.notFoundHandler(context);
-        } catch (route_err:any){
-            if(route_err == 404 || route_err.code == 404 || route_err.status == 404){
-                await this.notFoundHandler(context);
-            } else {
-                throw route_err;
-            }
+            throw 404;
+        } catch (err:any){
+            this._errors.handle(err, context)
         }
     }
 
-    /** Not Found Handler Setter
-     * 
-     * @param {Handler} handler 
-     */
-    notFound(handler:Handler){
-        if(typeof handler !== "function")
-            throw new TypeError("Not Found Handler must be a function!");
-
-        this.notFoundHandler = handler;
-    }
-
-    /** Error Handler Setter
-     * 
-     * @param {ErrorHandler} handler 
-     */
-    error(handler:ErrorHandler){
-        if(typeof handler !== "function")
-            throw new TypeError("Error Handler must be a function!");
-        
-        this.errorHandler = handler;
-    }
+    
 }
