@@ -93,8 +93,11 @@ export default class ErrorRouting extends Map<number|string, FormatedErrorHandle
     async handle(error:any, context:Context){
         let {status = 500, message} = await this._handle(ErrorRouting.formatError(error), context)
 
-        if(!context.response.commited() && this._default){
-            this._default({status, message}, context);
+        if(!context.response.commited()){
+            if(this._default)
+                this._default({status, message}, context);
+            
+            throw {status, message};
         }
     }
 
