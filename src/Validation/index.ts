@@ -117,13 +117,18 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
      * @param {Object} value 
      * @returns {Array}
      */
-    buildUpdateValues(value:Object<keyof P>):[string, Simple[]] {
+    buildUpdateValues(value:Object<keyof P>, constraints:(keyof P)[]):[string, Simple[]] {
         let string:string = "SET ";
         const values:Array<Simple> = [];
 
         for(const name in value) {
-            string  += name + " = ?, ";
-            values.push(this._props[name].simplify(value[name]));
+            const simple = this._props[name].simplify(value[name]);
+            //!(constraints.includes(name) && isEmpty(simple))
+            if( !isEmpty(simple) || !constraints.includes(name) ) {
+                string  += name + " = ?, ";
+                values.push(simple);
+            }
+            
         }
 
         return [string.substring(0, string.length-2), values];

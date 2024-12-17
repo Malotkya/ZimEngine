@@ -105,7 +105,7 @@ export default class QueryBuilder<P extends ObjectProperties> {
      * @param {ObjectDefaults} constraints
      */
     async update(value:ObjectValue<keyof P>, constraints?:DataConstraints<keyof P>):Promise<void>{
-        const [updateString, updateValues] = this._obj.buildUpdateValues(value);
+        const [updateString, updateValues] = this._obj.buildUpdateValues(value, Object.getOwnPropertyNames(constraints));
         const [constraintString, constraintValues] = this._obj.buildConstraints(constraints);
 
         const query = `UPDATE ${this._obj.name} ${updateString} ${constraintString}`;
