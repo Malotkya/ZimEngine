@@ -109,27 +109,20 @@ export default class ErrorRouting extends Map<number|string, FormatedErrorHandle
     set(status:string|number, handler:FormatedErrorHandler):this
     set(handler:DefaultErrorHandler):this
     set():this {
-        switch(arguments.length){
-            case 2:
-                const statusType = typeof arguments[0];
-                if(statusType !== "string" && statusType !== "number")
-                    throw new TypeError("Error status must be a number or string!");
+        switch (typeof arguments[0]){
+            case "function":
+                this._default = arguments[0];
+                break;
 
+            case "string":
+            case "number":
                 if(typeof arguments[1] !== "function")
                     throw new TypeError("Error Handler must be a function!");
 
                 super.set(arguments[0], arguments[1]);
                 break;
-
-            case 1:
-                if(typeof arguments[0] !== "function")
-                    throw new TypeError("Error Handler must be a function!");
-
-                this._default = arguments[0];
-                break;
-
             default:
-                throw new Error("Invalid number of arguments to set Error Handler!");
+                throw new TypeError("Error status must be a number or string!");
         }
 
         return this;
