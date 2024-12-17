@@ -5,6 +5,8 @@
 import Context from "../Context";
 import { getMessage } from '../HttpError';
 
+const MAX_ERROR_RECURSION = 5;
+
 //Formated Error For Handling
 interface FormatedError{
     status:number|string,
@@ -67,12 +69,19 @@ export default class ErrorRouting extends Map<number|string, FormatedErrorHandle
      * @param {Context} context 
      * @returns {Promise<InternalError>}
      */
-    private async _handle(error:InternalError, context:Context):Promise<InternalError>{
+    private async _handle(error:InternalError, context:Context, count:number = 1):Promise<InternalError>{
+        if(count > MAX_ERROR_RECURSION)
+            return new Error("Max error handler recurion met!");
+
         if(error.status && this.has(error.status)){
             try {
                 await this.get(error.status)!(error.message, context);
-            } catch (e){
-                return this._handle(ErrorRouting.formatError(e), context);
+            } catch (e:any){
+                e = ErrorRouting.formatError(e);
+                if(e.status === error.status)
+                    return e;
+
+                return this._handle(e, context, count+1);
             }
         }
 
@@ -89,13 +98,10 @@ export default class ErrorRouting extends Map<number|string, FormatedErrorHandle
      * @param {Context} context 
      */
     async handle(error:any, context:Context){
-        let {status, message} = await this._handle(ErrorRouting.formatError(error), context)
+        let {status = 500, message} = await this._handle(ErrorRouting.formatError(error), context)
 
         if(!context.response.commited() && this._default){
-            this._default({
-                status: status || "",
-                message
-            }, context);
+            this._default({status, message}, context);
         }
     }
 
