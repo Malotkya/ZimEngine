@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import Context from "../Context";
-import { getMessage } from 'zim-engine/HttpError';
+import { getMessage } from '../HttpError';
 
 //Formated Error For Handling
 interface FormatedError{
