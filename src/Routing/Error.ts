@@ -69,19 +69,12 @@ export default class ErrorRouting extends Map<number|string, FormatedErrorHandle
      * @param {Context} context 
      * @returns {Promise<InternalError>}
      */
-    private async _handle(error:InternalError, context:Context, count:number = 1):Promise<InternalError>{
-        if(count > MAX_ERROR_RECURSION)
-            return new Error("Max error handler recurion met!");
-
+    private async _handle(error:InternalError, context:Context):Promise<InternalError>{
         if(error.status && this.has(error.status)){
             try {
                 await this.get(error.status)!(error.message, context);
             } catch (e:any){
-                e = ErrorRouting.formatError(e);
-                if(e.status === error.status)
-                    return e;
-
-                return this._handle(e, context, count+1);
+                return ErrorRouting.formatError(e)
             }
         }
 
