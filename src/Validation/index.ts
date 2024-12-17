@@ -115,6 +115,7 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
     /** Build Update
      * 
      * @param {Object} value 
+     * @param {Array} constraints
      * @returns {Array}
      */
     buildUpdateValues(value:Object<keyof P>, constraints:(keyof P)[]):[string, Simple[]] {
