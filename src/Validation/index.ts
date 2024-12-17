@@ -126,6 +126,6 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
             values.push(this._props[name].simplify(value[name]));
         }
 
-        return [string, values];
+        return [string.substring(0, string.length-2), values];
     }
 }
