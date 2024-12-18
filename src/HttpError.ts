@@ -11,6 +11,84 @@
  * @returns {string}
  */
 export function getMessage(value:number):string|null {
+    if(value < 100)
+        return null;
+
+    if(value === 100)
+        return "Continue";
+
+    if(value === 101)
+        return "Switching Protocols";
+
+    if(value === 102)
+        return "Processing";
+
+    if(value === 103)
+        return "Early Hints";
+
+    if(value < 200)
+        return "Informational";
+
+    if(value === 200)
+        return "OK";
+
+    if(value === 201)
+        return "Created";
+
+    if(value === 202)
+        return "Accepted";
+
+    if(value === 203)
+        return "Non-Authoritative Information";
+
+    if(value === 204)
+        return "No Content";
+
+    if(value === 205)
+        return "Reset Content";
+
+    if(value === 206)
+        return "Partial Content";
+
+    if(value === 207)
+        return "Multi-Status";
+
+    if(value === 208)
+        return "Already Reported";
+
+    if(value === 226)
+        return "IM Used";
+
+    if(value < 300)
+        return "Success";
+
+    if(value === 300)
+        return "Multiple Choices";
+
+    if(value === 301)
+        return "Moved Permanently";
+
+    if(value === 302)
+        return "Found";
+
+    if(value === 303)
+        return "See Other";
+
+    if(value === 304)
+        return "Not Modified";
+
+    if(value === 305)
+        return "Use Proxy";
+
+    if(value === 306)
+        return "Switch Proxy";
+
+    if(value === 307)
+        return "Temporary Redirect";
+
+    if(value === 308)
+        return "Permanent Redirect";
+
     if(value < 400)
         return "Redirected";
 
