@@ -10,33 +10,39 @@ import { HeadUpdate } from "../Html/Head";
 import HeadEnvironment from "./Head";
 import { HEADER_KEY, HEADER_VALUE } from "../../Util";
 
+//Interface for Dialog Function
 type DialogLevel = "error"|"warning"|"info";
 interface DialogSettings {
     background: string,
-    text: string,
+    foreground: string,
     title?: string
 }
 
+/** Get Dialog Level Settings
+ * 
+ * @param {string} level 
+ * @returns {Object}
+ */
 function getLevelSettings(level:DialogLevel):DialogSettings {
     switch(level){
         case "error":
             return {
-                background: "red",
-                text: "red",
+                background: "#FFE5E5",
+                foreground: "#D60007",
                 title: "Error!"
             }
 
         case "warning":
             return {
-                background: "yellow",
-                text: "yellow",
+                background: "#FFFEE5",
+                foreground: "#BD5800",
                 title: "Warning!"
             }
 
         case "info":
             return {
-                background: "blue",
-                text: "blue"
+                background: "#E3EEFD",
+                foreground: "#0260ED"
             }
 
         default:
@@ -257,7 +263,7 @@ export default class RenderEnvironment {
      * @param {string} message 
      */
     private dialog(level:DialogLevel, message:string) {
-        const {background, text, title} = getLevelSettings(level);
+        const {background, foreground, title} = getLevelSettings(level);
 
         const dialog = document.createElement("dialog");
         dialog.style.position = "absolute";
@@ -276,7 +282,9 @@ export default class RenderEnvironment {
 
         const modal = document.createElement("div");
         modal.style.backgroundColor = background;
-        modal.style.padding = "5px";
+        modal.style.padding = "10px";
+        modal.style.borderRadius = "5px";
+        modal.style.border = `solid ${foreground}`;
 
         modal.addEventListener("click", (event)=>{
             event.stopPropagation();
@@ -284,15 +292,18 @@ export default class RenderEnvironment {
 
         if(title){
             const header = document.createElement("h1");
-            header.style.color = text;
+            header.style.color = foreground;
+            header.style.fontWeight = "bold";
             header.style.textAlign = "center";
+            header.style.margin = "0";
             header.textContent = title;
             modal.appendChild(header);
         }
         
 
         const body = document.createElement("p");
-        body.style.color = text;
+        body.style.color = foreground;
+        body.style.fontWeight = "bold";
         body.style.textAlign = "center";
         body.textContent = String(message);
         modal.appendChild(body);
