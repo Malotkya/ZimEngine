@@ -93,6 +93,7 @@ export default class RenderEnvironment {
      */
     async handler(url:string|URL = window.location.href, opts?:FetchOptions):Promise<string|undefined>{
         this._routing = true;
+        document.body.style.cursor = "wait";
         const {anchor, path} = getRouteInfo(url);
 
         try {
@@ -108,6 +109,7 @@ export default class RenderEnvironment {
         }
 
         this._routing = false;
+        document.body.style.cursor = "";
 
         if(this._delay){
             const {url, opts} = this._delay;
@@ -124,13 +126,12 @@ export default class RenderEnvironment {
      * @param {string|URL} url 
      * @param {FetchOptions} opts 
      */
-    route(url:string|URL, opts?:FetchOptions){
+    async route(url:string|URL, opts?:FetchOptions){
         if(!this._routing) {
             this.clear();
-            this.handler(url, opts).then(anchor=>{
-                if(anchor)
-                    this.scroll(anchor);
-            });
+            const anchor = await this.handler(url, opts);
+            if(anchor)
+                this.scroll(anchor);
         } else {
             this._delay = {url, opts};
         }
