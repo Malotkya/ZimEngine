@@ -4,6 +4,8 @@
  */
 import Context from "../Context";
 import Router from "./Router";
+import { getMessage } from "../HttpError";
+import { inNodeEnvironment } from "../Util";
 
 /** Routing Class
  * 
@@ -19,8 +21,6 @@ export default class Routing extends Router{
         super("");
         this._errors.set((err, ctx) => {
             const status = isNaN(err.status as number)? 500: Number(err.status);
-            const message = `${status}: ${err.message}`;
-
             const content = (ctx.request.headers.get("Content-Type") || "").toLocaleLowerCase();
 
             ctx.status(status);
@@ -28,19 +28,19 @@ export default class Routing extends Router{
                 try {
                     ctx.render({
                         head: {
-                            title: message
+                            title: err.message
                         },
                         body: {
-                            error: message
+                            error: `${status}: ${err.message}`
                         }
                     });
                 } catch (_) {
-                    ctx.html(`<html><head><title>${message}</title><style>#error{color: red}</head><body><h1 id="error">${message}</h1></body></html>`)
+                    ctx.html(`<html><head><title>${err.message}</title><style>#error{color: red}</head><body><h1 id="error">${status}: ${err.message}</h1></body></html>`)
                 }
             } else if(content.includes("json")){
-                ctx.json({status, message})
+                ctx.json(err)
             } else {
-                ctx.write(message);
+                ctx.write(err.message);
             }
 
             ctx.end();
@@ -54,7 +54,17 @@ export default class Routing extends Router{
      * @returns {Promise<Response>}
      */
     async route(context:Context):Promise<Response|undefined>{
+        const start = Date.now();
         await this.handle(context);
+
+        //Logging step if Node.js
+        if(inNodeEnvironment()){
+            const time = Date.now() - start;
+            const status = context.response.status;
+            const statusText = getMessage(status) || "Unknown Error";
+            console.log(`${context.method} ${context.path} ${status} ${statusText} (${time})\n`);
+        }
+
         return await context.flush();
     }
 
