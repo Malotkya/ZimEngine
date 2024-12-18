@@ -96,8 +96,8 @@ export default class ErrorRouting extends Map<number|string, FormatedErrorHandle
         if(!context.response.commited()){
             if(this._default)
                 this._default({status, message}, context);
-            
-            throw {status, message};
+            else
+                throw {status, message};
         }
     }
 
