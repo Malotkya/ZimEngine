@@ -64,6 +64,7 @@ export default class RenderEnvironment {
             window.history.pushState({}, "", url);
         } catch (e){
             RenderEnvironment.error(e);
+            //Possible rerouting??
         }
 
         this._routing = false;
@@ -243,25 +244,21 @@ export default class RenderEnvironment {
             opts.headers = {};
         opts.headers[HEADER_KEY] = HEADER_VALUE;
 
-        try {
-            const response = await fetch(url, opts);
+        const response = await fetch(url, opts);
 
-            if(response.headers.get(HEADER_KEY) !== HEADER_VALUE) {
-                throw new Error("Did not recieve an update response!");
-            } else if(response.headers.get("Content-Type") !== "application/json") {
-                throw new Error("Did not recieve JSON response!");
-            }
-
-            const data:FetchUpdate = await response.json();
-            
-            if(data.redirect === undefined && data.head === undefined && data.body === undefined && data.update === undefined){
-                throw new Error("Recieved either an empty or invalid response!");
-            }
-
-            return data;
-        } catch (e){
-            throw e;
+        if(response.headers.get(HEADER_KEY) !== HEADER_VALUE) {
+            throw new Error("Did not recieve an update response!");
+        } else if(response.headers.get("Content-Type") !== "application/json") {
+            throw new Error("Did not recieve JSON response!");
         }
+
+        const data:FetchUpdate = await response.json();
+            
+        if(data.redirect === undefined && data.head === undefined && data.body === undefined && data.update === undefined){
+            throw new Error("Recieved either an empty or invalid response!");
+        }
+
+        return data;
     }
 
     /** Display Error
