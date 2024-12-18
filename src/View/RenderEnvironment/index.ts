@@ -10,6 +10,40 @@ import { HeadUpdate } from "../Html/Head";
 import HeadEnvironment from "./Head";
 import { HEADER_KEY, HEADER_VALUE } from "../../Util";
 
+type DialogLevel = "error"|"warning"|"info";
+interface DialogSettings {
+    background: string,
+    text: string,
+    title?: string
+}
+
+function getLevelSettings(level:DialogLevel):DialogSettings {
+    switch(level){
+        case "error":
+            return {
+                background: "red",
+                text: "red",
+                title: "Error!"
+            }
+
+        case "warning":
+            return {
+                background: "yellow",
+                text: "yellow",
+                title: "Warning!"
+            }
+
+        case "info":
+            return {
+                background: "blue",
+                text: "blue"
+            }
+
+        default:
+            throw new Error("Unknown Settings Level!");
+    }
+}
+
 //Fetch Options Type
 interface FetchOptions extends RequestInit{
     headers?:Record<string, string>
@@ -56,14 +90,14 @@ export default class RenderEnvironment {
         const {anchor, path} = getRouteInfo(url);
 
         try {
-            const data = await RenderEnvironment.fetch(path, opts);
+            const data = await this.fetch(path, opts);
             if(data.redirect){
                 return this.handler(data.redirect);
             }
             await this.update(data);
             window.history.pushState({}, "", url);
         } catch (e){
-            RenderEnvironment.error(e);
+            this.error(e);
             //Possible rerouting??
         }
 
@@ -183,7 +217,7 @@ export default class RenderEnvironment {
         for(const id in update){
             const element = document.getElementById(id);
             if(element){
-                RenderEnvironment.render(element, update[id]);
+                this.render(element, update[id]);
                 const match = update[id].match(/<script.*?>.*?<\/script.*?>/gi);
                 if(match){
                     scripts.push(...match);
@@ -217,6 +251,67 @@ export default class RenderEnvironment {
         }
     }
 
+    /** Modal Dialog
+     * 
+     * @param {string} level 
+     * @param {string} message 
+     */
+    private dialog(level:DialogLevel, message:string) {
+        const {background, text, title} = getLevelSettings(level);
+
+        const dialog = document.createElement("dialog");
+        dialog.style.position = "absolute";
+        dialog.style.width = "100%";
+        dialog.style.height = "100%";
+        dialog.style.top = "0";
+        dialog.style.left = "0";
+        dialog.style.display = "flex";
+        dialog.style.alignItems = "center";
+        dialog.style.justifyContent = "center";
+        dialog.style.background = "rgba(0,0,0,0.5)";
+
+        dialog.addEventListener("click", ()=>{
+            document.body.removeChild(dialog);
+        });
+
+        const modal = document.createElement("div");
+        modal.style.backgroundColor = background;
+        modal.style.padding = "5px";
+
+        modal.addEventListener("click", (event)=>{
+            event.stopPropagation();
+        });
+
+        if(title){
+            const header = document.createElement("h1");
+            header.style.color = text;
+            header.style.textAlign = "center";
+            header.textContent = title;
+            modal.appendChild(header);
+        }
+        
+
+        const body = document.createElement("p");
+        body.style.color = text;
+        body.style.textAlign = "center";
+        body.textContent = String(message);
+        modal.appendChild(body);
+
+        const close = document.createElement("button");
+        close.style.display = "block";
+        close.style.margin = "0 auto";
+        close.textContent = "Ok";
+        modal.appendChild(close);
+
+        close.addEventListener("click", ()=>{
+            document.body.removeChild(dialog);
+        });
+        
+        dialog.appendChild(modal);
+        dialog.open = true;
+        document.body.appendChild(dialog);
+    }
+
     ////////////// Static FunctionS //////////////
 
     /** Assign Render Content to Target
@@ -224,7 +319,7 @@ export default class RenderEnvironment {
      * @param {HTMLElement} target 
      * @param {RenderContent} content 
      */
-    static render(target:HTMLElement&{value?:string}, content:string){
+    render(target:HTMLElement&{value?:string}, content:string){
 
         if(target.value){ 
             target.value = content;
@@ -239,7 +334,7 @@ export default class RenderEnvironment {
      * @param {FetchOptions} opts 
      * @returns {Promise<RenderUpdate>}
      */
-    static async fetch(url:string|URL, opts:FetchOptions = {}):Promise<FetchUpdate> {
+    async fetch(url:string|URL, opts:FetchOptions = {}):Promise<FetchUpdate> {
         if(opts.headers === undefined)
             opts.headers = {};
         opts.headers[HEADER_KEY] = HEADER_VALUE;
@@ -265,55 +360,34 @@ export default class RenderEnvironment {
      * 
      * @param {any} value 
      */
-    static error(value:any) {
-        const dialog = document.createElement("dialog");
-        dialog.style.position = "absolute";
-        dialog.style.width = "100%";
-        dialog.style.height = "100%";
-        dialog.style.top = "0";
-        dialog.style.left = "0";
-        dialog.style.display = "flex";
-        dialog.style.alignItems = "center";
-        dialog.style.justifyContent = "center";
-        dialog.style.background = "rgba(0,0,0,0.5)";
-
-        dialog.addEventListener("click", ()=>{
-            document.body.removeChild(dialog);
-        });
-
-        const modal = document.createElement("div");
-        modal.style.backgroundColor = "white";
-        modal.style.padding = "5px";
-
-        modal.addEventListener("click", (event)=>{
-            event.stopPropagation();
-        });
-
-        const header = document.createElement("h1");
-        header.style.color = "red";
-        header.style.textAlign = "center";
-        header.textContent = "Error";
-        modal.appendChild(header);
-
-        const message = document.createElement("p");
-        message.style.color = "red";
-        message.style.textAlign = "center";
-        message.textContent = String(value);
-        modal.appendChild(message);
-
-        const close = document.createElement("button");
-        close.style.display = "block";
-        close.style.margin = "0 auto";
-        close.textContent = "Ok";
-        modal.appendChild(close);
-
-        close.addEventListener("click", ()=>{
-            document.body.removeChild(dialog);
-        });
-        
-        dialog.appendChild(modal);
-        dialog.open = true;
-        document.body.appendChild(dialog);
+    error(value:any) {
+        this.dialog("error", value.message || String(value));
         console.error(value);
+    }
+
+    /** Display Warning
+     * 
+     * @param {any} value 
+     */
+    warn(value:string){
+        this.dialog("warning", value);
+        console.warn(value);
+    }
+
+    /** Display Warning
+     * 
+     * @param {any} value 
+     */
+    alert(value:string){
+        this.dialog("info", value);
+    }
+
+    /** Display Warning
+     * 
+     * @param {any} value 
+     */
+    info(value:string){
+        this.dialog("info", value);
+        console.info(value);
     }
 }
