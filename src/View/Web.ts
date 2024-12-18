@@ -48,8 +48,8 @@ window.addEventListener("popstate", function state_change(){
  * @param {Event} event
  */
 document.body.addEventListener("click", function click_event(event){
-    const target:HTMLElement = event.target as HTMLElement;
-    const link:HTMLAnchorElement|null = target.closest("a");
+    const target = <HTMLElement>event.target;
+    const link = target.closest("a");
 
     if(link){
         event.preventDefault();
@@ -86,9 +86,13 @@ document.body.addEventListener("click", function click_event(event){
  * @param {Event} event
  */
 document.body.addEventListener("submit", async function submit_event(event){
-    event.preventDefault();
-    const form = event.target as HTMLFormElement;
+    const form = <HTMLFormElement> event.target;
 
+    //Check that target is a form
+    if(form.nodeName.toLocaleLowerCase() !== "form")
+        return;
+
+    event.preventDefault();
     const url = form.action || window.location.pathname;
     const method = (form.getAttribute("method") || "GET").toLocaleUpperCase();
     
