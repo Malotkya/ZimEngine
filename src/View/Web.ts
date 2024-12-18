@@ -10,6 +10,8 @@ import { getRouteInfo } from "./RenderEnvironment/Util";
 
 //Render Environment
 const env = new RenderEnvironment();
+//@ts-ignore
+window.env = env;
 
 /** Close Dialog
  * 
