@@ -85,7 +85,7 @@ document.body.addEventListener("click", function click_event(event){
  * 
  * @param {Event} event
  */
-document.body.addEventListener("submit", async function submit_event(event){
+document.body.addEventListener("submit", function submit_event(event){
     const form = <HTMLFormElement> event.target;
 
     //Check that target is a form
@@ -102,26 +102,7 @@ document.body.addEventListener("submit", async function submit_event(event){
     }
     
     const body = new FormData(form);
-    let data: FetchUpdate
-    try {
-        data = await RenderEnvironment.fetch(url, {method, body});
-    } catch (e){
-        RenderEnvironment.error(e);
-        return;
-    }
-    
-    if(data.redirect){
-        env.route(data.redirect);
-    } else if(data.update){
-        for(const id in data.update){
-            const element = form.querySelector("#"+id) as HTMLElement|null;
-            if(element){
-                RenderEnvironment.render(element, data.update[id]);
-            }
-        }
-    } else {
-        env.update(data);
-    }
+    env.route(url, {method, body});
 });
 
 /** Load Event Listener
