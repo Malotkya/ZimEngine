@@ -283,11 +283,7 @@ export default class Context{
      * @param url 
      * @param status 
      */
-    redirect(url:string|URL, status?:number){
-        if(url === "back"){
-            url = this._request.headers.get("Referrer") || "/";
-        }
-        
+    redirect(url:string|URL, status?:number){        
         if(this.expectsRender()){
             if(url instanceof URL){
                 url = url.pathname;
