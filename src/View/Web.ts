@@ -4,7 +4,6 @@
  * 
  * @author Alex Malotky
  */
-import { FetchUpdate } from ".";
 import RenderEnvironment from "./RenderEnvironment";
 import { getRouteInfo } from "./RenderEnvironment/Util";
 
