@@ -56,6 +56,16 @@ document.body.addEventListener("click", function click_event(event){
         target.blur();
         link.blur();
 
+        //Test for back
+        if(link.getAttribute("href") === "..") {
+            const path = window.location.pathname.split("/");
+            let p = path.pop();
+            while(p === undefined || p.trim() === "")
+                p = path.pop();
+
+            link.href = path.join("/");
+        }
+
         if(link.getAttribute("target") !== "_blank" && link.href.indexOf(location.hostname) !== -1){
             const {anchor, path} = getRouteInfo(link.href);
 
