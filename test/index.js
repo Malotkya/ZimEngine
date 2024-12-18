@@ -1,4 +1,5 @@
 const {default:Engine, Router, View, Authorization, createElement:_} = require("../lib");
+const {sleep} = require("../lib/Util");
 const {default:Static} = require("../lib/Static");
 const http = require("http");
 const path = require("path");
@@ -169,6 +170,18 @@ BodyTest.get((ctx)=>{
             )
         }
     })
+});
+
+app.all("/wait", async(ctx)=>{
+    const number = Number(ctx.search.get("sleep"));
+    if (isNaN(number) === false)
+        await sleep(number);
+
+    ctx.render({
+        body: {
+            main: `<a href="/wait?sleep=10000">Start</wait><br/><input /><br/><textarea></textarea><br/><button>test</button>`
+        }
+    });
 })
 
 http.createServer(app.server).listen(5000, ()=>{
