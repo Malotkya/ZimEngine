@@ -31,7 +31,7 @@ export default class RenderEnvironment {
     private _events:Array<EventItem>;
 
     private _routing:boolean;
-    private _delay:{url:string|URL, body?:FormData}|undefined;
+    private _delay:{url:string|URL, opts?:FetchOptions}|undefined;
 
     /** Render Environment Constructor
      * 
@@ -51,12 +51,12 @@ export default class RenderEnvironment {
      * @param {FormData} body 
      * @returns {Promise<string|undefined>}
      */
-    async handler(url:string|URL = window.location.href, body?:FormData):Promise<string|undefined>{
+    async handler(url:string|URL = window.location.href, opts?:FetchOptions):Promise<string|undefined>{
         this._routing = true;
         const {anchor, path} = getRouteInfo(url);
 
         try {
-            const data = await RenderEnvironment.fetch(path, {body});
+            const data = await RenderEnvironment.fetch(path, opts);
             if(data.redirect){
                 return this.handler(data.redirect);
             }
@@ -70,10 +70,10 @@ export default class RenderEnvironment {
         this._routing = false;
 
         if(this._delay){
-            const {url, body} = this._delay;
+            const {url, opts} = this._delay;
             
             this._delay = undefined;
-            return this.handler(url, body);
+            return this.handler(url, opts);
         }
 
         return anchor;
@@ -82,17 +82,17 @@ export default class RenderEnvironment {
     /** Route to locale page.
      * 
      * @param {string|URL} url 
-     * @param {FormData} body 
+     * @param {FetchOptions} opts 
      */
-    route(url:string|URL, body?:FormData){
+    route(url:string|URL, opts?:FetchOptions){
         if(!this._routing) {
             this.clear();
-            this.handler(url, body).then(anchor=>{
+            this.handler(url, opts).then(anchor=>{
                 if(anchor)
                     this.scroll(anchor);
             });
         } else {
-            this._delay = {url, body};
+            this._delay = {url, opts};
         }
     }
 
@@ -239,7 +239,7 @@ export default class RenderEnvironment {
      * @param {FetchOptions} opts 
      * @returns {Promise<RenderUpdate>}
      */
-    static async fetch(url:string|URL, opts:FetchOptions):Promise<FetchUpdate> {
+    static async fetch(url:string|URL, opts:FetchOptions = {}):Promise<FetchUpdate> {
         if(opts.headers === undefined)
             opts.headers = {};
         opts.headers[HEADER_KEY] = HEADER_VALUE;
