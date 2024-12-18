@@ -62,7 +62,7 @@ export default class Routing extends Router{
             const time = Date.now() - start;
             const status = context.response.status;
             const statusText = getMessage(status) || "Unknown Error";
-            console.log(`${context.method} ${context.path} ${status} ${statusText} (${time})\n`);
+            console.log(`${context.method} ${context.path} ${status} ${statusText} (${time})`);
         }
 
         return await context.flush();
