@@ -10,6 +10,8 @@ import { HeadUpdate } from "../Html/Head";
 import HeadEnvironment from "./Head";
 import { HEADER_KEY, HEADER_VALUE } from "../../Util";
 
+const LOCK_STRING = "a, button, input, textarea, select";
+
 //Interface for Dialog Function
 type DialogLevel = "error"|"warning"|"info";
 interface DialogSettings {
@@ -93,7 +95,7 @@ export default class RenderEnvironment {
      */
     async handler(url:string|URL = window.location.href, opts?:FetchOptions):Promise<string|undefined>{
         this._routing = true;
-        document.body.style.cursor = "wait";
+        this.lock();
         const {anchor, path} = getRouteInfo(url);
 
         try {
@@ -109,7 +111,7 @@ export default class RenderEnvironment {
         }
 
         this._routing = false;
-        document.body.style.cursor = "";
+        this.unlock();
 
         if(this._delay){
             const {url, opts} = this._delay;
@@ -401,5 +403,23 @@ export default class RenderEnvironment {
     info(value:string){
         this.dialog("info", value);
         console.info(value);
+    }
+
+    lock(cursor:string = "wait"){
+        document.body.style.cursor = cursor;
+        (<NodeListOf<HTMLElement>>document.querySelectorAll(LOCK_STRING)).forEach(element=>{
+            element.ariaDisabled = "true";
+            element.toggleAttribute("disabled", true);
+            element.style.cursor = cursor;
+        });
+    }
+
+    unlock(){
+        document.body.style.cursor = "";
+        (<NodeListOf<HTMLElement>>document.querySelectorAll(LOCK_STRING)).forEach(element=>{
+            element.removeAttribute("aria-disabled");
+            element.toggleAttribute("disabled", false);
+            element.style.cursor = "";
+        });
     }
 }
