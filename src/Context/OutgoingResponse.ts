@@ -142,7 +142,7 @@ export default class OutgoingResponse extends Transform{
      */
     async flush():Promise<Response|undefined> {
         while(this.working)
-            sleep();
+            await sleep();
 
         if(this.#server){
             if(this.#redirect){
