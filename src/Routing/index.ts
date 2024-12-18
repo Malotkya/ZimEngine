@@ -4,12 +4,6 @@
  */
 import Context from "../Context";
 import Router from "./Router";
-import HttpError from "../HttpError";
-
-/** Handler Type
- * 
- */
-export type Handler = (context:Context)=>Promise<void>|void;
 
 /** Routing Class
  * 
@@ -25,15 +19,26 @@ export default class Routing extends Router{
         super("");
         this._errors.set((err, ctx) => {
             const status = isNaN(err.status as number)? 500: Number(err.status);
-            const message = String(err.message);
+            const message = `${status}: ${err.message}`;
+
+            const content = (ctx.request.headers.get("Content-Type") || "").toLocaleLowerCase();
 
             ctx.status(status);
-            if(ctx.expectsRender()){
-                ctx.render({
-                    body: {
-                        error: message
-                    }
-                });
+            if(ctx.expectsRender() || content.includes("html")){
+                try {
+                    ctx.render({
+                        head: {
+                            title: message
+                        },
+                        body: {
+                            error: message
+                        }
+                    });
+                } catch (_) {
+                    ctx.html(`<html><head><title>${message}</title><style>#error{color: red}</head><body><h1 id="error">${message}</h1></body></html>`)
+                }
+            } else if(content.includes("json")){
+                ctx.json({status, message})
             } else {
                 ctx.write(message);
             }
