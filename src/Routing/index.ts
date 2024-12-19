@@ -90,7 +90,7 @@ export default class Routing extends Router{
 
             throw 404;
         } catch (err:any){
-            this._errors.handle(err, context)
+            await this._errors.handle(err, context)
         }
     }
 

@@ -63,7 +63,7 @@ export default class Router extends Layer{
                     } 
                 }
             } catch (e:any){
-                this._errors.handle(e, context);
+                await this._errors.handle(e, context);
             }
         }
     }
