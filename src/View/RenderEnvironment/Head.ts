@@ -35,8 +35,8 @@ export default class HeadEnvironment {
         this._scripts = new Scripts(head);
 
         //Title Tracker Attributes
-        this._title = head.querySelector("title") as HTMLTitleElement;
-        this._defaultTitle = this._title.textContent || "";
+        this._title = findOrCreateElement("title", "head") as HTMLTitleElement;
+        this._defaultTitle = (this._title.textContent || "").trim();
         
         const index = this._defaultTitle.indexOf("|");
         if(index >= 0){
@@ -60,7 +60,8 @@ export default class HeadEnvironment {
         const meta:Record<string, AttributeList> = {};
         for(let name in update.meta){
             meta[name] = {
-                content: update.meta[name]
+                content: update.meta[name],
+                name: name
             };
         }
 
