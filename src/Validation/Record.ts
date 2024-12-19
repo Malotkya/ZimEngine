@@ -24,6 +24,10 @@ export default class RecordValidator<T extends Type> extends TypeValidator<Recor
 
         super(RecordName, formatRecordGenerator(type, value));
     }
+
+    simplify(value: Record<string, T>):string {
+        return JSON.stringify(value);
+    }
 }
 
 /** Format List Generator
