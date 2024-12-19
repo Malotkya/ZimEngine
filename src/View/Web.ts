@@ -26,8 +26,7 @@ function closeDailog(element:HTMLElement|null){
         return;
 
     if(element.tagName === "DIALOG"){
-        //@ts-ignore
-        element.open = false;
+        (<HTMLDialogElement>element).open = false;
         element.style.display = "none";
     } else {
         closeDailog(element.parentElement);
