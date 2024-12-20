@@ -93,7 +93,7 @@ export default class RenderEnvironment {
      * @param {FormData} body 
      * @returns {Promise<string|undefined>}
      */
-    private async handler(url:string|URL = window.location.href, opts?:FetchOptions):Promise<string|undefined>{
+    async handler(url:string|URL, opts?:FetchOptions):Promise<string|undefined>{
         this._routing = true;
         this.lock();
         const {anchor, path} = getRouteInfo(url);
