@@ -71,11 +71,11 @@ export default class Router extends Layer{
      * @param {IArguments} args 
      * @returns {Layer}
      */
-    private _filter(args:IArguments):Layer {
+    private _filter(args:IArguments, defaultRoute:string = "/"):Layer {
         let output:Layer;
         switch(typeof args[0]){
             case "function":
-                output = new Layer("/", args[0]);
+                output = new Layer(defaultRoute, args[0]);
                 break;
 
             case "string":
@@ -130,7 +130,7 @@ export default class Router extends Layer{
     use(middleware:Middleware|Layer):this
     use(path:string, handler:Middleware|Layer):this
     use():this{
-        this._methods.add("ALL", this._filter(arguments));
+        this._methods.add("ALL", this._filter(arguments, "*"));
         return this;
     }
 
