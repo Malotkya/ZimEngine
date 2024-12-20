@@ -44,6 +44,7 @@ export default class IncomingRequest {
             message.headers.forEach((value, key)=>{
                 this._headers.set(key, value);
             });
+            this._url = new URL(message.url);
         } else {
             for(const key in message.headers) {
                 let value = message.headers[key]!;
@@ -51,11 +52,8 @@ export default class IncomingRequest {
                     value = value.join(" ");
                 this._headers.set(key, value);
             }
+            this._url = new URL(message.url || "/", `http://${this._headers.get("host")}`);
         }
-
-        this._url = isCloudflareRequest(message) //Different URL construtor based on environement.
-            ? new URL(message.url)
-            : new URL(message.url || "/", `http://${this._headers.get("host")}`);
 
         this._raw = message;
     }
