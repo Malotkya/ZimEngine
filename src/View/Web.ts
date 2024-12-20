@@ -37,10 +37,8 @@ function closeDailog(element:HTMLElement|null){
  * 
  */
 window.addEventListener("popstate", function state_change(){
-    env.handler().then(anchor=>{
-        if(anchor)
-            env.scroll(anchor);
-    }).catch(console.error);
+    env.route(window.location.href)
+        .catch(env.error);
 });
 
 /** Click Event Listener
