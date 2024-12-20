@@ -224,10 +224,11 @@ export default class HttpError extends Error{
         let value:number = Number(status);
 
         if(isNaN(value)) {
-            message = "Invalid status: " + status
+            message = "Invalid status: " + status;
             status = 500;
         }else if(value < 300 || value > 599) {
-            message = "Status is not an error!"
+            message = `Status ${status} is not an error!`;
+            status = 500;
         }
 
         super(message || getMessage(value) || "Internal Server Error");
