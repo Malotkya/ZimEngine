@@ -62,7 +62,7 @@ export default class Routing extends Router{
             const time = Date.now() - start;
             const status = context.response.status;
             const statusText = getMessage(status) || "Unknown Error";
-            console.log(`${context.method} ${context.path} ${status} ${statusText} (${time})`);
+            console.log(`${context.method} ${context.url.pathname} ${status} ${statusText} (${time})`);
         }
 
         return await context.flush();
@@ -76,12 +76,7 @@ export default class Routing extends Router{
     async handle(context:Context):Promise<void>{
         try {
             for(const {name, layer} of this._methods){
-                if(name === "MIDDLEWARE"){
-                    await layer.handle(context);
-                    if(context.response.commited())
-                        return;
-                } else if(name === context.method || name === "ALL") {
-                    
+                if(name === "ALL" || name === context.method) {
                     await layer.handle(context);
                     if(context.response.commited())
                         return;

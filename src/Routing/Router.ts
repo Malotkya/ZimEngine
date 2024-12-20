@@ -10,18 +10,20 @@ import { joinPath } from "../Util";
 //Router Error Thrower
 const ROUTER_ERROR = ()=>{throw new Error("_handler called from Router!")};
 
+type Method = "GET"|"HEAD"|"POST"|"PUT"|"DELETE"|"OPTIONS"|"PATCH";
+
 /** Method Stack Class
  * 
  * Wrapper around array to make adding methods to the stack easier.
  */
-class Stack extends Array<{name:string, layer:Layer}>{
+class Stack extends Array<{name:Method|"ALL", layer:Layer}>{
 
     /** Add Method Layer
      * 
      * @param {string} name 
      * @param {Layer} layer 
      */
-    add(name:string, layer:Layer){
+    add(name:Method|"ALL", layer:Layer){
         this.push({name, layer});
     }
 }
@@ -52,11 +54,7 @@ export default class Router extends Layer{
         if(this.match(context)){
             try {
                 for(const {name, layer} of this._methods) {
-                    if(name === "MIDDLEWARE"){
-                        await layer.handle(context);
-                        if(context.response.commited())
-                            return;
-                    } else if(name === context.method || name === "ALL") {
+                    if(name === "ALL" || name === context.method) {
                         await layer.handle(context);
                         if(context.response.commited())
                             return;
@@ -132,7 +130,7 @@ export default class Router extends Layer{
     use(middleware:Middleware|Layer):this
     use(path:string, handler:Middleware|Layer):this
     use():this{
-        this._methods.add("MIDDLEWARE", this._filter(arguments));
+        this._methods.add("ALL", this._filter(arguments));
         return this;
     }
 
