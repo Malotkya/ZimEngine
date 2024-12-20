@@ -109,7 +109,7 @@ export default class OutgoingResponse extends Transform{
 
     /** Has Commited
      * 
-     * @returns 
+     * @returns {boolean}
      */
     commited():boolean{
         return this.working !== undefined
@@ -154,10 +154,9 @@ export default class OutgoingResponse extends Transform{
                 }
                 for(const chunk of this.#body)
                     this.#server.write(chunk);
-
-                this.#server.end();
             }
-            
+
+            this.#server.end();
             return;
         }
 
