@@ -53,7 +53,7 @@ export default class Authorization{
         }
 
         if(typeof arguments[0] !== "function")
-            throw new TypeError("Authentication Setter must be a function!");
+            throw new TypeError("Authentication Getter must be a function!");
 
         this._getter = arguments[0];
     }
