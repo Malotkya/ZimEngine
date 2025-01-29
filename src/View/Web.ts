@@ -49,7 +49,7 @@ document.body.addEventListener("click", function click_event(event){
     const target = <HTMLElement>event.target;
     const link = target.closest("a");
 
-    if(link){
+    if(link && link.download === ""){
         event.preventDefault();
         target.blur();
         link.blur();
