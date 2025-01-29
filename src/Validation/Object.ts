@@ -20,7 +20,7 @@ export default class ObjectValidator<P extends ObjectProperties> extends TypeVal
     protected _props:P;
     private _default:ObjectDefaults<keyof P>|undefined;
 
-    constructor(format:P, value?:ObjectDefaults<keyof P>) {
+    constructor(format:P, value?:ObjectDefaults<keyof P>, strict?:boolean) {
         if(value){
             if(typeof value !== "object")
                 throw new TypeError("Default value is not an object!");
@@ -28,7 +28,7 @@ export default class ObjectValidator<P extends ObjectProperties> extends TypeVal
             value = buildObject(format, value);
         }
 
-        super(ObjectName, formatObjectGenerator(format, value));
+        super(ObjectName, formatObjectGenerator(format, value, strict));
         this._props = format;
         this._default = value;
     }
@@ -57,7 +57,7 @@ export default class ObjectValidator<P extends ObjectProperties> extends TypeVal
  * @param {Object} props 
  * @returns {Function}
  */
-function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:ObjectDefaults<keyof P>):format<Object<keyof P>> {
+function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:ObjectDefaults<keyof P>, strict?:boolean):format<Object<keyof P>> {
     
     /** Format Object
      * 
@@ -65,7 +65,7 @@ function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:Obj
      * @returns {Object}
      */
     return function formatObject(input:unknown):Object<keyof P> {
-        return emptyHandler<Object<keyof P>>(input, (value:unknown)=>buildObject(props, objectify(value), ifEmpty), ifEmpty as any);
+        return emptyHandler<Object<keyof P>>(input, (value:unknown)=>buildObject(props, objectify(value), ifEmpty, strict), ifEmpty as any);
     }
 }
 
@@ -75,14 +75,18 @@ function formatObjectGenerator<P extends ObjectProperties>(props:P, ifEmpty?:Obj
  * @param {Object} value 
  * @returns {Object}
  */
-function buildObject<P extends ObjectProperties>(props:P, value:Record<string, unknown>, defaultValue:Record<string, Type> = {}):Object<keyof P> {
+function buildObject<P extends ObjectProperties>(props:P, value:Record<string, unknown>, defaultValue:Record<string, Type> = {}, strict:boolean = true):Object<keyof P> {
     const output:Record<string, Type> = {};
     const expected = Object.getOwnPropertyNames(props);
 
     for(const name in value){
         const index = expected.indexOf(name);
-        if(index === -1)
-            throw new Error(`Unexpected value occured at ${name}!`);
+        if(index === -1){
+            if(strict)
+                throw new Error(`Unexpected value occured at ${name}!`);
+
+            continue;
+        }
         
         expected.splice(index, 1);    
         try {
