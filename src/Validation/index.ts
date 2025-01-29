@@ -63,7 +63,7 @@ export default class DataObject<P extends ObjectProperties> extends ObjectValida
     
 
     constructor(tableName:string, properties:P) {
-        super(properties);
+        super(properties, undefined, false);
         this._table = tableName;
     }
 
