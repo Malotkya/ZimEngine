@@ -64,7 +64,8 @@ export function toString(name:string, value:Optional<Attribute>):string {
             return " "+name+"=\"NaN\" ";
 
         case "boolean":
-            return " "+name;
+            if(value)
+                return " "+name;
 
         case "undefined":
             return "";
