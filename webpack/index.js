@@ -58,15 +58,7 @@ module.exports = (args) => {
         definitions = {},
         terserOptions = {}
     } = args;
-
-    if(terserOptions.mangle === undefined){
-        terserOptions.mangle = {}
-    }
-    if(terserOptions.mangle.reserved === undefined){
-        terserOptions.mangle.reserved = ["env", "event"];
-    } else {
-        terserOptions.mangle.reserved.push("env", "event");
-    }
+    terserOptions.mangle = false;
 
     return {
         mode: inProduction? "production": "development",
