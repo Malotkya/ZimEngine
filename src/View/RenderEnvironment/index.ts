@@ -165,7 +165,11 @@ export default class RenderEnvironment {
      * @param script 
      */
     run(script:string) {
-        new Function("env", script)(this);
+        try {
+            new Function("env", script)(this);
+        } catch (e: any){
+            console.error("Uncaught error in env script:\n", e);
+        }
     }
 
     /** Add Event
