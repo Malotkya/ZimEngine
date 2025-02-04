@@ -8,9 +8,8 @@ import RenderEnvironment from "./RenderEnvironment";
 import { getRouteInfo } from "./RenderEnvironment/Util";
 
 //Render Environment
-const env = new RenderEnvironment();
-//@ts-ignore
-window.env = env;
+const env = (window as any)["env"]
+          = new RenderEnvironment();
 
 /** Close Dialog
  * 
