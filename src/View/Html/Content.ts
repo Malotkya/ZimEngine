@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { toString as funToString } from "./Function";
+import {toContent as functionToString} from "./Function";
 import Element,{ isElement, compileElement } from "./Element";
 
 /** Content Type
@@ -27,7 +27,7 @@ export function compressContent(content:Content):string {
     } else {
         switch (typeof content){
             case "function":
-                return funToString(content);
+                return functionToString(content);
 
             case "object":
                 if(isElement(content)) {
