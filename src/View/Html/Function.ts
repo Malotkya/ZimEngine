@@ -13,8 +13,7 @@
  * @returns {string}
  */
 export function toAttribute(fun:Function):string {
-    const str = ""+fun;
-    return str.substring(str.indexOf("{")+1, str.lastIndexOf("}")-1)
+    return toContent(fun).replaceAll(/(?<=\s|;)event\w+/ig, "event")
               .replace(/\s+/g, " ").trim();
 }
 
@@ -30,5 +29,5 @@ export function toAttribute(fun:Function):string {
 export function toContent(fun:Function):string {
     const str = ""+fun;
     return str.substring(str.indexOf("{")+1, str.lastIndexOf("}")-1)
-            .replaceAll(/(?<=\s|;)env\w+/ig, "env").trim();
+              .replaceAll(/(?<=\s|;)env\w+/ig, "env").trim();
 }
