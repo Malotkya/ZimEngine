@@ -2,7 +2,7 @@
  * 
  * @author Alex Malotky
  */
-import { Object as ObjectValue } from "../Validation/Type";
+import { Object as ObjectValue } from "../Validation";
 import DataObject, { TypeOf, DataConstraints, ObjectProperties } from "../Validation";
 
 //Query Filter Constraints
@@ -92,8 +92,8 @@ export default class QueryBuilder<P extends ObjectProperties> {
      * 
      * @param {Object} value 
      */
-    async insert(value:ObjectValue<keyof P>):Promise<void> {
-        const [string, values] = this._obj.buildInsertValues(value);
+    async insert(value:ObjectValue<P>):Promise<void> {
+        const [string, values] = await this._obj.buildInsertValues(value);
 
         const query = `INSERT INTO ${this._obj.name}${string}`;
         await this.db.prepare(query).bind(...values).run();
@@ -104,9 +104,9 @@ export default class QueryBuilder<P extends ObjectProperties> {
      * @param {Object} value 
      * @param {ObjectDefaults} constraints
      */
-    async update(value:ObjectValue<keyof P>, constraints?:DataConstraints<keyof P>):Promise<void>{
-        const [updateString, updateValues] = this._obj.buildUpdateValues(value, Object.getOwnPropertyNames(constraints));
-        const [constraintString, constraintValues] = this._obj.buildConstraints(constraints);
+    async update(value:ObjectValue<P>, constraints?:DataConstraints<keyof P>):Promise<void>{
+        const [updateString, updateValues] = await this._obj.buildUpdateValues(value, Object.getOwnPropertyNames(constraints));
+        const [constraintString, constraintValues] = await this._obj.buildConstraints(constraints);
 
         const query = `UPDATE ${this._obj.name} ${updateString} ${constraintString}`;
         await this.db.prepare(query).bind(...updateValues.concat(constraintValues)).run();
@@ -116,7 +116,7 @@ export default class QueryBuilder<P extends ObjectProperties> {
      * 
      */
     async delete(constraints?:DataConstraints<keyof P>):Promise<void> {
-        const [string, values] = this._obj.buildConstraints(constraints);
+        const [string, values] = await this._obj.buildConstraints(constraints);
 
         const query = `DELETE FROM ${this._obj.name} ${string}`;
         await this.db.prepare(query).bind(...values).run();
@@ -127,7 +127,7 @@ export default class QueryBuilder<P extends ObjectProperties> {
      * @param {ObjectDefaults} constraints
      */
     async get(constraints?:DataConstraints<keyof P>):Promise<TypeOf<DataObject<P>>|null> {
-        const [string, values] = this._obj.buildConstraints(constraints); 
+        const [string, values] = await this._obj.buildConstraints(constraints); 
 
         const query = `SELECT * FROM ${this._obj.name} ${string}`;
         const result:TypeOf<DataObject<P>>|null = await this.db.prepare(query).bind(...values).first();
@@ -143,7 +143,7 @@ export default class QueryBuilder<P extends ObjectProperties> {
      * @param {ObjectDefaults} constraints
      */
     async getAll(constraints?:DataConstraints<keyof P>, filter?:QueryConstraints<P>):Promise<TypeOf<DataObject<P>>[]> {
-        const [string, values] = this._obj.buildConstraints(constraints); 
+        const [string, values] = await this._obj.buildConstraints(constraints); 
         const filterString = buildFilterString(filter);
 
         const query = `SELECT * FROM ${this._obj.name} ${string} ${filterString}`;
