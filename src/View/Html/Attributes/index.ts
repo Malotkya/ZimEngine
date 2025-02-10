@@ -4,7 +4,7 @@
  */
 import AriaGlobalAttributes, {toString as toAriaString} from "./Aria";
 import {toAttribute as functionToString} from "../Function";
-import { Optional } from "../../../Validation/Type";
+import { Optional } from "../../../Validation";
 
 type Attribute = string|number|boolean|Array<string>|Date|EventListener;
 export default Attribute;

@@ -3,7 +3,7 @@
  * @author Alex Malotky
  */
 import { ObjectProperties, ObjectDefaults, ObjectValidator, Simple, isEmpty, Object } from "zim-validation";
-export { boolean, number, string, empty, color, date, datetime, email, telephone, time, url, list, object, optional, record, TypeOf} from "zim-validation";
+export { boolean, number, string, empty, color, date, datetime, email, telephone, time, url, list, object, optional, record, TypeOf, Optional} from "zim-validation";
 
 export type DataConstraints<K extends string|number|symbol> = ObjectDefaults<K>;
 export {ObjectProperties, Object};
