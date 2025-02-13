@@ -83,7 +83,7 @@ function processBasicData(data:string):[string, string]{
  * @param {string} data
  * @returns {[string, string]}
  */
-function processMultipartData(data:string):[string, string]{
+function processMultipartData(data:string):[string, string|File]{
     const match = data.match(/[\d\D\n]*?\r\n\r\n/);
     if(match === null)
         throw new Error("Malformed Multipart Data!");
@@ -116,7 +116,7 @@ function processMultipartData(data:string):[string, string]{
 class BodyDataHandler{
     private _buffer:string;
     private _boundry:RegExp;
-    private _processData:(s:string)=>[string, string];
+    private _processData:(s:string)=>[string, string|File];
     private _data:BodyData;
     private _total:number;
     private readonly _limit:number;
