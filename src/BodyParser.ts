@@ -9,8 +9,17 @@ import { isCloudflareRequest } from "./Util";
 const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
 const DEFAULT_SIZE_LIMIT = 500000000; //500MB
 
+/** Options used by Body Parser
+ * 
+ */
+export interface BodyParserOptions {
+    maxSize?:number
+    timeout?:number
+}
+
+type File = Blob&{fileName:string};
 export interface BodyData{
-    [key:string]: string|Blob|undefined
+    [key:string]: string|File|undefined
 };
 
 /** Parse Headers from String
@@ -39,149 +48,242 @@ function parseHeaders(value:string):Record<string, string> {
     return headers;
 }
 
-/** Process Cloudflare Request
+/** Parse Body Parser Options
  * 
- * @param {Request} request 
- * @returns {Promise<RawBodyData>}
+ * @param {BodyParserOptions} options 
+ * @returns {Required<BodyParserOptions>}
  */
-async function processCloudflareRequest(request:Request):Promise<BodyData> {
-    const content = request.headers.get("Content-Type")?.toLocaleLowerCase();
+function parseOptions(options:BodyParserOptions):Required<BodyParserOptions> {
+    const {maxSize = DEFAULT_SIZE_LIMIT, timeout = DEFAULT_TIME_LIMIT} = options;
+    
+    if(typeof maxSize !== "number")
+        throw new TypeError("Max Download Size must be a number!");
 
-    if(content !== undefined) {
-        let body:FormData|URLSearchParams|undefined;
+    if(typeof timeout !== "number")
+        throw new TypeError("Timeout must be a number!");
 
-        if( content.includes("form-data") ) {
-            body = await request.formData();
-        } else if(content.includes("x-www-form-urlencoded")) {
-            body = new URLSearchParams(await request.text());
-        }
+    return {maxSize, timeout};
+}
 
-        if(body){
-            const data:BodyData ={};
+/** Process Basic Data
+ * 
+ * Used to process Basic FormData body.
+ * 
+ * @param {string} data
+ * @returns {[string, string]}
+ */
+function processBasicData(data:string):[string, string]{
+    return data.split("=") as [string, string];
+}
 
-            body.forEach((value, key)=>{
-                data[key] = value;
-            });
+/** Process Multipart Form Data
+ * 
+ * Used to process Multipart FormData body.
+ * 
+ * @param {string} data
+ * @returns {[string, string]}
+ */
+function processMultipartData(data:string):[string, string]{
+    const match = data.match(/[\d\D\n]*?\r\n\r\n/);
+    if(match === null)
+        throw new Error("Malformed Multipart Data!");
+
+    //Seperate Header from data/info
+    const headers = parseHeaders(match[0])
+    data = data.substring(match[0].length);
+
+    //Make sure name is found.
+    const name = headers["name"];
+    if(name === undefined)
+        throw new Error("No name given in multipart data!");
+
+    //Detect if File
+    if(headers["filename"] !== undefined){
+        const file:any = new Blob([data], { type: headers["Content-Type"] || "text/plain" });
+        file.fileName = file;
+
+        return [ headers["name"], file ];
+    }
+
+    return [ headers["name"], data];
+}
+
+/** Body Data Handler
+ * 
+ * Process the data being pushed into the buffer and creates an object
+ * that holds the data.
+ */
+class BodyDataHandler{
+    private _buffer:string;
+    private _boundry:RegExp;
+    private _processData:(s:string)=>[string, string];
+    private _data:BodyData;
+    private _total:number;
+    private readonly _limit:number;
+    private _start:number|undefined;
+    private readonly _timeout:number;
+
+    constructor(formData:string|undefined, opts:BodyParserOptions) {
+        const {maxSize, timeout} = parseOptions(opts);
+
+        this._buffer = "";
+        this._boundry = new RegExp("&");
+        this._data = {};
+        this._total = 0;
+        this._limit = maxSize;
+        this._timeout = timeout;
+
+        if(formData && formData.includes("form-data")){
+            const header = parseHeaders(formData);
+            if(header["boundary"] === undefined)
+                throw new Error("Form-Data Header is malformed.");
         
-            return data;
+            this._boundry = new RegExp(header["boundary"].replace(/-+/, "-+"));
+            this._processData = processMultipartData;
+
+        } else {
+            this._boundry = new RegExp("&");
+            this._processData = processBasicData;
         }
     }
 
-    return {};
+    /** Push Data to be proccessed.
+     * 
+     * @param data 
+     */
+    push(data:string):void {
+        
+        this._buffer += data;
+        this._total += data.length;
+        this.process();
+
+        if(this._start){
+            if( (Date.now() - this._start) > this._timeout )
+                throw new Error("Upload timeout limit reached!");
+        } else {
+            this._start = Date.now();
+        }
+
+        if(this._total > this._limit){
+            throw new Error("Upload size limit reached!");
+        }
+    }
+
+    /** Process Buffer
+     * 
+     */
+    private process() {
+        let match = this._buffer.match(this._boundry);
+
+        while(match !== null){
+            const index = this._buffer.indexOf(match[0]);
+
+            if(index === 0){
+                this._buffer = this._buffer.substring(match[0].length);
+            } else {
+                const [key, value] = this._processData(this._buffer.slice(0, index));
+                (<any>this._data[key]) = value;
+                this._buffer = this._buffer.slice(index+match[0].length)
+            }
+
+            match = this._buffer.match(this._boundry);
+        }
+    }
+
+    /** Get Value
+     * 
+     * @returns {BodyData}
+     */
+    value():BodyData {
+        return this._data;
+    }
+}
+
+/** Process Cloudflare Request
+ * 
+ * @param {Request} request 
+ * @returns {Promise<BodyData>}
+ */
+async function processCloudflareRequest(request:Request, opts:BodyParserOptions):Promise<BodyData> {
+    return new Promise((res, rej)=>{
+        if(request.body === null)
+            return rej(new Error("Body is null!"));
+    
+        if(request.bodyUsed)
+            return rej(new Error("Body is already used!"));
+    
+        let protoParser:BodyDataHandler;
+        try {
+            protoParser = new BodyDataHandler(request.headers.get("Content-Type")?.toLocaleLowerCase(), opts);
+        } catch (e){
+            rej(e);
+        }
+    
+        const {writable} = new TransformStream({
+            transform(chunk){
+                try {
+                    protoParser.push(chunk);  
+                } catch (e){
+                    rej(e);
+                }
+            }
+        });
+    
+        request.body.pipeTo(writable).then(()=>{
+            res(protoParser.value())
+        }).catch(rej);
+    });
+}
+
+interface NodeRequest extends IncomingMessage {
+    bodyUsed?:boolean;
 }
 
 /** Process Node Request
  * 
  * @param {IncomingMessage} request 
- * @returns {Promise<RawBodyData>}
+ * @returns {Promise<BodyData>}
  */
-function processNodeRequest(request:IncomingMessage):Promise<BodyData> {
-    let multipart:boolean = false;
-    let boundry:RegExp    = new RegExp("&");
-
-    const type = request.headers["content-type"]?.toLocaleLowerCase();
-    if(type && type.indexOf("form-data") >= 0) {
-        const header = parseHeaders(type);
-        if(header["boundary"] === undefined)
-            throw new Error("Header is malformed.");
-        boundry = new RegExp(header["boundary"].replace(/-+/, "-+"));
-        multipart = true;
-    }
-    let buffer = "";
-    let output:BodyData = {};
-
-    /** Process Multipart Data 
-     * 
-     * @param {string} data 
-     * @returns {name:string, info:FileData|string}
-     */
-    const processMultipartData = (data:string):[string, string|Blob] => {
-        //Multipart Headers Match
-        const match = data.match(/[\d\D\n]*?\r\n\r\n/);
-        if(match === null)
-            throw new Error("Malformed Multipart Data!");
-    
-        //Seperate Header from data/info
-        const headers = parseHeaders(match[0])
-        data = data.substring(match[0].length);
-    
-        //Make sure name is found.
-        if(headers["name"] === undefined)
-            throw new Error("No name given in multipart data!");
-    
-        //Detect if File
-        if(headers["filename"] !== undefined){
-            [
-                headers["name"],
-                new Blob([data], { type: headers["Content-Type"] || "text/plain" })
-            ]
+function processNodeRequest(request:NodeRequest, opts:BodyParserOptions):Promise<BodyData> {
+    return new Promise((res, rej)=>{
+        if(request.bodyUsed) {
+            return rej(new Error("Body is already used!"));
         }
 
-        return [
-            headers["name"],
-            data
-        ]
-    }
-
-    /** Takes data as a string and process the information.
-     * 
-     * @param {string} data 
-     */
-    const processData = (data:string) => {
-        const [name, value] = multipart? processMultipartData(data): data.split("=");
-        output[name] = value;
-    }
-
-    /** Process Buffer
-     * 
-     * Loops through the buffer untill all boundrys are crossed.
-     */
-    const processBuffer = () =>{
-        let match = buffer.match(boundry);
-
-        while(match !== null){
-            const index = buffer.indexOf(match[0]);
-
-            if(index === 0){
-                buffer = buffer.substring(match[0].length);
-            } else {
-                processData(buffer.slice(0, index));
-                buffer = buffer.slice(index+match[0].length)
-            }
-
-            match = buffer.match(boundry);
+        let protoParser:BodyDataHandler;
+        try {
+            protoParser = new BodyDataHandler(request.headers["content-type"]?.toLocaleLowerCase(), opts);
+        } catch (e){
+            rej(e);
         }
-    }
 
-    return new Promise((resolve, reject)=>{
-
-        request.on("data", chunk=>{
+        request.on("data", (chunk)=>{
             try {
-                buffer += String(chunk);
-                if(buffer.length >= DEFAULT_SIZE_LIMIT)
-                    throw new Error("Upload size limit reached!");
-                processBuffer();
-            } catch (err){
-                reject(err);
+                protoParser.push(chunk);
+            } catch (e){
+                rej(e);
             }
-            
+
         });
 
-        request.on("error", reject);
+        request.on("error", rej);
 
         request.on("end", ()=>{
-            resolve(output);
+            request.bodyUsed = true;
+            res(protoParser.value());
         });
-
-        setTimeout(()=>{
-            reject(new Error("Upload timeout limit reached!"));
-        }, DEFAULT_TIME_LIMIT);
     });
 }
 
-export default function BodyParser(request:IncomingMessage|Request):Promise<BodyData>{
+/** Body Parser
+ * 
+ * @param {IncomingMessage|Request} request 
+ * @param {BodyParserOptions} opts 
+ * @returns {Promise<BodyData>}
+ */
+export default function BodyParser(request:IncomingMessage|Request, opts:BodyParserOptions = {}):Promise<BodyData>{
     if(isCloudflareRequest(request))
-        return processCloudflareRequest(request);
+        return processCloudflareRequest(request, opts);
     
-    return processNodeRequest(request);
+    return processNodeRequest(request, opts);
 }
