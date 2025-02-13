@@ -4,7 +4,7 @@
  */
 import { IncomingMessage } from "node:http"
 import { isCloudflareRequest } from "../Util";
-import BodyParser, {BodyData} from "../BodyParser";
+import BodyParser, {BodyData} from "./BodyParser";
 
 // Node:Request Type
 type NodeRequeset = IncomingMessage;

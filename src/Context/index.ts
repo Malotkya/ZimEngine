@@ -7,7 +7,7 @@ import OutgoingResponse, {NodeResponse} from "./OutgoingResponse";
 import IncomingRequest, {NodeRequeset} from "./IncomingRequest";
 import Authorization from "../Authorization";
 import MimeTypes from "../MimeTypes";
-import { BodyData } from "../BodyParser";
+import { BodyData } from "./BodyParser";
 import { HEADER_KEY, HEADER_VALUE } from "../Util";
 import DataObject, { TypeOf, ObjectProperties } from "../Validation";
 import QueryBuilder from "./QueryBuilder";
