@@ -26,7 +26,7 @@
     },
     "dependencies": {
         "path-to-regexp": "^8.2.0",
-        "zim-validation": "^1.0.3"
+        "zim-validation": "^1.1.0"
     },
     "optionalDependencies": {
         "json5": "^2.2.3",
