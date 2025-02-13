@@ -6,9 +6,43 @@ import { ServerResponse } from "node:http";
 import {Transform, TransformCallback} from "node:stream";
 import { sleep } from "../Util";
 
+const DEFAULT_ENCODER = new TextEncoder();
+
 //Node:Resposne Type
 type NodeResponse = ServerResponse;
 export type {NodeResponse}
+
+/** Stringify Encoded Data
+ * 
+ * Will apply encoding toString if able before using default
+ * String() method.
+ * 
+ * @param {any} data 
+ * @param {string} encode 
+ * @returns {string}
+ */
+function stringify(data:any, encode:string):string {
+    //Test if not string.
+    if(typeof data !== "string") {
+
+        //Test if it has toString method
+        if(typeof data.toString === "function") {
+
+            //Test if accepts encdoding.
+            if(data.toString.length >= 1){
+                return data.toString(encode);
+            } else {
+                if(encode)
+                    console.warn(`Encoding '${encode}' ignored!`);
+                return data.toString();
+            }
+        }
+
+        return String(data);
+    }
+
+    return data;
+}
 
 /** Outgoing Response
  * 
@@ -25,58 +59,19 @@ export default class OutgoingResponse extends Transform{
 
     //Not Strict Private
     private working:boolean|undefined;
-    private static encoder = new TextEncoder();
-
-    /** Stringify Encoded Data
-     * 
-     * @param {any} data 
-     * @param {string} encode 
-     * @returns {string}
-     */
-    private static _stringify(data:any, encode:string):string {
-
-        //Test if not string.
-        if(typeof data !== "string") {
-
-            //Test if it has toString method
-            if(typeof data.toString === "function") {
-
-                //Test if accepts encdoding.
-                if(data.toString.length >= 1){
-                    return data.toString(encode);
-                } else {
-                    if(encode)
-                        console.warn(`Encoding '${encode}' ignored!`);
-                    return data.toString();
-                }
-            }
-
-            return String(data);
-        }
-        
-        return data;
-    }
-    
-    /** Encode to Uint8Array
-     * 
-     * @param {any} data 
-     * @param {string} encode 
-     * @returns {Uint8Array}
-     */
-    private static _encode(data:any, encode:string):Uint8Array {
-        return OutgoingResponse.encoder.encode(OutgoingResponse._stringify(data, encode));
-    }
+    private encoder:TextEncoder;
 
     /** Proto Response Constructor
      * 
      */
-    constructor(response?:ServerResponse){
+    constructor(response?:ServerResponse, encoder:TextEncoder = DEFAULT_ENCODER){
         super();
 
         this.#status = 200;
         this.#headers = new Map();
         this.#body = [];
         this.#server = response;
+        this.encoder = encoder;
 
         //Default headers
         this.#headers.set("Referrer-Policy", "strict-origin");
@@ -93,7 +88,7 @@ export default class OutgoingResponse extends Transform{
         if( data instanceof Uint8Array )
             this.#body.push(data);
         else
-            this.#body.push(OutgoingResponse._encode(data, encode));
+            this.#body.push(this.encoder.encode(stringify(data, encode)));
         callback();
     }
 
