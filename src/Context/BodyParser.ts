@@ -4,7 +4,7 @@
  * @author Alex Malotky
  */
 import { IncomingMessage } from "http";
-import { isCloudflareRequest } from "./Util";
+import { isCloudflareRequest } from "../Util";
 
 const DEFAULT_TIME_LIMIT = 60000000; //One Minute;
 const DEFAULT_SIZE_LIMIT = 500000000; //500MB
